@@ -64,30 +64,7 @@ button:focus-visible {
   border-radius: var(--border-radius);
 }
 
-.gps-main__button, .gps-theme-toggle, button {
-  border-radius: var(--border-radius);
-  transition: var(--transition);
-}
 
-.gps-main__button {
-  background: var(--color-accent);
-  color: var(--color-text);
-}
-.gps-main__button:hover {
-  background: var(--color-accent-hover);
-}
-.gps-main__button--danger {
-  background: var(--color-danger);
-}
-.gps-main__button--danger:hover {
-  background: var(--color-danger-hover);
-}
-.gps-main__button--warn {
-  background: var(--color-warn);
-}
-.gps-main__button--warn:hover {
-  background: var(--color-warn-hover);
-}
 
 @media (prefers-color-scheme: light) {
   :root {

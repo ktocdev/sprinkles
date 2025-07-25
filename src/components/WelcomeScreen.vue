@@ -1,5 +1,6 @@
 <script setup>
 import { ref, defineEmits, defineProps } from 'vue'
+import Button from './Button.vue'
 
 const props = defineProps({
   nameInput: String
@@ -19,7 +20,7 @@ function handleSubmit() {
     <h2 class="gps-welcome__title">Welcome to Guinea Pig Simulator!</h2>
     <p class="gps-welcome__desc">Please enter your name to begin:</p>
     <input class="gps-welcome__input" :value="nameInput" @input="handleInput" @keyup.enter="handleSubmit" placeholder="Your name" />
-    <button class="gps-welcome__button" @click="handleSubmit">Start</button>
+    <Button type="primary" @click="handleSubmit">Start</Button>
   </div>
 </template>
 
@@ -30,15 +31,5 @@ function handleSubmit() {
   border: 1px solid var(--color-border, #aaa);
   border-radius: 4px;
 }
-.gps-welcome__button {
-  padding: 0.5em 1em;
-  border: none;
-  background: var(--color-accent);
-  color: var(--color-text);
-  border-radius: 4px;
-  cursor: pointer;
-}
-.gps-welcome__button:hover {
-  background: var(--color-accent-hover);
-}
+
 </style> 

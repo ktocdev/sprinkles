@@ -5,6 +5,8 @@ import GuineaPig from './GuineaPig.vue'
 import Cage from './Cage.vue'
 import { useCageStore } from '../stores/cage'
 import { useGuineaPigStore } from '../stores/guineaPig'
+import ThemeToggle from './ThemeToggle.vue'
+import TopBar from './TopBar.vue'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
@@ -51,23 +53,20 @@ function clearCage() {
 
 <template>
   <div class="gps-main">
+    <TopBar
+      :onInventory="toggleInventory"
+      :onGuineaPig="toggleGuineaPig"
+      :onNeeds="toggleNeeds"
+      :onReset="resetGame"
+      :onClearCage="clearCage"
+      :showInventory="showInventory"
+      :showGuineaPig="showGuineaPig"
+      :showNeeds="showNeeds"
+    />
     <h2 class="gps-main__title">Welcome, {{ userStore.name }}!</h2>
     <p class="gps-main__desc">
       Guinea Pig Simulator is a text-based game where you care for your guinea pig, manage their needs, and keep their cage clean. Earn currency, buy food, and keep your furry friend happy!
     </p>
-    <div class="gps-main__menubar" role="menubar">
-      <button class="gps-main__button" role="menuitem" @click="toggleInventory">
-        {{ showInventory ? 'Hide Inventory' : 'Show Inventory' }}
-      </button>
-      <button class="gps-main__button" role="menuitem" @click="toggleGuineaPig">
-        {{ showGuineaPig ? 'Hide Guinea Pig Info' : 'Show Guinea Pig Info' }}
-      </button>
-      <button class="gps-main__button" role="menuitem" @click="toggleNeeds">
-        {{ showNeeds ? 'Hide Needs' : 'Show Needs' }}
-      </button>
-      <button class="gps-main__button gps-main__button--danger" role="menuitem" @click="resetGame">Reset Game</button>
-      <button class="gps-main__button gps-main__button--warn" role="menuitem" @click="clearCage">Clear Cage</button>
-    </div>
     <div class="gps-main__content-grid">
       <div class="gps-main__content-cage">
         <Cage class="gps-main__cage" />
@@ -100,37 +99,6 @@ function clearCage() {
 </template>
 
 <style>
-.gps-main__menubar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  margin-bottom: 1em;
-}
-.gps-main__button {
-  padding: 0.5em 1em;
-  border: none;
-  background: var(--color-accent);
-  color: var(--color-text);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background 0.2s;
-}
-.gps-main__button:hover {
-  background: var(--color-accent-hover);
-}
-.gps-main__button--danger {
-  background: var(--color-danger);
-}
-.gps-main__button--danger:hover {
-  background: var(--color-danger-hover);
-}
-.gps-main__button--warn {
-  background: var(--color-warn);
-}
-.gps-main__button--warn:hover {
-  background: var(--color-warn-hover);
-}
 .gps-main__inventory-menu,
 .gps-main__guinea-pig-panel {
   background: var(--color-panel);

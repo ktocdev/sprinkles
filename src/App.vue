@@ -5,7 +5,6 @@ import { useInventoryStore } from './stores/inventory'
 import { useGuineaPigStore } from './stores/guineaPig'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import MainScreen from './components/MainScreen.vue'
-import ThemeToggle from './components/ThemeToggle.vue'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
@@ -45,7 +44,6 @@ function resetGame() {
 
 <template>
   <div class="gps-app">
-    <ThemeToggle />
     <WelcomeScreen v-if="!userStore.name" :nameInput="nameInput" @update:nameInput="val => nameInput = val" @submit="submitName" />
     <MainScreen v-else :userStore="userStore" :inventoryStore="inventoryStore" :resetGame="resetGame" />
   </div>
