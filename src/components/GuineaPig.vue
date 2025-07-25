@@ -37,7 +37,7 @@ function cancelEditInfo() {
           </select>
         </label><br />
         <button class="gps-guinea-pig__button" @click="saveInfo">Save</button>
-        <button class="gps-guinea-pig__button gps-guinea-pig__button--cancel" @click="cancelEditInfo" style="margin-left: 0.5em;">Cancel</button>
+        <button class="gps-guinea-pig__button gps-guinea-pig__button--cancel" @click="cancelEditInfo" style="margin-inline-start: 0.5em;">Cancel</button>
       </div>
     </template>
     <template v-else>
@@ -53,11 +53,11 @@ function cancelEditInfo() {
 <style>
 .gps-guinea-pig__label {
   display: block;
-  margin-bottom: 0.5em;
+  margin-block-end: 0.5em;
 }
 .gps-guinea-pig__input {
-  margin-left: 0.5em;
-  margin-bottom: 0.5em;
+  margin-inline-start: 0.5em;
+  margin-block-end: 0.5em;
 }
 .gps-guinea-pig__button {
   padding: 0.3em 0.8em;
@@ -75,6 +75,6 @@ function cancelEditInfo() {
   background: var(--color-accent-hover);
 }
 .gps-guinea-pig__title {
-  margin-bottom: 0.5em;
+  margin-block-end: 0.5em;
 }
 </style> 

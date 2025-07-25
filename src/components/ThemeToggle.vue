@@ -1,22 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import Button from './Button.vue'
+import { useThemeStore } from '../stores/theme'
 
-const isLight = ref(false)
-
-function toggleTheme() {
-  isLight.value = !isLight.value
-  document.body.classList.toggle('theme-light', isLight.value)
-}
+const themeStore = useThemeStore()
 
 onMounted(() => {
-  document.body.classList.toggle('theme-light', isLight.value)
+  themeStore.initTheme()
 })
 </script>
 
 <template>
-  <Button type="flat" @click="toggleTheme">
-    <span v-if="isLight">🌞 Light</span>
+  <Button type="flat" @click="themeStore.toggleTheme">
+    <span v-if="themeStore.isLight">🌞 Light</span>
     <span v-else>🌙 Dark</span>
   </Button>
 </template> 

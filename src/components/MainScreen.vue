@@ -1,126 +1,148 @@
 <script setup>
-import { ref } from 'vue'
-import { defineProps } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 import GuineaPig from './GuineaPig.vue'
 import Cage from './Cage.vue'
-import { useCageStore } from '../stores/cage'
+import Panel from './Panel.vue'
 import { useGuineaPigStore } from '../stores/guineaPig'
-import ThemeToggle from './ThemeToggle.vue'
-import TopBar from './TopBar.vue'
 
-const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
 
 const props = defineProps({
   userStore: Object,
   inventoryStore: Object,
-  resetGame: Function
+  showInventory: Boolean,
+  showGuineaPig: Boolean,
+  showNeeds: Boolean
 })
 
-const showInventory = ref(false)
-const showGuineaPig = ref(false)
-const showNeeds = ref(false)
-
-function toggleInventory() {
-  if (!showInventory.value) {
-    showGuineaPig.value = false
-    showNeeds.value = false
-  }
-  showInventory.value = !showInventory.value
-}
-function toggleGuineaPig() {
-  if (!showGuineaPig.value) {
-    showInventory.value = false
-    showNeeds.value = false
-  }
-  showGuineaPig.value = !showGuineaPig.value
-}
-function toggleNeeds() {
-  if (!showNeeds.value) {
-    showInventory.value = false
-    showGuineaPig.value = false
-  }
-  showNeeds.value = !showNeeds.value
-}
-
-function clearCage() {
-  if (window.confirm('Are you sure you want to clear the cage? This cannot be undone.')) {
-    cageStore.$reset()
-    localStorage.removeItem('cage')
-  }
-}
+const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds'])
 </script>
 
 <template>
   <div class="gps-main">
-    <TopBar
-      :onInventory="toggleInventory"
-      :onGuineaPig="toggleGuineaPig"
-      :onNeeds="toggleNeeds"
-      :onReset="resetGame"
-      :onClearCage="clearCage"
-      :showInventory="showInventory"
-      :showGuineaPig="showGuineaPig"
-      :showNeeds="showNeeds"
-    />
-    <h2 class="gps-main__title">Welcome, {{ userStore.name }}!</h2>
+    <h1 class="gps-main__title">Guinea Pig Simulator</h1>
     <p class="gps-main__desc">
-      Guinea Pig Simulator is a text-based game where you care for your guinea pig, manage their needs, and keep their cage clean. Earn currency, buy food, and keep your furry friend happy!
+      Welcome, {{ userStore.name }}! Guinea Pig Simulator is a text-based game where you care for your guinea pig, manage their needs, and keep their cage clean. Earn currency, buy food, and keep your furry friend happy!
     </p>
     <div class="gps-main__content-grid">
       <div class="gps-main__content-cage">
         <Cage class="gps-main__cage" />
       </div>
-      <div class="gps-main__content-info">
-        <div v-if="showInventory" class="gps-main__inventory-menu">
-          <h3 class="gps-main__subtitle">Your Inventory</h3>
-          <ul class="gps-main__inventory-list">
-            <li class="gps-main__inventory-item" v-for="(qty, item) in inventoryStore.items" :key="item">
-              {{ item.charAt(0).toUpperCase() + item.slice(1) }}: {{ qty }}
-            </li>
-          </ul>
-        </div>
-        <div v-if="showGuineaPig" class="gps-main__guinea-pig-panel">
-          <GuineaPig class="gps-main__guinea-pig" />
-        </div>
-        <div v-if="showNeeds" class="gps-main__needs-panel">
-          <h4 class="gps-main__needs-title">Needs</h4>
-          <ul class="gps-main__needs-list">
-            <li class="gps-main__needs-item" v-for="(value, need) in guineaPigStore.needs" :key="need">
-              <span class="gps-main__needs-label">{{ need.charAt(0).toUpperCase() + need.slice(1) }}:</span>
-              <progress class="gps-main__needs-bar" :value="value" max="100"></progress>
-              <span class="gps-main__needs-value">{{ value }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
+
+    <!-- Modal Panels -->
+    <Panel 
+      :isOpen="showInventory" 
+      title="Your Inventory" 
+      @close="emit('closeInventory')"
+    >
+      <ul class="gps-main__inventory-list">
+        <li class="gps-main__inventory-item" v-for="(qty, item) in inventoryStore.items" :key="item">
+          {{ item.charAt(0).toUpperCase() + item.slice(1) }}: {{ qty }}
+        </li>
+      </ul>
+    </Panel>
+
+    <Panel 
+      :isOpen="showGuineaPig" 
+      title="Guinea Pig Information" 
+      @close="emit('closeGuineaPig')"
+    >
+      <GuineaPig />
+    </Panel>
+
+    <Panel 
+      :isOpen="showNeeds" 
+      title="Guinea Pig Needs" 
+      @close="emit('closeNeeds')"
+    >
+      <ul class="gps-main__needs-list">
+        <li class="gps-main__needs-item" v-for="(value, need) in guineaPigStore.needs" :key="need">
+          <span class="gps-main__needs-label">{{ need.charAt(0).toUpperCase() + need.slice(1) }}:</span>
+          <progress class="gps-main__needs-bar" :value="value" max="100"></progress>
+          <span class="gps-main__needs-value">{{ value }}</span>
+        </li>
+      </ul>
+    </Panel>
   </div>
 </template>
 
 <style>
-.gps-main__inventory-menu,
-.gps-main__guinea-pig-panel {
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1em;
-  margin-bottom: 1em;
-  box-shadow: var(--box-shadow);
+.gps-main__title {
+  font-size: 2em;
+  margin-block-end: 0.5em;
+  color: var(--color-accent);
 }
-.gps-main__needs-panel {
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1em;
-  margin-bottom: 1em;
-  box-shadow: var(--box-shadow);
-}
+
 .gps-main__content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2em;
-  align-items: start;
-  margin-top: 2em;
+  display: flex;
+  justify-content: center;
+  margin-block-start: 2em;
+}
+
+.gps-main__content-cage {
+  max-width: 600px;
+  width: 100%;
+}
+
+.gps-main__inventory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gps-main__inventory-item {
+  padding: 0.5rem 0;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.gps-main__inventory-item:last-child {
+  border-block-end: none;
+}
+
+.gps-main__needs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gps-main__needs-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.gps-main__needs-item:last-child {
+  border-block-end: none;
+}
+
+.gps-main__needs-label {
+  min-width: 100px;
+  font-weight: 500;
+}
+
+.gps-main__needs-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-border);
+}
+
+.gps-main__needs-bar::-webkit-progress-bar {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.gps-main__needs-bar::-webkit-progress-value {
+  background: var(--color-accent);
+  border-radius: 4px;
+}
+
+.gps-main__needs-value {
+  min-width: 40px;
+  text-align: end;
+  font-weight: 500;
 }
 </style> 

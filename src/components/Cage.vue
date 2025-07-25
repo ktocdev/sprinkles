@@ -121,68 +121,145 @@ onUnmounted(() => {
 
 <style>
 .gps-cage {
-  margin-top: 2em;
+  margin-block-start: 2em;
+  container-type: inline-size;
+  container-name: cage;
 }
+
 .gps-cage__title {
-  margin-bottom: 0.5em;
+  margin-block-end: 0.5em;
 }
+
 .gps-cage__bedding {
-  margin-bottom: 1em;
+  margin-block-end: 1em;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 0.5em;
 }
+
 .gps-cage__bedding-label {
-  margin-right: 0.5em;
+  margin-inline-end: 0;
 }
+
 .gps-cage__bedding-bar {
-  width: 120px;
-  margin-right: 0.5em;
+  width: 100%;
+  max-width: 200px;
+  margin-inline-end: 0;
 }
+
 .gps-cage__bedding-value {
   min-width: 2em;
-  text-align: right;
+  text-align: center;
 }
+
 .gps-cage__grid {
   display: grid;
   grid-gap: 1px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
+
 .gps-cage__cell {
-  width: 1.2em;
-  height: 1.2em;
+  width: 1em;
+  height: 1em;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1em;
+  font-size: 0.8em;
   cursor: pointer;
   transition: var(--transition);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
 }
+
 .gps-cage__cell--guinea-pig {
   background: var(--color-cage-guinea-pig);
 }
+
 .gps-cage__cell--poop {
   background: var(--color-cage-poop);
 }
+
 .gps-cage__status {
-  margin-top: 1em;
+  margin-block-start: 1em;
   font-style: italic;
   color: var(--color-text, #888);
+  text-align: center;
 }
+
+/* Mobile-first: Start with column layout */
 .gps-cage__layout {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 2em;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5em;
 }
+
 .gps-cage__sidebar {
-  min-width: 180px;
+  width: 100%;
+  max-width: 300px;
   display: flex;
   flex-direction: column;
   gap: 1em;
+  text-align: center;
+}
+
+.gps-cage__grid-wrapper {
+  order: -1;
+}
+
+/* Container query for medium containers */
+@container cage (min-width: 400px) {
+  .gps-cage__bedding {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+  }
+  
+  .gps-cage__bedding-label {
+    margin-inline-end: 0.5em;
+  }
+  
+  .gps-cage__bedding-bar {
+    width: 120px;
+    margin-inline-end: 0.5em;
+  }
+  
+  .gps-cage__bedding-value {
+    text-align: end;
+  }
+  
+  .gps-cage__cell {
+    width: 1.1em;
+    height: 1.1em;
+    font-size: 0.9em;
+  }
+}
+
+/* Container query for large containers - expand to row layout */
+@container cage (min-width: 500px) {
+  .gps-cage__layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2em;
+  }
+  
+  .gps-cage__sidebar {
+    min-width: 180px;
+    max-width: none;
+    text-align: start;
+  }
+  
+  .gps-cage__status {
+    text-align: start;
+  }
+  
+  .gps-cage__cell {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1em;
+  }
 }
 </style> 

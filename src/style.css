@@ -14,8 +14,6 @@ body {
   color: var(--color-text);
   transition: background 0.2s, color 0.2s;
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -50,10 +48,36 @@ button:focus-visible {
 }
 
 #app {
-  max-width: 1280px;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.gps-app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gps-app__content {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   text-align: center;
+  flex: 1;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .gps-app__content {
+    padding: 1rem 0.75rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .gps-app__content {
+    padding: 2rem 1.5rem;
+  }
 }
 
 .gps-app, .gps-main__inventory-menu, .gps-main__guinea-pig-panel, .gps-main__needs-panel, .gps-cage__sidebar, .gps-cage__grid-wrapper {
