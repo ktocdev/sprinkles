@@ -1,18 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useInventoryStore } from './stores/inventory'
 import { useGuineaPigStore } from './stores/guineaPig'
-import GuineaPig from './components/GuineaPig.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import MainScreen from './components/MainScreen.vue'
+import ThemeToggle from './components/ThemeToggle.vue'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const guineaPigStore = useGuineaPigStore()
 const nameInput = ref('')
-const editingInfo = ref(false)
-const tempInfo = ref({ ...guineaPigStore.info })
+
+const isLight = ref(false)
+
+function toggleTheme() {
+  isLight.value = !isLight.value
+  document.body.classList.toggle('theme-light', isLight.value)
+}
+
+onMounted(() => {
+  document.body.classList.toggle('theme-light', isLight.value)
+})
 
 function submitName() {
   if (nameInput.value.trim()) {
@@ -32,26 +41,11 @@ function resetGame() {
     localStorage.removeItem('cage')
   }
 }
-
-function startEditInfo() {
-  tempInfo.value = { ...guineaPigStore.info }
-  editingInfo.value = true
-}
-
-function saveInfo() {
-  for (const key in tempInfo.value) {
-    guineaPigStore.setInfoField(key, tempInfo.value[key])
-  }
-  editingInfo.value = false
-}
-
-function cancelEditInfo() {
-  editingInfo.value = false
-}
 </script>
 
 <template>
   <div class="gps-app">
+    <ThemeToggle />
     <WelcomeScreen v-if="!userStore.name" :nameInput="nameInput" @update:nameInput="val => nameInput = val" @submit="submitName" />
     <MainScreen v-else :userStore="userStore" :inventoryStore="inventoryStore" :resetGame="resetGame" />
   </div>

@@ -27,18 +27,18 @@ function handleSubmit() {
 .gps-welcome__input {
   padding: 0.5em;
   margin-right: 0.5em;
-  border: 1px solid #aaa;
+  border: 1px solid var(--color-border, #aaa);
   border-radius: 4px;
 }
 .gps-welcome__button {
   padding: 0.5em 1em;
   border: none;
-  background: #42b883;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-text);
   border-radius: 4px;
   cursor: pointer;
 }
 .gps-welcome__button:hover {
-  background: #369870;
+  background: var(--color-accent-hover);
 }
 </style> 

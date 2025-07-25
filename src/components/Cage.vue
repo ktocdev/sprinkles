@@ -8,13 +8,12 @@ const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
 const height = computed(() => cageStore.size.height)
 
-const guineaPigPos = ref({ x: 0, y: 0 })
 const sitting = ref(true)
 let moveInterval = null
 let poopTimeout = null
 
 function cellContent(cell, x, y) {
-  if (guineaPigPos.value.x === x && guineaPigPos.value.y === y) return '🐹'
+  if (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y) return '🐹'
   if (cell === 'poop') return '💩'
   if (cell === 'object') return '🪑'
   return ''
@@ -28,7 +27,7 @@ function moveGuineaPig() {
   }
   sitting.value = false
   // Find possible moves (adjacent cells)
-  const { x, y } = guineaPigPos.value
+  const { x, y } = cageStore.guineaPigPos
   const moves = []
   if (x > 0) moves.push({ x: x - 1, y })
   if (x < width.value - 1) moves.push({ x: x + 1, y })
@@ -36,7 +35,7 @@ function moveGuineaPig() {
   if (y < height.value - 1) moves.push({ x, y: y + 1 })
   if (moves.length > 0) {
     const next = moves[Math.floor(Math.random() * moves.length)]
-    guineaPigPos.value = next
+    cageStore.setGuineaPigPos(next.x, next.y)
     // Drop a poop if it's time
     if (shouldDropPoop.value) {
       cageStore.addPoop(next.x, next.y)
@@ -67,10 +66,9 @@ const flatGrid = computed(() => {
 
 onMounted(() => {
   // Place guinea pig at a random position
-  guineaPigPos.value = {
-    x: Math.floor(Math.random() * width.value),
-    y: Math.floor(Math.random() * height.value)
-  }
+  const x = Math.floor(Math.random() * width.value)
+  const y = Math.floor(Math.random() * height.value)
+  cageStore.setGuineaPigPos(x, y)
   resetPoopTimer()
   moveInterval = setInterval(moveGuineaPig, 2000)
 })
@@ -108,7 +106,7 @@ onUnmounted(() => {
             :key="item.x + '-' + item.y"
             class="gps-cage__cell"
             :class="{
-              'gps-cage__cell--guinea-pig': guineaPigPos.x === item.x && guineaPigPos.y === item.y,
+              'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
               'gps-cage__cell--poop': item.cell === 'poop'
             }"
             @click="handleCellClick(item.cell, item.x, item.y)"
@@ -153,25 +151,27 @@ onUnmounted(() => {
 .gps-cage__cell {
   width: 1.2em;
   height: 1.2em;
-  background: #f0e6d2;
-  border: 1px solid #c2b280;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1em;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--transition);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
 }
 .gps-cage__cell--guinea-pig {
-  background: #ffe4b5;
+  background: var(--color-cage-guinea-pig);
 }
 .gps-cage__cell--poop {
-  background: #e2c48d;
+  background: var(--color-cage-poop);
 }
 .gps-cage__status {
   margin-top: 1em;
   font-style: italic;
-  color: #888;
+  color: var(--color-text, #888);
 }
 .gps-cage__layout {
   display: flex;

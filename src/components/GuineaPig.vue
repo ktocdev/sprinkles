@@ -62,26 +62,19 @@ function cancelEditInfo() {
 .gps-guinea-pig__button {
   padding: 0.3em 0.8em;
   border: none;
-  background: #42b883;
-  color: white;
-  border-radius: 4px;
+  background: var(--color-accent);
+  color: var(--color-text);
+  border-radius: var(--border-radius);
   cursor: pointer;
+  transition: var(--transition);
 }
 .gps-guinea-pig__button--cancel {
-  background: #e74c3c;
+  background: var(--color-danger);
 }
 .gps-guinea-pig__button:hover {
-  background: #369870;
+  background: var(--color-accent-hover);
 }
 .gps-guinea-pig__title {
   margin-bottom: 0.5em;
-}
-.gps-guinea-pig__info-panel {
-  background: #f8f8f8;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 1em;
-  margin-bottom: 1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 </style> 

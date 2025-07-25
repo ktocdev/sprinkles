@@ -109,44 +109,44 @@ function clearCage() {
 .gps-main__button {
   padding: 0.5em 1em;
   border: none;
-  background: #42b883;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-text);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1em;
   transition: background 0.2s;
 }
 .gps-main__button:hover {
-  background: #369870;
+  background: var(--color-accent-hover);
 }
 .gps-main__button--danger {
-  background: #e74c3c;
+  background: var(--color-danger);
 }
 .gps-main__button--danger:hover {
-  background: #c0392b;
+  background: var(--color-danger-hover);
 }
 .gps-main__button--warn {
-  background: #e67e22;
+  background: var(--color-warn);
 }
 .gps-main__button--warn:hover {
-  background: #d35400;
+  background: var(--color-warn-hover);
 }
 .gps-main__inventory-menu,
 .gps-main__guinea-pig-panel {
-  background: #f8f8f8;
-  border: 1px solid #ccc;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 1em;
   margin-bottom: 1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--box-shadow);
 }
 .gps-main__needs-panel {
-  background: #f8f8f8;
-  border: 1px solid #ccc;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 1em;
   margin-bottom: 1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--box-shadow);
 }
 .gps-main__content-grid {
   display: grid;
@@ -154,11 +154,5 @@ function clearCage() {
   gap: 2em;
   align-items: start;
   margin-top: 2em;
-}
-.gps-main__content-cage {
-  /* Optionally add a panel style here */
-}
-.gps-main__content-info {
-  /* Optionally add a panel style here */
 }
 </style> 
