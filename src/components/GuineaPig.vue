@@ -19,11 +19,6 @@ function saveInfo() {
 function cancelEditInfo() {
   editingInfo.value = false
 }
-
-const showNeeds = ref(false)
-function toggleNeeds() {
-  showNeeds.value = !showNeeds.value
-}
 </script>
 
 <template>
@@ -52,17 +47,6 @@ function toggleNeeds() {
       <p class="gps-guinea-pig__info"><strong>Gender:</strong> {{ guineaPigStore.info.gender || '—' }}</p>
       <button class="gps-guinea-pig__button" @click="startEditInfo">Edit Info</button>
     </template>
-    <!-- Needs toggle button removed -->
-    <div v-if="showNeeds" class="gps-guinea-pig__needs-panel">
-      <h4 class="gps-guinea-pig__needs-title">Needs</h4>
-      <ul class="gps-guinea-pig__needs-list">
-        <li class="gps-guinea-pig__needs-item" v-for="(value, need) in guineaPigStore.needs" :key="need">
-          <span class="gps-guinea-pig__needs-label">{{ need.charAt(0).toUpperCase() + need.slice(1) }}:</span>
-          <progress class="gps-guinea-pig__needs-bar" :value="value" max="100"></progress>
-          <span class="gps-guinea-pig__needs-value">{{ value }}</span>
-        </li>
-      </ul>
-    </div>
   </div>
 </template>
 
@@ -99,46 +83,5 @@ function toggleNeeds() {
   padding: 1em;
   margin-bottom: 1em;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.gps-guinea-pig__needs-panel {
-  background: #f8f8f8;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 1em;
-  margin-bottom: 1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.gps-guinea-pig__needs-list {
-  list-style: none;
-  padding: 0;
-}
-.gps-guinea-pig__needs-item {
-  margin-bottom: 0.5em;
-}
-.gps-guinea-pig__needs-label {
-  display: inline-block;
-  width: 100px;
-}
-.gps-guinea-pig__needs-bar {
-  vertical-align: middle;
-  width: 120px;
-}
-.gps-guinea-pig__needs-value {
-  margin-left: 8px;
-}
-.gps-guinea-pig__needs-toggle {
-  margin-bottom: 0.5em;
-  padding: 0.5em 1em;
-  border: none;
-  background: #42b883;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  display: block;
-  font-size: 1em;
-  transition: background 0.2s;
-}
-.gps-guinea-pig__needs-toggle:hover {
-  background: #369870;
 }
 </style> 

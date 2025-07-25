@@ -1,5 +1,37 @@
-# Vue 3 + TypeScript + Vite
+# Guinea Pig Simulator
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A text-based browser game where you care for a virtual guinea pig! Built with Vue 3, Vite, and Pinia.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Features
+- Care for your guinea pig: manage hunger, thirst, cleanliness, and more
+- Interactive cage grid with movable guinea pig and droppable poops
+- Inventory system for food and items
+- Market, currency, and user profile
+- All game state is saved in your browser (localStorage)
+- Modern, modular UI with panels and menubar
+
+## Getting Started
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+2. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+3. **Open your browser:**
+   Visit [http://localhost:5173](http://localhost:5173)
+
+## Tech Stack
+- [Vue 3](https://vuejs.org/)
+- [Vite](https://vitejs.dev/)
+- [Pinia](https://pinia.vuejs.org/) (state management)
+
+## Project Structure
+- `src/components/` — UI components (Cage, GuineaPig, MainScreen, etc.)
+- `src/stores/` — Pinia stores for user, inventory, guinea pig, and cage
+- `public/favicon.svg` — Guinea pig emoji favicon
+
+## License
+MIT
