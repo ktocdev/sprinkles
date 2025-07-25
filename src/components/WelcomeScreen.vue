@@ -1,5 +1,6 @@
 <script setup>
 import { ref, defineEmits, defineProps } from 'vue'
+import Button from './Button.vue'
 
 const props = defineProps({
   nameInput: String
@@ -16,29 +17,46 @@ function handleSubmit() {
 
 <template>
   <div class="gps-welcome">
-    <h2 class="gps-welcome__title">Welcome to Guinea Pig Simulator!</h2>
     <p class="gps-welcome__desc">Please enter your name to begin:</p>
     <input class="gps-welcome__input" :value="nameInput" @input="handleInput" @keyup.enter="handleSubmit" placeholder="Your name" />
-    <button class="gps-welcome__button" @click="handleSubmit">Start</button>
+    <Button type="primary" @click="handleSubmit">Start</Button>
   </div>
 </template>
 
 <style>
+.gps-welcome {
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.gps-welcome__desc {
+  margin-block-end: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
 .gps-welcome__input {
-  padding: 0.5em;
-  margin-right: 0.5em;
-  border: 1px solid #aaa;
-  border-radius: 4px;
+  display: block;
+  width: 100%;
+  padding: 0.75em;
+  margin-block-end: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-sizing: border-box;
 }
-.gps-welcome__button {
-  padding: 0.5em 1em;
-  border: none;
-  background: #42b883;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+
+.gps-welcome__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(66, 184, 131, 0.2);
 }
-.gps-welcome__button:hover {
-  background: #369870;
+
+.gps-welcome__input::placeholder {
+  color: var(--color-text);
+  opacity: 0.6;
 }
 </style> 
