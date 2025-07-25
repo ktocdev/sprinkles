@@ -46,9 +46,9 @@
       <h2 class="gps-button-specimen__section-title">Warning Buttons</h2>
       <p class="gps-button-specimen__section-desc">Buttons for actions that require caution, with orange background.</p>
       <div class="gps-button-specimen__examples">
-        <Button type="warn">Warning Button</Button>
-        <Button type="warn">Clear Cage</Button>
-        <Button type="warn">Delete Item</Button>
+        <Button type="warning">Warning Button</Button>
+        <Button type="warning">Clear Cage</Button>
+        <Button type="warning">Delete Item</Button>
       </div>
     </div>
 
