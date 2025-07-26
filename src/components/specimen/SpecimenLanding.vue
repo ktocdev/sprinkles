@@ -101,6 +101,52 @@
         </Button>
       </div>
 
+      <!-- Input Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📝</div>
+          <h3 class="gps-specimen-landing__card-title">Input Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Reusable input component with validation, icons, and various input types for forms and data entry.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Multiple types</span>
+          <span class="gps-specimen-landing__feature">Validation</span>
+          <span class="gps-specimen-landing__feature">Icons</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showInputSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View Input Specimen
+        </Button>
+      </div>
+
+      <!-- FormGroup Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📋</div>
+          <h3 class="gps-specimen-landing__card-title">FormGroup Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Form field wrapper component that provides consistent layout, labels, and validation for form elements.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Consistent layout</span>
+          <span class="gps-specimen-landing__feature">Labels & validation</span>
+          <span class="gps-specimen-landing__feature">Inline support</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showFormGroupSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View FormGroup Specimen
+        </Button>
+      </div>
+
 
     </div>
 
@@ -124,7 +170,9 @@ const emit = defineEmits([
   'showButtonSpecimen',
   'showDropdownSpecimen', 
   'showModalSpecimen',
-  'showStatusBarSpecimen'
+  'showStatusBarSpecimen',
+  'showInputSpecimen',
+  'showFormGroupSpecimen'
 ])
 </script>
 

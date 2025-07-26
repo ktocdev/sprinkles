@@ -160,27 +160,27 @@
         />
       </div>
       
-      <div class="gps-cage-item-manager__form-group">
-        <label>Position X:</label>
-        <input 
+      <FormGroup label="Position X">
+        <Input 
           v-model.number="itemX" 
           type="number" 
-          min="0" 
+          :min="0" 
           :max="cageStore.size.width - 1"
-          class="gps-cage-item-manager__input"
+          placeholder="Enter X position"
+          icon="📍"
         />
-      </div>
+      </FormGroup>
       
-      <div class="gps-cage-item-manager__form-group">
-        <label>Position Y:</label>
-        <input 
+      <FormGroup label="Position Y">
+        <Input 
           v-model.number="itemY" 
           type="number" 
-          min="0" 
+          :min="0" 
           :max="cageStore.size.height - 1"
-          class="gps-cage-item-manager__input"
+          placeholder="Enter Y position"
+          icon="📍"
         />
-      </div>
+      </FormGroup>
       
       <template #actions>
         <Button 
@@ -205,27 +205,27 @@
       :title="`Move ${formatItemName(itemToMove?.name)}`"
       @close="showMoveModal = false"
     >
-      <div class="gps-cage-item-manager__form-group">
-        <label>New Position X:</label>
-        <input 
+      <FormGroup label="New Position X">
+        <Input 
           v-model.number="moveX" 
           type="number" 
-          min="0" 
+          :min="0" 
           :max="cageStore.size.width - 1"
-          class="gps-cage-item-manager__input"
+          placeholder="Enter X position"
+          icon="📍"
         />
-      </div>
+      </FormGroup>
       
-      <div class="gps-cage-item-manager__form-group">
-        <label>New Position Y:</label>
-        <input 
+      <FormGroup label="New Position Y">
+        <Input 
           v-model.number="moveY" 
           type="number" 
-          min="0" 
+          :min="0" 
           :max="cageStore.size.height - 1"
-          class="gps-cage-item-manager__input"
+          placeholder="Enter Y position"
+          icon="📍"
         />
-      </div>
+      </FormGroup>
       
       <template #actions>
         <Button 
@@ -253,6 +253,8 @@ import { useInventoryStore } from '../../stores/inventory'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
+import Input from '../shared/Input.vue'
+import FormGroup from '../shared/FormGroup.vue'
 
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
@@ -546,32 +548,7 @@ function clearInventory() {
   background: var(--color-danger);
 }
 
-.gps-cage-item-manager__form-group {
-  margin-block-end: 1rem;
-}
 
-.gps-cage-item-manager__form-group label {
-  display: block;
-  margin-block-end: 0.5rem;
-  color: var(--color-text);
-  font-weight: var(--font-weight-medium);
-}
-
-.gps-cage-item-manager__input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-}
-
-.gps-cage-item-manager__input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  box-shadow: var(--box-shadow-focus);
-}
 
 .gps-cage-item-manager__no-items-message {
   background: var(--color-bg);

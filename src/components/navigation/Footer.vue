@@ -40,8 +40,8 @@ function showSpecimenLanding() {
 
 .gps-footer__content-wrapper {
   padding: 1rem 1.5rem;
-  max-width: 1400px; /* Maximum width constraint */
-  margin-inline-end: auto; /* Center the content */
+  max-width: 1400px;
+  margin-inline: auto;
 }
 
 .gps-footer__content {
@@ -82,13 +82,12 @@ function showSpecimenLanding() {
   outline-offset: 2px;
 }
 
-/* Responsive breakpoints */
 @media (max-width: 1250px) {
   .gps-footer__content-wrapper {
-    margin-inline-start: 60px; /* Keep sidebar margin */
-    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    margin-inline-start: 60px;
+    width: calc(100% - 60px);
     max-width: 1200px;
-    margin-inline-end: auto;
+    margin-inline: auto;
     padding: 1rem 1.5rem;
   }
   
@@ -101,8 +100,9 @@ function showSpecimenLanding() {
 
 @media (max-width: 768px) {
   .gps-footer__content-wrapper {
-    margin-inline-start: 60px; /* Keep sidebar margin */
-    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    margin-inline-start: 60px;
+    width: calc(100% - 60px);
+    margin-inline: auto;
     padding: 1rem;
   }
   
