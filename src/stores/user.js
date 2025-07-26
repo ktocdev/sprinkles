@@ -1,5 +1,9 @@
 import { defineStore } from 'pinia'
 
+function clampValue(value, min = 0, max = 50) {
+  return Math.max(min, Math.min(max, value))
+}
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     currency: 50,
@@ -8,7 +12,7 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     addCurrency(amount) {
-      this.currency = Math.min(this.currency + amount, this.maxCurrency)
+      this.currency = clampValue(this.currency + amount, 0, this.maxCurrency)
     },
     spendCurrency(amount) {
       if (this.currency >= amount) {
@@ -18,7 +22,7 @@ export const useUserStore = defineStore('user', {
       return false
     },
     setCurrency(amount) {
-      this.currency = Math.min(amount, this.maxCurrency)
+      this.currency = clampValue(amount, 0, this.maxCurrency)
     }
   },
   persist: true

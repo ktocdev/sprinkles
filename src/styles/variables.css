@@ -1,0 +1,81 @@
+:root {
+  /* Dark theme (default) */
+  --color-bg: #181a1b;
+  --color-text: #f5f6fa;
+  --color-panel: #23272a;
+  --color-border: #333;
+  --color-accent: #42b883;
+  --color-accent-hover: #369870;
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+  --color-warning: #e67e22;
+  --color-warning-hover: #d35400;
+  --color-white: #fff;
+  --box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --border-radius: 6px;
+  --transition: background 0.2s, color 0.2s;
+  --color-cage-guinea-pig: #ffe4b5;
+  --color-cage-poop: #e2c48d;
+  
+  /* Typography */
+  --font-size-xs: 0.8em;
+  --font-size-sm: 0.9rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 1.2em;
+  --font-size-2xl: 1.25rem;
+  --font-size-3xl: 1.5rem;
+  --font-size-4xl: 2.5em;
+  --font-size-5xl: 3.2em;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+  
+  /* Font Families */
+  --font-family-header: 'Inter', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+}
+body.theme-light {
+  --color-bg: #fafafa;
+  --color-text: #222;
+  --color-panel: #f8f8f8;
+  --color-border: #ccc;
+  --color-accent: #42b883;
+  --color-accent-hover: #369870;
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+  --color-warning: #e67e22;
+  --color-warning-hover: #d35400;
+  --color-cage-guinea-pig: #ffe4b5;
+  --color-cage-poop: #e2c48d;
+  
+  /* Typography */
+  --font-size-xs: 0.8em;
+  --font-size-sm: 0.9rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 1.2em;
+  --font-size-2xl: 1.25rem;
+  --font-size-3xl: 1.5rem;
+  --font-size-4xl: 2.5em;
+  --font-size-5xl: 3.2em;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+  
+  /* Font Families */
+  --font-family-header: 'Inter', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+} 

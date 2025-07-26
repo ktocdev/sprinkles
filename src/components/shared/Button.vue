@@ -51,8 +51,8 @@ const handleKeydown = (event) => {
   transition: var(--transition);
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   cursor: pointer;
 }
@@ -116,10 +116,10 @@ const handleKeydown = (event) => {
 
 /* Warning button */
 .gps-button--warning {
-  background: var(--color-warn);
+  background: var(--color-warning);
   color: var(--color-white);
 }
 .gps-button--warning:hover {
-  background: var(--color-warn-hover);
+  background: var(--color-warning-hover);
 }
 </style> 

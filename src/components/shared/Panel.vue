@@ -87,15 +87,15 @@ function handleEscapeKey(event) {
 
 .gps-panel__title {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text);
 }
 
 .gps-panel__close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-size-3xl);
   color: var(--color-text);
   cursor: pointer;
   padding: 0.25rem;

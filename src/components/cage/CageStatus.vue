@@ -26,6 +26,4 @@ const cageStore = useCageStore()
 .gps-cage-status {
   width: 100%;
 }
-
-
 </style> 

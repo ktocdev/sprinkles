@@ -26,8 +26,8 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
 
 <template>
   <div class="gps-main">
-    <div class="gps-main__content-grid">
-      <div class="gps-main__content-cage">
+    <div class="gps-main__content-grid gps-flex--justify-center">
+      <div class="gps-main__content-cage gps-container">
         <Cage class="gps-main__cage" />
         <div class="gps-main__status">
           <div v-if="guineaPigStore.sitting" class="gps-main__status-text">The guinea pig is sitting.</div>
@@ -81,13 +81,10 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
 
 <style>
 .gps-main__content-grid {
-  display: flex;
-  justify-content: center;
   margin-block-start: 2em;
 }
 
 .gps-main__content-cage {
-  max-width: 1200px;
   width: 100%;
 }
 

@@ -1,17 +1,22 @@
 @import './variables.css';
+@import './specimen.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Lato:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
 
 a {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--color-accent);
-  text-decoration: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 a:hover {
   color: var(--color-accent-hover);
+  text-decoration-thickness: 2px;
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
+  font-family: var(--font-family-body);
   transition: background 0.2s, color 0.2s;
   margin: 0;
   min-width: 320px;
@@ -19,16 +24,17 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-header);
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   background-color: var(--color-panel);
   color: var(--color-text);
@@ -101,4 +107,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
+} 

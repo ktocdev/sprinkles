@@ -2,6 +2,10 @@ import { defineStore } from 'pinia'
 import { useInventoryStore } from './inventory.js'
 import { useUserStore } from './user.js'
 
+function isOfferActive(offer) {
+  return offer && offer.active && Date.now() < offer.expiresAt
+}
+
 export const useMarketStore = defineStore('market', {
   state: () => ({
     // Base prices for all items
@@ -60,14 +64,7 @@ export const useMarketStore = defineStore('market', {
       return state.currentPrices[itemName] || state.basePrices[itemName] || 0
     },
     
-    // Get all current prices
-    getAllPrices: (state) => {
-      const prices = {}
-      Object.keys(state.basePrices).forEach(item => {
-        prices[item] = state.getItemPrice(item)
-      })
-      return prices
-    },
+
     
     // Check if market is due for price update
     shouldUpdatePrices: (state) => {
@@ -77,15 +74,14 @@ export const useMarketStore = defineStore('market', {
     // Get items that are on special offer
     getSpecialOffers: (state) => {
       return Object.keys(state.specialOffers).filter(item => 
-        state.specialOffers[item].active && 
-        Date.now() < state.specialOffers[item].expiresAt
+        isOfferActive(state.specialOffers[item])
       )
     },
     
     // Get discount percentage for an item
     getDiscount: (state) => (itemName) => {
       const offer = state.specialOffers[itemName]
-      if (offer && offer.active && Date.now() < offer.expiresAt) {
+      if (isOfferActive(offer)) {
         return offer.discount
       }
       return 0
@@ -221,7 +217,7 @@ export const useMarketStore = defineStore('market', {
     clearExpiredOffers() {
       Object.keys(this.specialOffers).forEach(item => {
         const offer = this.specialOffers[item]
-        if (offer && Date.now() > offer.expiresAt) {
+        if (offer && !isOfferActive(offer)) {
           this.specialOffers[item].active = false
         }
       })

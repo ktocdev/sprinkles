@@ -1,5 +1,9 @@
 import { defineStore } from 'pinia'
 
+function clampValue(value, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, value))
+}
+
 export const useGuineaPigStore = defineStore('guineaPig', {
   state: () => ({
     info: {
@@ -33,7 +37,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     },
     adjustNeed(need, delta) {
       if (need in this.needs) {
-        this.needs[need] = Math.max(0, Math.min(100, this.needs[need] + delta))
+        this.needs[need] = clampValue(this.needs[need] + delta)
       }
     },
     resetNeeds() {
