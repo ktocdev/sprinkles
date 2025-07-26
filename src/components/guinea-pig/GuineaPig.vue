@@ -66,7 +66,7 @@ function cancelEditInfo() {
 </script>
 
 <template>
-  <div class="gps-guinea-pig">
+  <div class="gps-guinea-pig gps-panel-content">
     <h3 class="gps-guinea-pig__title">Your Guinea Pig</h3>
     <template v-if="editingInfo">
       <div class="gps-guinea-pig__edit-form">
@@ -80,7 +80,7 @@ function cancelEditInfo() {
             <option value="Sow">Sow</option>
           </select>
         </label><br />
-        <div class="gps-guinea-pig__edit-actions">
+        <div class="gps-guinea-pig__edit-actions gps-panel-controls">
           <button class="gps-guinea-pig__button" @click="saveInfo">Save</button>
           <button class="gps-guinea-pig__button gps-guinea-pig__button--secondary" @click="generateRandomData">🎲 Random</button>
           <button class="gps-guinea-pig__button gps-guinea-pig__button--cancel" @click="cancelEditInfo">Cancel</button>
@@ -92,7 +92,7 @@ function cancelEditInfo() {
       <p class="gps-guinea-pig__info"><strong>Birthday:</strong> {{ guineaPigStore.info.birthday || '—' }}</p>
       <p class="gps-guinea-pig__info"><strong>Coat:</strong> {{ guineaPigStore.info.coat || '—' }}</p>
       <p class="gps-guinea-pig__info"><strong>Gender:</strong> {{ guineaPigStore.info.gender || '—' }}</p>
-      <div class="gps-guinea-pig__actions">
+      <div class="gps-guinea-pig__actions gps-panel-controls">
         <button class="gps-guinea-pig__button" @click="startEditInfo">Edit Info</button>
         <button class="gps-guinea-pig__button gps-guinea-pig__button--secondary" @click="generateRandomData">🎲 Generate Random Data</button>
       </div>

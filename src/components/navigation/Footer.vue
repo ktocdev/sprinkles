@@ -6,11 +6,8 @@
           Guinea Pig Simulator - A text-based pet care game
         </p>
         <nav class="gps-footer__nav">
-          <button class="gps-footer__link" @click="showButtonSpecimen">
-            Button Specimen
-          </button>
-          <button class="gps-footer__link" @click="showDropdownSpecimen">
-            Dropdown Specimen
+          <button class="gps-footer__link" @click="showSpecimenLanding">
+            Component Specimens
           </button>
         </nav>
       </div>
@@ -21,14 +18,10 @@
 <script setup>
 import { defineEmits } from 'vue'
 
-const emit = defineEmits(['showButtonSpecimen', 'showDropdownSpecimen'])
+const emit = defineEmits(['showSpecimenLanding'])
 
-function showButtonSpecimen() {
-  emit('showButtonSpecimen')
-}
-
-function showDropdownSpecimen() {
-  emit('showDropdownSpecimen')
+function showSpecimenLanding() {
+  emit('showSpecimenLanding')
 }
 </script>
 
@@ -38,18 +31,17 @@ function showDropdownSpecimen() {
   background: var(--color-panel);
   border-block-start: 2px solid var(--color-accent);
   margin-block-start: auto;
-  position: relative;
-  z-index: 10;
-  overflow: hidden; /* Prevent content from showing outside footer */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
 }
 
 .gps-footer__content-wrapper {
   padding: 1rem 1.5rem;
-  margin-inline-start: 60px; /* Account for sidebar width */
-  width: calc(100% - 60px); /* Take full width minus sidebar */
   max-width: 1400px; /* Maximum width constraint */
   margin-inline-end: auto; /* Center the content */
-  box-sizing: border-box;
 }
 
 .gps-footer__content {

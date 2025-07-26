@@ -14,7 +14,8 @@ export const useCageStore = defineStore('cage', {
     beddingFreshness: 100,
     waterLevel: 100,
     poop: [], // array of { x, y }
-    guineaPigPos: { x: 0, y: 0 }
+    guineaPigPos: { x: 0, y: 0 },
+    items: [] // array of { id, name, type, x, y, isConsumable, quantity }
   }),
   getters: {
     grid(state) {
@@ -25,6 +26,12 @@ export const useCageStore = defineStore('cage', {
           grid[p.y][p.x] = 'poop'
         }
       }
+      // Place items
+      for (const item of state.items) {
+        if (grid[item.y] && grid[item.y][item.x] !== undefined) {
+          grid[item.y][item.x] = item
+        }
+      }
       // Place guinea pig
       if (
         grid[state.guineaPigPos.y] &&
@@ -33,6 +40,12 @@ export const useCageStore = defineStore('cage', {
         grid[state.guineaPigPos.y][state.guineaPigPos.x] = 'guineaPig'
       }
       return grid
+    },
+    consumableItems(state) {
+      return state.items.filter(item => item.isConsumable)
+    },
+    permanentItems(state) {
+      return state.items.filter(item => !item.isConsumable)
     }
   },
   actions: {
@@ -61,6 +74,65 @@ export const useCageStore = defineStore('cage', {
       this.waterLevel = 100
       this.poop = []
       this.guineaPigPos = { x: 0, y: 0 }
+      this.items = []
+    },
+    refreshWater() {
+      this.waterLevel = 100
+    },
+    cleanCage() {
+      this.poop = []
+    },
+    addItem(item, x, y) {
+      // Check if position is available
+      const isOccupied = this.items.some(i => i.x === x && i.y === y) ||
+                        (this.guineaPigPos.x === x && this.guineaPigPos.y === y) ||
+                        this.poop.some(p => p.x === x && p.y === y)
+      
+      if (isOccupied) {
+        return false
+      }
+      
+      this.items.push({
+        id: Date.now() + Math.random(),
+        name: item.name,
+        type: item.type,
+        x: x,
+        y: y,
+        isConsumable: item.isConsumable,
+        quantity: item.quantity || 1
+      })
+      return true
+    },
+    removeItem(itemId) {
+      this.items = this.items.filter(item => item.id !== itemId)
+    },
+    moveItem(itemId, newX, newY) {
+      const item = this.items.find(i => i.id === itemId)
+      if (!item) return false
+      
+      // Check if new position is available
+      const isOccupied = this.items.some(i => i.id !== itemId && i.x === newX && i.y === newY) ||
+                        (this.guineaPigPos.x === newX && this.guineaPigPos.y === newY) ||
+                        this.poop.some(p => p.x === newX && p.y === newY)
+      
+      if (isOccupied) {
+        return false
+      }
+      
+      item.x = newX
+      item.y = newY
+      return true
+    },
+    consumeItem(itemId) {
+      const item = this.items.find(i => i.id === itemId)
+      if (!item || !item.isConsumable) return false
+      
+      if (item.quantity > 1) {
+        item.quantity--
+      } else {
+        this.removeItem(itemId)
+      }
+      return true
     }
   },
   persist: true

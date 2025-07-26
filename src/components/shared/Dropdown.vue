@@ -218,7 +218,9 @@ onUnmounted(() => {
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   margin-block-start: 0.25rem;
-  max-height: 200px;
+  max-height: 275px;
+  max-width: 320px;
+  width: max-content;
   overflow-y: auto;
 }
 

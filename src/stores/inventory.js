@@ -3,26 +3,26 @@ import { defineStore } from 'pinia'
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
     items: {
-      bedding: 0,
-      hay: 0,
-      pellets: 0,
-      lettuce: 0,
-      blueberries: 0,
-      carrots: 0,
-      cucumbers: 0,
-      small_chew_stick: 0,
-      large_chew_stick: 0,
-      small_ball: 0,
-      large_ball: 0,
-      small_tunnel: 0,
-      large_tunnel: 0,
-      small_hammock: 0,
-      large_hammock: 0,
-      small_bed: 0,
-      large_bed: 0,
-      small_house: 0,
-      large_house: 0,
-      chew_cube: 0,
+      bedding: 5,
+      hay: 10,
+      pellets: 8,
+      lettuce: 3,
+      blueberries: 2,
+      carrots: 4,
+      cucumbers: 2,
+      small_chew_stick: 3,
+      large_chew_stick: 2,
+      small_ball: 1,
+      large_ball: 1,
+      small_tunnel: 1,
+      large_tunnel: 1,
+      small_hammock: 1,
+      large_hammock: 1,
+      small_bed: 1,
+      large_bed: 1,
+      small_house: 1,
+      large_house: 1,
+      chew_cube: 2,
     }
   }),
   actions: {
@@ -41,6 +41,30 @@ export const useInventoryStore = defineStore('inventory', {
     setItemQuantity(item, amount) {
       if (this.items[item] !== undefined) {
         this.items[item] = amount
+      }
+    },
+    resetToDefaults() {
+      this.items = {
+        bedding: 5,
+        hay: 10,
+        pellets: 8,
+        lettuce: 3,
+        blueberries: 2,
+        carrots: 4,
+        cucumbers: 2,
+        small_chew_stick: 3,
+        large_chew_stick: 2,
+        small_ball: 1,
+        large_ball: 1,
+        small_tunnel: 1,
+        large_tunnel: 1,
+        small_hammock: 1,
+        large_hammock: 1,
+        small_bed: 1,
+        large_bed: 1,
+        small_house: 1,
+        large_house: 1,
+        chew_cube: 2,
       }
     }
   },

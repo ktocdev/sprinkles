@@ -1,6 +1,6 @@
 <template>
   <div class="gps-cage-status">
-    <div class="gps-cage-status__container gps-status-grid--two-columns">
+    <div class="gps-cage-status__container gps-status-grid--two-columns gps-panel-content">
       <StatusBar 
         label="Bedding Freshness" 
         :value="cageStore.beddingFreshness" 
