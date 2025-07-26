@@ -1,14 +1,14 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useCageStore } from '../stores/cage'
+import { useCageStore } from '../../stores/cage'
+import { useGuineaPigStore } from '../../stores/guineaPig'
 
 const cageStore = useCageStore()
+const guineaPigStore = useGuineaPigStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
 const height = computed(() => cageStore.size.height)
-
-const sitting = ref(true)
 let moveInterval = null
 let poopTimeout = null
 
@@ -22,10 +22,10 @@ function cellContent(cell, x, y) {
 function moveGuineaPig() {
   // 65% chance to sit
   if (Math.random() < 0.65) {
-    sitting.value = true
+    guineaPigStore.setSitting(true)
     return
   }
-  sitting.value = false
+  guineaPigStore.setSitting(false)
   // Find possible moves (adjacent cells)
   const { x, y } = cageStore.guineaPigPos
   const moves = []
@@ -81,18 +81,7 @@ onUnmounted(() => {
 
 <template>
   <div class="gps-cage">
-    <div class="gps-cage__layout">
-      <div class="gps-cage__sidebar">
-        <h3 class="gps-cage__title">Cage</h3>
-        <div class="gps-cage__bedding">
-          <span class="gps-cage__bedding-label">Bedding Freshness:</span>
-          <progress class="gps-cage__bedding-bar" :value="cageStore.beddingFreshness" max="100"></progress>
-          <span class="gps-cage__bedding-value">{{ cageStore.beddingFreshness }}</span>
-        </div>
-        <div v-if="sitting" class="gps-cage__status">The guinea pig is sitting.</div>
-        <div v-else class="gps-cage__status">The guinea pig is moving...</div>
-      </div>
-      <div class="gps-cage__grid-wrapper">
+    <div class="gps-cage__grid-wrapper">
         <div
           class="gps-cage__grid"
           :style="{
@@ -114,7 +103,6 @@ onUnmounted(() => {
             {{ cellContent(item.cell, item.x, item.y) }}
           </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -126,32 +114,7 @@ onUnmounted(() => {
   container-name: cage;
 }
 
-.gps-cage__title {
-  margin-block-end: 0.5em;
-}
 
-.gps-cage__bedding {
-  margin-block-end: 1em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5em;
-}
-
-.gps-cage__bedding-label {
-  margin-inline-end: 0;
-}
-
-.gps-cage__bedding-bar {
-  width: 100%;
-  max-width: 200px;
-  margin-inline-end: 0;
-}
-
-.gps-cage__bedding-value {
-  min-width: 2em;
-  text-align: center;
-}
 
 .gps-cage__grid {
   display: grid;
@@ -182,54 +145,13 @@ onUnmounted(() => {
   background: var(--color-cage-poop);
 }
 
-.gps-cage__status {
-  margin-block-start: 1em;
-  font-style: italic;
-  color: var(--color-text, #888);
-  text-align: center;
-}
-
-/* Mobile-first: Start with column layout */
-.gps-cage__layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5em;
-}
-
-.gps-cage__sidebar {
-  width: 100%;
-  max-width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  text-align: center;
-}
-
 .gps-cage__grid-wrapper {
-  order: -1;
+  display: flex;
+  justify-content: center;
 }
 
 /* Container query for medium containers */
 @container cage (min-width: 400px) {
-  .gps-cage__bedding {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
-  }
-  
-  .gps-cage__bedding-label {
-    margin-inline-end: 0.5em;
-  }
-  
-  .gps-cage__bedding-bar {
-    width: 120px;
-    margin-inline-end: 0.5em;
-  }
-  
-  .gps-cage__bedding-value {
-    text-align: end;
-  }
   
   .gps-cage__cell {
     width: 1.1em;
@@ -249,10 +171,6 @@ onUnmounted(() => {
   .gps-cage__sidebar {
     min-width: 180px;
     max-width: none;
-    text-align: start;
-  }
-  
-  .gps-cage__status {
     text-align: start;
   }
   

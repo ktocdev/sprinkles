@@ -17,7 +17,8 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       sleep: 100,
       love: 100,
       cleanliness: 100,
-    }
+    },
+    sitting: true
   }),
   actions: {
     setInfoField(field, value) {
@@ -39,6 +40,9 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       for (const need in this.needs) {
         this.needs[need] = 100
       }
+    },
+    setSitting(sitting) {
+      this.sitting = sitting
     }
   },
   persist: true

@@ -100,8 +100,8 @@
 </template>
 
 <script setup>
-import Button from './Button.vue'
-import ThemeToggle from './ThemeToggle.vue'
+import Button from '../shared/Button.vue'
+import ThemeToggle from '../shared/ThemeToggle.vue'
 </script>
 
 <style>
@@ -230,7 +230,7 @@ import ThemeToggle from './ThemeToggle.vue'
     align-items: stretch;
   }
   
-  .gps-button-specimen__examples .gps-main__button {
+  .gps-button-specimen__examples .gps-button {
     width: 100%;
   }
 }

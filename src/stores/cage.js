@@ -8,6 +8,7 @@ export const useCageStore = defineStore('cage', {
   state: () => ({
     size: { width: 12, height: 8 },
     beddingFreshness: 100,
+    waterLevel: 100,
     poop: [], // array of { x, y }
     guineaPigPos: { x: 0, y: 0 }
   }),
@@ -39,6 +40,9 @@ export const useCageStore = defineStore('cage', {
     setBeddingFreshness(value) {
       this.beddingFreshness = Math.max(0, Math.min(100, value))
     },
+    setWaterLevel(value) {
+      this.waterLevel = Math.max(0, Math.min(100, value))
+    },
     addPoop(x, y) {
       this.poop.push({ x, y })
     },
@@ -50,6 +54,7 @@ export const useCageStore = defineStore('cage', {
     },
     resetCage() {
       this.beddingFreshness = 100
+      this.waterLevel = 100
       this.poop = []
       this.guineaPigPos = { x: 0, y: 0 }
     }
