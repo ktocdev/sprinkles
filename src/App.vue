@@ -13,6 +13,7 @@ import IconSidebar from './components/navigation/IconSidebar.vue'
 import Panel from './components/shared/Panel.vue'
 import Footer from './components/navigation/Footer.vue'
 import ButtonSpecimen from './components/specimen/ButtonSpecimen.vue'
+import DropdownSpecimen from './components/specimen/DropdownSpecimen.vue'
 import Market from './components/market/Market.vue'
 
 const userStore = useUserStore()
@@ -64,6 +65,7 @@ const showNeeds = ref(false)
 const showCageStatus = ref(false)
 const showMarket = ref(false)
 const showButtonSpecimen = ref(false)
+const showDropdownSpecimen = ref(false)
 
 function toggleInventory() {
   if (!showInventory.value) {
@@ -123,6 +125,10 @@ function clearCage() {
 function toggleButtonSpecimen() {
   showButtonSpecimen.value = !showButtonSpecimen.value
 }
+
+function toggleDropdownSpecimen() {
+  showDropdownSpecimen.value = !showDropdownSpecimen.value
+}
 </script>
 
 <template>
@@ -164,6 +170,7 @@ function toggleButtonSpecimen() {
     <Footer 
       v-if="userStore.name"
       @showButtonSpecimen="toggleButtonSpecimen"
+      @showDropdownSpecimen="toggleDropdownSpecimen"
     />
 
     <!-- Welcome Panel -->
@@ -195,6 +202,15 @@ function toggleButtonSpecimen() {
       @close="showButtonSpecimen = false"
     >
       <ButtonSpecimen />
+    </Panel>
+
+    <!-- Dropdown Specimen Panel -->
+    <Panel 
+      :isOpen="showDropdownSpecimen" 
+      title="Dropdown Component Specimen" 
+      @close="showDropdownSpecimen = false"
+    >
+      <DropdownSpecimen />
     </Panel>
   </div>
 </template>

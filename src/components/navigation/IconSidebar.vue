@@ -153,7 +153,7 @@ const props = defineProps({
 }
 
 .gps-icon-sidebar__button--warning:hover {
-  background: var(--color-warn);
+  background: var(--color-warning);
 }
 
 .gps-icon-sidebar__divider {

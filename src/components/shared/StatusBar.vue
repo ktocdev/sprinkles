@@ -43,7 +43,7 @@ const props = defineProps({
 .gps-status-bar__label {
   margin-inline-end: 0.5em;
   color: var(--color-text);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
@@ -69,7 +69,7 @@ const props = defineProps({
   min-width: 2em;
   text-align: end;
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 

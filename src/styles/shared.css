@@ -39,4 +39,53 @@
   .gps-status-grid--two-columns {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Common Layout Utilities */
+
+/* Standard container with max-width and centering */
+.gps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Flex utilities */
+.gps-flex {
+  display: flex;
+}
+
+.gps-flex--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gps-flex--align-center {
+  display: flex;
+  align-items: center;
+}
+
+.gps-flex--justify-center {
+  display: flex;
+  justify-content: center;
+}
+
+.gps-flex--space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Common spacing utilities */
+.gps-margin-auto {
+  margin-inline: auto;
+}
+
+.gps-margin-start-auto {
+  margin-inline-start: auto;
+}
+
+.gps-margin-end-auto {
+  margin-inline-end: auto;
 } 

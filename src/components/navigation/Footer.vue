@@ -1,14 +1,17 @@
 <template>
   <footer class="gps-footer">
-    <div class="gps-footer__container">
-      <div class="gps-footer__content">
+    <div class="gps-footer__container gps-container">
+      <div class="gps-footer__content gps-flex--space-between">
         <p class="gps-footer__text">
           Guinea Pig Simulator - A text-based pet care game
         </p>
         <nav class="gps-footer__nav">
-          <a href="#" class="gps-footer__link" @click.prevent="showButtonSpecimen">
+          <button class="gps-footer__link" @click="showButtonSpecimen">
             Button Specimen
-          </a>
+          </button>
+          <button class="gps-footer__link" @click="showDropdownSpecimen">
+            Dropdown Specimen
+          </button>
         </nav>
       </div>
     </div>
@@ -18,10 +21,14 @@
 <script setup>
 import { defineEmits } from 'vue'
 
-const emit = defineEmits(['showButtonSpecimen'])
+const emit = defineEmits(['showButtonSpecimen', 'showDropdownSpecimen'])
 
 function showButtonSpecimen() {
   emit('showButtonSpecimen')
+}
+
+function showDropdownSpecimen() {
+  emit('showDropdownSpecimen')
 }
 </script>
 
@@ -34,22 +41,17 @@ function showButtonSpecimen() {
 }
 
 .gps-footer__container {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 1rem 1.5rem;
 }
 
 .gps-footer__content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 1rem;
 }
 
 .gps-footer__text {
   color: var(--color-text);
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   opacity: 0.8;
 }
 
@@ -59,15 +61,25 @@ function showButtonSpecimen() {
 }
 
 .gps-footer__link {
+  background: none;
+  border: none;
   color: var(--color-accent);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
   transition: var(--transition);
 }
 
 .gps-footer__link:hover {
   color: var(--color-accent-hover);
   text-decoration: underline;
+}
+
+.gps-footer__link:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* Mobile responsiveness */

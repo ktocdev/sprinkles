@@ -4,6 +4,10 @@ function createEmptyGrid(width, height) {
   return Array.from({ length: height }, () => Array.from({ length: width }, () => null))
 }
 
+function clampValue(value, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, value))
+}
+
 export const useCageStore = defineStore('cage', {
   state: () => ({
     size: { width: 12, height: 8 },
@@ -38,10 +42,10 @@ export const useCageStore = defineStore('cage', {
       this.guineaPigPos = { x: 0, y: 0 }
     },
     setBeddingFreshness(value) {
-      this.beddingFreshness = Math.max(0, Math.min(100, value))
+      this.beddingFreshness = clampValue(value)
     },
     setWaterLevel(value) {
-      this.waterLevel = Math.max(0, Math.min(100, value))
+      this.waterLevel = clampValue(value)
     },
     addPoop(x, y) {
       this.poop.push({ x, y })
