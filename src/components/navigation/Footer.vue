@@ -1,6 +1,6 @@
 <template>
   <footer class="gps-footer">
-    <div class="gps-footer__container gps-container">
+    <div class="gps-footer__content-wrapper">
       <div class="gps-footer__content gps-flex--space-between">
         <p class="gps-footer__text">
           Guinea Pig Simulator - A text-based pet care game
@@ -38,10 +38,18 @@ function showDropdownSpecimen() {
   background: var(--color-panel);
   border-block-start: 2px solid var(--color-accent);
   margin-block-start: auto;
+  position: relative;
+  z-index: 10;
+  overflow: hidden; /* Prevent content from showing outside footer */
 }
 
-.gps-footer__container {
+.gps-footer__content-wrapper {
   padding: 1rem 1.5rem;
+  margin-inline-start: 60px; /* Account for sidebar width */
+  width: calc(100% - 60px); /* Take full width minus sidebar */
+  max-width: 1400px; /* Maximum width constraint */
+  margin-inline-end: auto; /* Center the content */
+  box-sizing: border-box;
 }
 
 .gps-footer__content {
@@ -82,15 +90,31 @@ function showDropdownSpecimen() {
   outline-offset: 2px;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .gps-footer__container {
-    padding: 1rem;
+/* Responsive breakpoints */
+@media (max-width: 1250px) {
+  .gps-footer__content-wrapper {
+    margin-inline-start: 60px; /* Keep sidebar margin */
+    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    max-width: 1200px;
+    margin-inline-end: auto;
+    padding: 1rem 1.5rem;
   }
   
   .gps-footer__content {
     flex-direction: column;
     text-align: center;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .gps-footer__content-wrapper {
+    margin-inline-start: 60px; /* Keep sidebar margin */
+    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    padding: 1rem;
+  }
+  
+  .gps-footer__content {
     gap: 0.5rem;
   }
 }

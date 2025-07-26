@@ -150,28 +150,32 @@ function toggleDropdownSpecimen() {
     />
     <TopBar v-if="userStore.name" />
     <div class="gps-app__content">
-      <Main 
-        v-if="userStore.name"
-        :userStore="userStore" 
-        :inventoryStore="inventoryStore" 
-        :showInventory="showInventory"
-        :showGuineaPig="showGuineaPig"
-        :showNeeds="showNeeds"
-        :showCageStatus="showCageStatus"
-        :showMarket="showMarket"
-        @closeInventory="showInventory = false"
-        @closeGuineaPig="showGuineaPig = false"
-        @closeNeeds="showNeeds = false"
-        @closeCageStatus="showCageStatus = false"
-        @closeMarket="showMarket = false"
-      />
+      <div class="gps-app__content-wrapper">
+        <Main 
+          v-if="userStore.name"
+          :userStore="userStore" 
+          :inventoryStore="inventoryStore" 
+          :showInventory="showInventory"
+          :showGuineaPig="showGuineaPig"
+          :showNeeds="showNeeds"
+          :showCageStatus="showCageStatus"
+          :showMarket="showMarket"
+          @closeInventory="showInventory = false"
+          @closeGuineaPig="showGuineaPig = false"
+          @closeNeeds="showNeeds = false"
+          @closeCageStatus="showCageStatus = false"
+          @closeMarket="showMarket = false"
+        />
+      </div>
     </div>
 
-    <Footer 
-      v-if="userStore.name"
-      @showButtonSpecimen="toggleButtonSpecimen"
-      @showDropdownSpecimen="toggleDropdownSpecimen"
-    />
+    <div class="gps-app__footer-wrapper">
+      <Footer 
+        v-if="userStore.name"
+        @showButtonSpecimen="toggleButtonSpecimen"
+        @showDropdownSpecimen="toggleDropdownSpecimen"
+      />
+    </div>
 
     <!-- Welcome Panel -->
     <Panel 
@@ -219,6 +223,7 @@ function toggleDropdownSpecimen() {
 @import './styles/shared.css';
 
 .gps-app {
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -230,12 +235,40 @@ function toggleDropdownSpecimen() {
   width: calc(100% - 60px); /* Take full width minus sidebar */
   max-width: 1400px; /* Maximum width constraint */
   margin-inline-end: auto; /* Center the content */
+  padding: 2rem 1rem;
+  text-align: center;
+  box-sizing: border-box; /* Include padding in width calculation */
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
-/* Responsive - remove sidebar margin on mobile */
+.gps-app__content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gps-app__footer-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1250px) {
+  .gps-app__content {
+    margin-inline-start: 60px; /* Keep sidebar margin */
+    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    max-width: 1200px;
+    margin-inline-end: auto;
+    padding: 2rem 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .gps-app__content {
-    margin-inline-start: 0;
+    margin-inline-start: 60px; /* Keep sidebar margin */
+    width: calc(100% - 60px); /* Keep sidebar width calculation */
+    padding: 1rem 0.75rem;
   }
 }
 </style>
