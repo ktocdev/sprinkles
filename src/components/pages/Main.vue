@@ -86,6 +86,8 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
 
 .gps-main__content-cage {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .gps-main__status {

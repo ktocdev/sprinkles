@@ -188,10 +188,5 @@ const props = defineProps({
   opacity: 1;
 }
 
-/* Responsive - hide on mobile */
-@media (max-width: 768px) {
-  .gps-icon-sidebar {
-    display: none;
-  }
-}
+
 </style> 
