@@ -18,9 +18,9 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       shelter: 100,
       chew: 100,
       enrichment: 100,
-      sleep: 100,
       love: 100,
       cleanliness: 100,
+      nails: 100,
     },
     sitting: true
   }),

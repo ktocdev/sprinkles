@@ -5,7 +5,7 @@
       class="gps-status-bar__progress" 
       :value="value" 
       max="100"
-      :style="{ accentColor: color }"
+      :style="{ '--progress-color': color }"
     ></progress>
     <span class="gps-status-bar__value">{{ value }}</span>
   </div>
@@ -63,6 +63,12 @@ const props = defineProps({
 .gps-status-bar__progress::-webkit-progress-value {
   border-radius: var(--border-radius);
   transition: width 0.3s ease;
+  background: var(--progress-color, var(--color-accent));
+}
+
+.gps-status-bar__progress::-moz-progress-bar {
+  border-radius: var(--border-radius);
+  background: var(--progress-color, var(--color-accent));
 }
 
 .gps-status-bar__value {

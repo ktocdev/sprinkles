@@ -232,6 +232,7 @@ function toggleDropdownSpecimen() {
 .gps-app__content {
   flex: 1;
   margin-inline-start: 60px; /* Account for sidebar width */
+  margin-block-start: 60px; /* Account for TopBar height */
   width: calc(100% - 60px); /* Take full width minus sidebar */
   max-width: 1400px; /* Maximum width constraint */
   margin-inline-end: auto; /* Center the content */

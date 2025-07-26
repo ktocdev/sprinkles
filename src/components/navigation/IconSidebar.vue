@@ -18,7 +18,7 @@
         :class="{ 'gps-icon-sidebar__button--active': props.showGuineaPig }"
         title="Show Guinea Pig Info"
       >
-        🐹
+        📋
       </button>
 
       <!-- Needs -->
@@ -98,17 +98,20 @@ const props = defineProps({
 .gps-icon-sidebar {
   position: fixed;
   left: 0;
-  top: 0;
+  top: 60px; /* Start below the TopBar */
   bottom: 0;
+  height: calc(100vh - 92px);
   width: 60px;
   background: var(--color-panel);
   border-inline-end: 1px solid var(--color-border);
-  z-index: 100;
+  z-index: 200;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem 0;
 }
+
+
 
 .gps-icon-sidebar__container {
   display: flex;

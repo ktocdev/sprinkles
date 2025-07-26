@@ -1,6 +1,6 @@
 <template>
   <div class="gps-inventory">
-    <div class="gps-inventory__container">
+    <div class="gps-inventory__container gps-panel-content">
       <div v-if="Object.keys(inventoryStore.items).length === 0">
         <p class="gps-inventory__empty">Your inventory is empty.</p>
       </div>
@@ -39,9 +39,7 @@ const formatItemName = (itemName) => {
   width: 100%;
 }
 
-.gps-inventory__container {
-  width: 100%;
-}
+/* Container styles now handled by shared .gps-panel-content */
 
 .gps-inventory__empty {
   text-align: center;

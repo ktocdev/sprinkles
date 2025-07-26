@@ -38,9 +38,11 @@ function showDropdownSpecimen() {
   background: var(--color-panel);
   border-block-start: 2px solid var(--color-accent);
   margin-block-start: auto;
-  position: relative;
-  z-index: 10;
-  overflow: hidden; /* Prevent content from showing outside footer */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
 }
 
 .gps-footer__content-wrapper {

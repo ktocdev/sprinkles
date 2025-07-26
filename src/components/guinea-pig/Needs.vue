@@ -1,6 +1,6 @@
 <template>
   <div class="gps-needs">
-    <div class="gps-needs__container gps-status-grid">
+    <div class="gps-needs__container gps-status-grid gps-panel-content">
       <div v-if="Object.keys(guineaPigStore.needs).length === 0" class="gps-needs__empty">
         No needs data available
       </div>
@@ -30,9 +30,9 @@ const getNeedColor = (need) => {
     shelter: '#95a5a6',     // Gray
     chew: '#f39c12',        // Orange
     enrichment: '#9b59b6',  // Purple
-    sleep: '#2c3e50',       // Dark blue
     love: '#e91e63',        // Pink
-    cleanliness: '#27ae60'  // Green
+    cleanliness: '#27ae60', // Green
+    nails: '#8e44ad'        // Purple (darker shade)
   }
   return colors[need] || 'var(--color-accent)'
 }

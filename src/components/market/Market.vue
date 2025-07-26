@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <div class="gps-market__content">
+    <div class="gps-market__content gps-panel-content">
       <!-- Market Stats -->
       <div class="gps-market__stats">
         <div class="gps-market__stat">
@@ -40,11 +40,11 @@
         </div>
       </div>
 
-      <!-- Market Items -->
-      <div class="gps-market__sections">
-        <!-- Food Section -->
-        <div class="gps-market__section">
-          <h3 class="gps-market__section-title">🥕 Food & Bedding</h3>
+              <!-- Market Items -->
+        <div class="gps-market__sections">
+          <!-- Food Section -->
+          <div class="gps-market__section gps-panel-section">
+            <h3 class="gps-market__section-title gps-panel-section-title">🥕 Food & Bedding</h3>
           <div class="gps-market__items">
             <div v-for="item in foodItems" :key="item" class="gps-market__item">
               <div class="gps-market__item-info">
@@ -69,9 +69,9 @@
           </div>
         </div>
 
-        <!-- Toys Section -->
-        <div class="gps-market__section">
-          <h3 class="gps-market__section-title">🎾 Toys & Enrichment</h3>
+                  <!-- Toys Section -->
+          <div class="gps-market__section gps-panel-section">
+            <h3 class="gps-market__section-title gps-panel-section-title">🎾 Toys & Enrichment</h3>
           <div class="gps-market__items">
             <div v-for="item in toyItems" :key="item" class="gps-market__item">
               <div class="gps-market__item-info">
@@ -98,15 +98,15 @@
       </div>
 
       <!-- Market Controls -->
-      <div class="gps-market__controls">
+      <div class="gps-market__controls gps-panel-controls">
         <Button type="warning" @click="updatePrices">Update Prices</Button>
         <Button type="secondary" @click="resetPrices">Reset to Base Prices</Button>
         <Button type="flat" @click="createRandomOffer">Create Random Offer</Button>
       </div>
 
       <!-- Transaction History -->
-      <div class="gps-market__history">
-        <h3 class="gps-market__section-title">📊 Recent Transactions</h3>
+      <div class="gps-market__history gps-panel-section">
+        <h3 class="gps-market__section-title gps-panel-section-title">📊 Recent Transactions</h3>
         <div class="gps-market__history-list">
           <div v-for="(transaction, index) in recentTransactions" :key="index" class="gps-market__transaction">
             <span class="gps-market__transaction-type" :class="transaction.type === 'buy' ? 'gps-market__transaction-type--buy' : 'gps-market__transaction-type--sell'">
@@ -235,9 +235,7 @@ const formatTime = (timestamp) => {
 
 <style>
 .gps-market {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
 }
 
 .gps-market__header {
@@ -338,18 +336,7 @@ const formatTime = (timestamp) => {
   margin-block-end: 2rem;
 }
 
-.gps-market__section {
-  background: var(--color-panel);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.gps-market__section-title {
-  font-size: 1.5em;
-  color: var(--color-accent);
-  margin-block-end: 1rem;
-  margin-block-start: 0;
-}
+/* Section styles now handled by shared .gps-panel-section and .gps-panel-section-title */
 
 .gps-market__items {
   display: grid;
@@ -398,18 +385,9 @@ const formatTime = (timestamp) => {
   gap: 0.5rem;
 }
 
-.gps-market__controls {
-  display: flex;
-  gap: 1rem;
-  margin-block-end: 2rem;
-  flex-wrap: wrap;
-}
+/* Controls styles now handled by shared .gps-panel-controls */
 
-.gps-market__history {
-  background: var(--color-panel);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
+/* History styles now handled by shared .gps-panel-section */
 
 .gps-market__history-list {
   display: flex;
@@ -455,10 +433,6 @@ const formatTime = (timestamp) => {
 }
 
 @media (max-width: 768px) {
-  .gps-market {
-    padding: 1rem;
-  }
-  
   .gps-market__header {
     flex-direction: column;
     gap: 1rem;
@@ -474,10 +448,6 @@ const formatTime = (timestamp) => {
   .gps-market__item-actions {
     width: 100%;
     justify-content: stretch;
-  }
-  
-  .gps-market__controls {
-    flex-direction: column;
   }
 }
 </style> 
