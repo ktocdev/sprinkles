@@ -170,28 +170,24 @@
       @close="showFormModal = false"
     >
       <div class="gps-modal-specimen__form">
-        <div class="gps-modal-specimen__form-group">
-          <label>Display Name:</label>
-          <input 
+        <FormGroup label="Display Name">
+          <Input 
             v-model="formData.displayName" 
-            type="text" 
             placeholder="Enter your display name"
-            class="gps-modal-specimen__input"
+            icon="👤"
           />
-        </div>
+        </FormGroup>
         
-        <div class="gps-modal-specimen__form-group">
-          <label>Email:</label>
-          <input 
+        <FormGroup label="Email">
+          <Input 
             v-model="formData.email" 
             type="email" 
             placeholder="Enter your email"
-            class="gps-modal-specimen__input"
+            icon="📧"
           />
-        </div>
+        </FormGroup>
         
-        <div class="gps-modal-specimen__form-group">
-          <label>Theme:</label>
+        <FormGroup label="Theme">
           <Dropdown
             v-model="formData.theme"
             :options="[
@@ -200,12 +196,11 @@
               { value: 'auto', label: 'Auto (System)' }
             ]"
             placeholder="Select a theme"
-            class="gps-modal-specimen__dropdown"
           />
-        </div>
+        </FormGroup>
         
-        <div class="gps-modal-specimen__form-group">
-          <label>
+        <FormGroup label="Notifications">
+          <label class="gps-modal-specimen__checkbox-label">
             <input 
               v-model="formData.notifications" 
               type="checkbox"
@@ -213,7 +208,7 @@
             />
             Enable notifications
           </label>
-        </div>
+        </FormGroup>
       </div>
       
       <template #actions>
@@ -255,6 +250,8 @@ import { ref } from 'vue'
 import Button from '../shared/Button.vue'
 import Modal from '../shared/Modal.vue'
 import Dropdown from '../shared/Dropdown.vue'
+import Input from '../shared/Input.vue'
+import FormGroup from '../shared/FormGroup.vue'
 import SpecimenPage from './SpecimenPage.vue'
 
 const emit = defineEmits(['backToLanding'])
@@ -362,31 +359,13 @@ function confirmAction() {
   gap: 1rem;
 }
 
-.gps-modal-specimen__form-group {
+.gps-modal-specimen__checkbox-label {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
-}
-
-.gps-modal-specimen__form-group label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
   font-size: var(--font-size-sm);
-}
-
-.gps-modal-specimen__input {
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background: var(--color-bg);
   color: var(--color-text);
-  font-size: var(--font-size-base);
-}
-
-.gps-modal-specimen__input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  box-shadow: var(--box-shadow-focus);
+  cursor: pointer;
 }
 
 .gps-modal-specimen__dropdown {

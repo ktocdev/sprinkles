@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import Input from '../shared/Input.vue'
+import FormGroup from '../shared/FormGroup.vue'
+import Button from '../shared/Button.vue'
 
 const guineaPigStore = useGuineaPigStore()
 const editingInfo = ref(false)
@@ -70,20 +73,45 @@ function cancelEditInfo() {
     <h3 class="gps-guinea-pig__title">Your Guinea Pig</h3>
     <template v-if="editingInfo">
       <div class="gps-guinea-pig__edit-form">
-        <label class="gps-guinea-pig__label">Name: <input class="gps-guinea-pig__input" v-model="tempInfo.name" /></label><br />
-        <label class="gps-guinea-pig__label">Birthday: <input class="gps-guinea-pig__input" v-model="tempInfo.birthday" type="date" /></label><br />
-        <label class="gps-guinea-pig__label">Coat: <input class="gps-guinea-pig__input" v-model="tempInfo.coat" /></label><br />
-        <label class="gps-guinea-pig__label">Gender:
-          <select class="gps-guinea-pig__input" v-model="tempInfo.gender">
-            <option value="">Select</option>
+        <FormGroup label="Name" required>
+          <Input 
+            v-model="tempInfo.name"
+            placeholder="Enter guinea pig name"
+            icon="🐹"
+          />
+        </FormGroup>
+        
+        <FormGroup label="Birthday">
+          <Input 
+            v-model="tempInfo.birthday"
+            type="date"
+            icon="📅"
+          />
+        </FormGroup>
+        
+        <FormGroup label="Coat">
+          <Input 
+            v-model="tempInfo.coat"
+            placeholder="Enter coat type"
+            icon="🎨"
+          />
+        </FormGroup>
+        
+        <FormGroup label="Gender">
+          <select 
+            v-model="tempInfo.gender"
+            class="gps-guinea-pig__select"
+          >
+            <option value="">Select gender</option>
             <option value="Neutered Boar">Neutered Boar</option>
             <option value="Sow">Sow</option>
           </select>
-        </label><br />
+        </FormGroup>
+        
         <div class="gps-guinea-pig__edit-actions gps-panel-controls">
-          <button class="gps-guinea-pig__button" @click="saveInfo">Save</button>
-          <button class="gps-guinea-pig__button gps-guinea-pig__button--secondary" @click="generateRandomData">🎲 Random</button>
-          <button class="gps-guinea-pig__button gps-guinea-pig__button--cancel" @click="cancelEditInfo">Cancel</button>
+          <Button type="primary" @click="saveInfo">Save</Button>
+          <Button type="secondary" @click="generateRandomData">🎲 Random</Button>
+          <Button type="danger" @click="cancelEditInfo">Cancel</Button>
         </div>
       </div>
     </template>
@@ -93,43 +121,30 @@ function cancelEditInfo() {
       <p class="gps-guinea-pig__info"><strong>Coat:</strong> {{ guineaPigStore.info.coat || '—' }}</p>
       <p class="gps-guinea-pig__info"><strong>Gender:</strong> {{ guineaPigStore.info.gender || '—' }}</p>
       <div class="gps-guinea-pig__actions gps-panel-controls">
-        <button class="gps-guinea-pig__button" @click="startEditInfo">Edit Info</button>
-        <button class="gps-guinea-pig__button gps-guinea-pig__button--secondary" @click="generateRandomData">🎲 Generate Random Data</button>
+        <Button type="primary" @click="startEditInfo">Edit Info</Button>
+        <Button type="secondary" @click="generateRandomData">🎲 Generate Random Data</Button>
       </div>
     </template>
   </div>
 </template>
 
 <style>
-.gps-guinea-pig__label {
-  display: block;
-  margin-block-end: 0.5em;
-}
-.gps-guinea-pig__input {
-  margin-inline-start: 0.5em;
-  margin-block-end: 0.5em;
-}
-.gps-guinea-pig__button {
-  padding: 0.3em 0.8em;
-  border: none;
-  background: var(--color-accent);
-  color: var(--color-text);
+.gps-guinea-pig__select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  cursor: pointer;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-family: inherit;
   transition: var(--transition);
 }
-.gps-guinea-pig__button--cancel {
-  background: var(--color-danger);
-}
-.gps-guinea-pig__button--secondary {
-  background: var(--color-secondary);
-  color: var(--color-text);
-}
-.gps-guinea-pig__button:hover {
-  background: var(--color-accent-hover);
-}
-.gps-guinea-pig__button--secondary:hover {
-  background: var(--color-secondary-hover);
+
+.gps-guinea-pig__select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
 }
 .gps-guinea-pig__actions {
   display: flex;

@@ -18,6 +18,8 @@ import ButtonSpecimen from './components/specimen/ButtonSpecimen.vue'
 import DropdownSpecimen from './components/specimen/DropdownSpecimen.vue'
 import ModalSpecimen from './components/specimen/ModalSpecimen.vue'
 import StatusBarSpecimen from './components/specimen/StatusBarSpecimen.vue'
+import InputSpecimen from './components/specimen/InputSpecimen.vue'
+import FormGroupSpecimen from './components/specimen/FormGroupSpecimen.vue'
 import Market from './components/market/Market.vue'
 
 const userStore = useUserStore()
@@ -75,6 +77,8 @@ const showButtonSpecimen = ref(false)
 const showDropdownSpecimen = ref(false)
 const showModalSpecimen = ref(false)
 const showStatusBarSpecimen = ref(false)
+const showInputSpecimen = ref(false)
+const showFormGroupSpecimen = ref(false)
 
 function toggleInventory() {
   if (!showInventory.value) {
@@ -158,6 +162,8 @@ function toggleSpecimenLanding() {
   showDropdownSpecimen.value = false
   showModalSpecimen.value = false
   showStatusBarSpecimen.value = false
+  showInputSpecimen.value = false
+  showFormGroupSpecimen.value = false
   showSpecimenLanding.value = !showSpecimenLanding.value
 }
 
@@ -187,7 +193,28 @@ function toggleStatusBarSpecimen() {
   showButtonSpecimen.value = false
   showDropdownSpecimen.value = false
   showModalSpecimen.value = false
+  showInputSpecimen.value = false
   showStatusBarSpecimen.value = !showStatusBarSpecimen.value
+}
+
+function toggleInputSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = false
+  showFormGroupSpecimen.value = false
+  showInputSpecimen.value = !showInputSpecimen.value
+}
+
+function toggleFormGroupSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = false
+  showInputSpecimen.value = false
+  showFormGroupSpecimen.value = !showFormGroupSpecimen.value
 }
 </script>
 
@@ -302,6 +329,8 @@ function toggleStatusBarSpecimen() {
         @showDropdownSpecimen="toggleDropdownSpecimen"
         @showModalSpecimen="toggleModalSpecimen"
         @showStatusBarSpecimen="toggleStatusBarSpecimen"
+        @showInputSpecimen="toggleInputSpecimen"
+        @showFormGroupSpecimen="toggleFormGroupSpecimen"
       />
     </Panel>
 
@@ -340,6 +369,24 @@ function toggleStatusBarSpecimen() {
     >
       <StatusBarSpecimen @backToLanding="toggleSpecimenLanding" />
     </Panel>
+
+    <!-- Input Specimen Panel -->
+    <Panel 
+      :isOpen="showInputSpecimen" 
+      title="Input Component Specimen" 
+      @close="showInputSpecimen = false"
+    >
+      <InputSpecimen @backToLanding="toggleSpecimenLanding" />
+    </Panel>
+
+    <!-- FormGroup Specimen Panel -->
+    <Panel 
+      :isOpen="showFormGroupSpecimen" 
+      title="FormGroup Component Specimen" 
+      @close="showFormGroupSpecimen = false"
+    >
+      <FormGroupSpecimen @backToLanding="toggleSpecimenLanding" />
+    </Panel>
   </div>
 </template>
 
@@ -359,7 +406,7 @@ function toggleStatusBarSpecimen() {
   margin-block-start: 60px; /* Account for TopBar height */
   width: calc(100% - 60px); /* Take full width minus sidebar */
   max-width: 1400px; /* Maximum width constraint */
-  margin-inline-end: auto; /* Center the content */
+  margin-inline: auto; /* Center the content horizontally */
   padding: 2rem 1rem;
   text-align: center;
   box-sizing: border-box; /* Include padding in width calculation */
@@ -384,7 +431,7 @@ function toggleStatusBarSpecimen() {
     margin-inline-start: 60px; /* Keep sidebar margin */
     width: calc(100% - 60px); /* Keep sidebar width calculation */
     max-width: 1200px;
-    margin-inline-end: auto;
+    margin-inline: auto; /* Center the content horizontally */
     padding: 2rem 1.5rem;
   }
 }
@@ -393,6 +440,7 @@ function toggleStatusBarSpecimen() {
   .gps-app__content {
     margin-inline-start: 60px; /* Keep sidebar margin */
     width: calc(100% - 60px); /* Keep sidebar width calculation */
+    margin-inline: auto; /* Center the content horizontally */
     padding: 1rem 0.75rem;
   }
 }

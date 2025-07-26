@@ -41,7 +41,6 @@ const props = defineProps({
 const emit = defineEmits(['backToLanding'])
 
 function handleBackClick() {
-  console.log('Back button clicked in SpecimenPage')
   emit('backToLanding')
 }
 </script>
