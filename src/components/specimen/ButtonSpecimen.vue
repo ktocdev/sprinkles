@@ -1,16 +1,9 @@
 <template>
-  <div class="gps-specimen">
-    <div class="gps-specimen__header">
-      <div class="gps-specimen__header-content">
-        <h1 class="gps-specimen__title">Button Component Specimen</h1>
-        <p class="gps-specimen__desc">
-          This page showcases all available button variations in the Guinea Pig Simulator design system.
-        </p>
-      </div>
-      <div class="gps-specimen__theme-toggle">
-        <ThemeToggle />
-      </div>
-    </div>
+  <SpecimenPage
+    title="Button Component Specimen"
+    description="This page showcases all available button variations in the Guinea Pig Simulator design system."
+    @backToLanding="$emit('backToLanding')"
+  >
 
     <div class="gps-specimen__section">
       <h2 class="gps-specimen__section-title">Primary Buttons</h2>
@@ -96,10 +89,12 @@
         </ul>
       </div>
     </div>
-  </div>
+  </SpecimenPage>
 </template>
 
 <script setup>
 import Button from '../shared/Button.vue'
-import ThemeToggle from '../shared/ThemeToggle.vue'
+import SpecimenPage from './SpecimenPage.vue'
+
+const emit = defineEmits(['backToLanding'])
 </script> 

@@ -12,6 +12,9 @@
   --color-warning-hover: #d35400;
   --color-white: #fff;
   --box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --box-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --box-shadow-focus: 0 0 0 2px rgba(66, 184, 131, 0.2);
   --border-radius: 6px;
   --transition: background 0.2s, color 0.2s;
   --color-cage-guinea-pig: #ffe4b5;
@@ -54,6 +57,12 @@ body.theme-light {
   --color-warning-hover: #d35400;
   --color-cage-guinea-pig: #ffe4b5;
   --color-cage-poop: #e2c48d;
+  
+  /* Box Shadows */
+  --box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --box-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --box-shadow-focus: 0 0 0 2px rgba(66, 184, 131, 0.2);
   
   /* Typography */
   --font-size-xs: 0.8em;

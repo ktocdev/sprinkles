@@ -1,5 +1,7 @@
 <script setup>
-import { defineProps, computed } from 'vue'
+import { defineProps, defineEmits, computed } from 'vue'
+
+const emit = defineEmits(['click'])
 
 const props = defineProps({
   type: {
@@ -19,7 +21,10 @@ const handleClick = (event) => {
   if (props.type === 'disabled') {
     event.preventDefault()
     event.stopPropagation()
+    return
   }
+  // For non-disabled buttons, emit the click event
+  emit('click', event)
 }
 
 const handleKeydown = (event) => {

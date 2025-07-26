@@ -52,7 +52,7 @@ function handleSubmit() {
 .gps-welcome__input:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(66, 184, 131, 0.2);
+  box-shadow: var(--box-shadow-focus);
 }
 
 .gps-welcome__input::placeholder {

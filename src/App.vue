@@ -10,10 +10,14 @@ import Welcome from './components/pages/Welcome.vue'
 import Main from './components/pages/Main.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
+import SidebarSubNav from './components/navigation/SidebarSubNav.vue'
 import Panel from './components/shared/Panel.vue'
 import Footer from './components/navigation/Footer.vue'
+import SpecimenLanding from './components/specimen/SpecimenLanding.vue'
 import ButtonSpecimen from './components/specimen/ButtonSpecimen.vue'
 import DropdownSpecimen from './components/specimen/DropdownSpecimen.vue'
+import ModalSpecimen from './components/specimen/ModalSpecimen.vue'
+import StatusBarSpecimen from './components/specimen/StatusBarSpecimen.vue'
 import Market from './components/market/Market.vue'
 
 const userStore = useUserStore()
@@ -52,6 +56,7 @@ function resetGame() {
     showGuineaPig.value = false
     showNeeds.value = false
     showCageStatus.value = false
+    showCageInteractions.value = false
     showMarket.value = false
     // Reset name input
     nameInput.value = ''
@@ -63,9 +68,13 @@ const showInventory = ref(false)
 const showGuineaPig = ref(false)
 const showNeeds = ref(false)
 const showCageStatus = ref(false)
+const showCageInteractions = ref(false)
 const showMarket = ref(false)
+const showSpecimenLanding = ref(false)
 const showButtonSpecimen = ref(false)
 const showDropdownSpecimen = ref(false)
+const showModalSpecimen = ref(false)
+const showStatusBarSpecimen = ref(false)
 
 function toggleInventory() {
   if (!showInventory.value) {
@@ -100,9 +109,30 @@ function toggleCageStatus() {
     showInventory.value = false
     showGuineaPig.value = false
     showNeeds.value = false
+    showCageInteractions.value = false
     showMarket.value = false
   }
   showCageStatus.value = !showCageStatus.value
+}
+
+function toggleCageInteractions() {
+  showCageInteractions.value = !showCageInteractions.value
+}
+
+function handleCageInteraction(action) {
+  switch (action) {
+    case 'refreshWater':
+      cageStore.refreshWater()
+      break
+    case 'cleanCage':
+      cageStore.cleanCage()
+      break
+    case 'manageItems':
+      // This will be handled by the Cage component itself
+      // The CageItemManager is already integrated into the Cage view
+      break
+  }
+  showCageInteractions.value = false
 }
 
 function toggleMarket() {
@@ -111,6 +141,7 @@ function toggleMarket() {
     showGuineaPig.value = false
     showNeeds.value = false
     showCageStatus.value = false
+    showCageInteractions.value = false
   }
   showMarket.value = !showMarket.value
 }
@@ -122,12 +153,41 @@ function clearCage() {
   }
 }
 
+function toggleSpecimenLanding() {
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = false
+  showSpecimenLanding.value = !showSpecimenLanding.value
+}
+
 function toggleButtonSpecimen() {
+  showSpecimenLanding.value = false
   showButtonSpecimen.value = !showButtonSpecimen.value
 }
 
 function toggleDropdownSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = false
   showDropdownSpecimen.value = !showDropdownSpecimen.value
+}
+
+function toggleModalSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showStatusBarSpecimen.value = false
+  showModalSpecimen.value = !showModalSpecimen.value
+}
+
+function toggleStatusBarSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = !showStatusBarSpecimen.value
 }
 </script>
 
@@ -139,6 +199,7 @@ function toggleDropdownSpecimen() {
       :onGuineaPig="toggleGuineaPig"
       :onNeeds="toggleNeeds"
       :onCageStatus="toggleCageStatus"
+      :onCageInteractions="toggleCageInteractions"
       :onMarket="toggleMarket"
       :onReset="resetGame"
       :onClearCage="clearCage"
@@ -146,7 +207,39 @@ function toggleDropdownSpecimen() {
       :showGuineaPig="showGuineaPig"
       :showNeeds="showNeeds"
       :showCageStatus="showCageStatus"
+      :showCageInteractions="showCageInteractions"
       :showMarket="showMarket"
+    />
+    
+    <SidebarSubNav
+      v-if="userStore.name"
+      :isVisible="showCageInteractions"
+      title="Cage Interactions"
+      :buttons="[
+        {
+          id: 'refreshWater',
+          icon: '💧',
+          title: 'Refresh Water',
+          action: 'refreshWater',
+          class: 'gps-sidebar-subnav__button--primary'
+        },
+        {
+          id: 'cleanCage',
+          icon: '🧹',
+          title: 'Clean Cage',
+          action: 'cleanCage',
+          class: 'gps-sidebar-subnav__button--warning'
+        },
+        {
+          id: 'manageItems',
+          icon: '📦',
+          title: 'Manage Items',
+          action: 'manageItems',
+          class: 'gps-sidebar-subnav__button--primary'
+        }
+      ]"
+      @close="showCageInteractions = false"
+      @action="handleCageInteraction"
     />
     <TopBar v-if="userStore.name" />
     <div class="gps-app__content">
@@ -172,8 +265,7 @@ function toggleDropdownSpecimen() {
     <div class="gps-app__footer-wrapper">
       <Footer 
         v-if="userStore.name"
-        @showButtonSpecimen="toggleButtonSpecimen"
-        @showDropdownSpecimen="toggleDropdownSpecimen"
+        @showSpecimenLanding="toggleSpecimenLanding"
       />
     </div>
 
@@ -199,13 +291,27 @@ function toggleDropdownSpecimen() {
       <Market />
     </Panel>
 
+    <!-- Specimen Landing Panel -->
+    <Panel 
+      :isOpen="showSpecimenLanding" 
+      title="Component Specimens" 
+      @close="showSpecimenLanding = false"
+    >
+      <SpecimenLanding 
+        @showButtonSpecimen="toggleButtonSpecimen"
+        @showDropdownSpecimen="toggleDropdownSpecimen"
+        @showModalSpecimen="toggleModalSpecimen"
+        @showStatusBarSpecimen="toggleStatusBarSpecimen"
+      />
+    </Panel>
+
     <!-- Button Specimen Panel -->
     <Panel 
       :isOpen="showButtonSpecimen" 
       title="Button Component Specimen" 
       @close="showButtonSpecimen = false"
     >
-      <ButtonSpecimen />
+      <ButtonSpecimen @backToLanding="toggleSpecimenLanding" />
     </Panel>
 
     <!-- Dropdown Specimen Panel -->
@@ -214,7 +320,25 @@ function toggleDropdownSpecimen() {
       title="Dropdown Component Specimen" 
       @close="showDropdownSpecimen = false"
     >
-      <DropdownSpecimen />
+      <DropdownSpecimen @backToLanding="toggleSpecimenLanding" />
+    </Panel>
+
+    <!-- Modal Specimen Panel -->
+    <Panel 
+      :isOpen="showModalSpecimen" 
+      title="Modal Component Specimen" 
+      @close="showModalSpecimen = false"
+    >
+      <ModalSpecimen @backToLanding="toggleSpecimenLanding" />
+    </Panel>
+
+    <!-- StatusBar Specimen Panel -->
+    <Panel 
+      :isOpen="showStatusBarSpecimen" 
+      title="StatusBar Component Specimen" 
+      @close="showStatusBarSpecimen = false"
+    >
+      <StatusBarSpecimen @backToLanding="toggleSpecimenLanding" />
     </Panel>
   </div>
 </template>

@@ -41,6 +41,16 @@
         🏠
       </button>
 
+      <!-- Cage Interactions -->
+      <button 
+        class="gps-icon-sidebar__button"
+        @click="props.onCageInteractions"
+        :class="{ 'gps-icon-sidebar__button--active': props.showCageInteractions }"
+        title="Cage Interactions"
+      >
+        🛠️
+      </button>
+
       <!-- Market -->
       <button 
         class="gps-icon-sidebar__button gps-icon-sidebar__button--primary"
@@ -82,14 +92,16 @@ const props = defineProps({
   onInventory: Function,
   onGuineaPig: Function,
   onNeeds: Function,
-      onCageStatus: Function,
+  onCageStatus: Function,
+  onCageInteractions: Function,
   onMarket: Function,
   onReset: Function,
   onClearCage: Function,
   showInventory: Boolean,
   showGuineaPig: Boolean,
   showNeeds: Boolean,
-      showCageStatus: Boolean,
+  showCageStatus: Boolean,
+  showCageInteractions: Boolean,
   showMarket: Boolean
 })
 </script>
@@ -110,8 +122,6 @@ const props = defineProps({
   align-items: center;
   padding: 1rem 0;
 }
-
-
 
 .gps-icon-sidebar__container {
   display: flex;
@@ -184,12 +194,11 @@ const props = defineProps({
   pointer-events: none;
   transition: opacity 0.2s ease;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--box-shadow-light);
 }
 
 .gps-icon-sidebar__button:hover::before {
   opacity: 1;
 }
-
 
 </style> 

@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import CageItemManager from './CageItemManager.vue'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
@@ -15,7 +16,17 @@ let poopTimeout = null
 function cellContent(cell, x, y) {
   if (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y) return '🐹'
   if (cell === 'poop') return '💩'
-  if (cell === 'object') return '🪑'
+  if (cell && typeof cell === 'object' && cell.name) {
+    // Return appropriate emoji based on item type
+    const itemType = cell.type
+    if (itemType === 'food') return '🥕'
+    if (itemType === 'bedding') return '🛏️'
+    if (itemType === 'chew') return '🦷'
+    if (itemType === 'toy') return '🎾'
+    if (itemType === 'bed') return '🛏️'
+    if (itemType === 'shelter') return '🏠'
+    return '📦' // Default item emoji
+  }
   return ''
 }
 
@@ -56,6 +67,9 @@ function resetPoopTimer() {
 function handleCellClick(cell, x, y) {
   if (cell === 'poop') {
     cageStore.removePoop(x, y)
+  } else if (cell && typeof cell === 'object' && cell.name) {
+    // Handle item click - could show item info or actions
+    console.log('Clicked on item:', cell.name, 'at position', x, y)
   }
 }
 
@@ -81,7 +95,8 @@ onUnmounted(() => {
 
 <template>
   <div class="gps-cage">
-    <div class="gps-cage__grid-wrapper">
+    <div class="gps-cage__layout">
+      <div class="gps-cage__grid-wrapper">
         <div
           class="gps-cage__grid"
           :style="{
@@ -96,13 +111,19 @@ onUnmounted(() => {
             class="gps-cage__cell"
             :class="{
               'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
-              'gps-cage__cell--poop': item.cell === 'poop'
+              'gps-cage__cell--poop': item.cell === 'poop',
+              'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name
             }"
             @click="handleCellClick(item.cell, item.x, item.y)"
           >
             {{ cellContent(item.cell, item.x, item.y) }}
           </div>
         </div>
+      </div>
+      
+      <div class="gps-cage__sidebar">
+        <CageItemManager />
+      </div>
     </div>
   </div>
 </template>
@@ -112,6 +133,16 @@ onUnmounted(() => {
   margin-block-start: 2em;
   container-type: inline-size;
   container-name: cage;
+}
+
+.gps-cage__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.gps-cage__sidebar {
+  max-width: 100%;
 }
 
 
@@ -145,6 +176,11 @@ onUnmounted(() => {
   background: var(--color-cage-poop);
 }
 
+.gps-cage__cell--item {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
 .gps-cage__grid-wrapper {
   display: flex;
   justify-content: center;
@@ -169,8 +205,8 @@ onUnmounted(() => {
   }
   
   .gps-cage__sidebar {
-    min-width: 180px;
-    max-width: none;
+    min-width: 300px;
+    max-width: 400px;
     text-align: start;
   }
   

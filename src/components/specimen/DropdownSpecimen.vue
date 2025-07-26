@@ -1,18 +1,11 @@
 <template>
-  <div class="gps-specimen">
-    <div class="gps-specimen__header">
-      <div class="gps-specimen__header-content">
-        <h1 class="gps-specimen__title">Dropdown Component Examples</h1>
-        <p class="gps-specimen__desc">
-          This page showcases the dropdown component with various examples and use cases.
-        </p>
-      </div>
-      <div class="gps-specimen__theme-toggle">
-        <ThemeToggle />
-      </div>
-    </div>
+  <SpecimenPage
+    title="Dropdown Component Examples"
+    description="This page showcases the dropdown component with various examples and use cases."
+    @backToLanding="$emit('backToLanding')"
+  >
     
-          <div class="gps-specimen__section">
+      <div class="gps-specimen__section">
         <h2 class="gps-specimen__section-title">Basic Dropdown</h2>
         <p class="gps-specimen__section-desc">A simple dropdown with basic functionality.</p>
         <div class="gps-specimen__examples">
@@ -69,13 +62,15 @@
           />
         </div>
       </div>
-  </div>
+  </SpecimenPage>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import Dropdown from '../shared/Dropdown.vue'
-import ThemeToggle from '../shared/ThemeToggle.vue'
+import SpecimenPage from './SpecimenPage.vue'
+
+const emit = defineEmits(['backToLanding'])
 
 const selectedFruit = ref('')
 const selectedColor = ref('red')
