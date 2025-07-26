@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import Button from './Button.vue'
-import { useThemeStore } from '../stores/theme'
+import { useThemeStore } from '../../stores/theme'
 
 const themeStore = useThemeStore()
 

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineEmits, defineProps } from 'vue'
-import Button from './Button.vue'
+import Button from '../shared/Button.vue'
 
 const props = defineProps({
   nameInput: String
