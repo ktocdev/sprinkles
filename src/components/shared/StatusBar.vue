@@ -35,20 +35,21 @@ const props = defineProps({
 .gps-status-bar {
   margin-block-end: 1em;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 0.5em;
 }
 
 .gps-status-bar__label {
-  margin-inline-end: 0;
+  margin-inline-end: 0.5em;
   color: var(--color-text);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .gps-status-bar__progress {
   width: 100%;
-  margin-inline-end: 0;
+  margin-inline-end: 0.5em;
   height: 1.2em;
   border-radius: var(--border-radius);
   background: var(--color-border);
@@ -66,30 +67,10 @@ const props = defineProps({
 
 .gps-status-bar__value {
   min-width: 2em;
-  text-align: center;
+  text-align: end;
   color: var(--color-text);
   font-weight: 600;
 }
 
-/* Container query for medium containers */
-@container cage (min-width: 400px) {
-  .gps-status-bar {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
-  }
-  
-  .gps-status-bar__label {
-    margin-inline-end: 0.5em;
-    white-space: nowrap;
-  }
-  
-  .gps-status-bar__progress {
-    margin-inline-end: 0.5em;
-  }
-  
-  .gps-status-bar__value {
-    text-align: end;
-  }
-}
+
 </style> 

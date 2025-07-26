@@ -5,18 +5,16 @@ import ThemeToggle from '../shared/ThemeToggle.vue'
 <template>
   <header class="gps-topbar">
     <div class="gps-topbar__container">
-      <div class="gps-topbar__menubar" role="menubar">
-        <!-- Logo -->
-        <div class="gps-topbar__logo">
-          🐹
-        </div>
-        
-        <!-- Title -->
-        <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
-        
-        <!-- Theme toggle -->
-        <ThemeToggle class="gps-topbar__theme-toggle" />
+      <!-- Logo -->
+      <div class="gps-topbar__logo">
+        🐹
       </div>
+      
+      <!-- Title -->
+      <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
+      
+      <!-- Theme toggle -->
+      <ThemeToggle class="gps-topbar__theme-toggle" />
     </div>
   </header>
 </template>
@@ -36,15 +34,12 @@ import ThemeToggle from '../shared/ThemeToggle.vue'
   max-width: 1200px;
   margin: 0 auto;
   padding: 0.5rem 0.75rem;
-  container-type: inline-size;
-  container-name: topbar;
-}
-
-.gps-topbar__menubar {
   display: flex;
   align-items: center;
   gap: 0.25em;
   position: relative;
+  container-type: inline-size;
+  container-name: topbar;
 }
 
 .gps-topbar__logo {
@@ -71,9 +66,6 @@ import ThemeToggle from '../shared/ThemeToggle.vue'
 @container topbar (min-width: 800px) {
   .gps-topbar__container {
     padding: 0.75rem 1.5rem;
-  }
-  
-  .gps-topbar__menubar {
     gap: 0.75em;
   }
 }
@@ -82,9 +74,6 @@ import ThemeToggle from '../shared/ThemeToggle.vue'
 @container topbar (min-width: 600px) and (max-width: 799px) {
   .gps-topbar__container {
     padding: 0.75rem 1rem;
-  }
-  
-  .gps-topbar__menubar {
     gap: 0.5em;
   }
 }

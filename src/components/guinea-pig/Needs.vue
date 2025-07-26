@@ -1,6 +1,6 @@
 <template>
   <div class="gps-needs">
-    <div class="gps-needs__container">
+    <div class="gps-needs__container gps-status-grid">
       <div v-if="Object.keys(guineaPigStore.needs).length === 0" class="gps-needs__empty">
         No needs data available
       </div>
@@ -43,12 +43,6 @@ const getNeedColor = (need) => {
   width: 100%;
 }
 
-.gps-needs__container {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-}
-
 .gps-needs__empty {
   grid-column: 1 / -1;
   text-align: center;
@@ -56,19 +50,5 @@ const getNeedColor = (need) => {
   opacity: 0.7;
   font-style: italic;
   padding: 2rem 0;
-}
-
-/* Tablet and up - 2 columns */
-@media (min-width: 600px) {
-  .gps-needs__container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Desktop and up - 4 columns */
-@media (min-width: 900px) {
-  .gps-needs__container {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 </style> 

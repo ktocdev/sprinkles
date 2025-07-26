@@ -5,7 +5,7 @@ import Cage from '../cage/Cage.vue'
 import Panel from '../shared/Panel.vue'
 import Needs from '../guinea-pig/Needs.vue'
 import Inventory from '../inventory/Inventory.vue'
-import CageData from '../cage/CageData.vue'
+import CageStatus from '../cage/CageStatus.vue'
 import Market from '../market/Market.vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 
@@ -17,11 +17,11 @@ const props = defineProps({
   showInventory: Boolean,
   showGuineaPig: Boolean,
   showNeeds: Boolean,
-  showCageData: Boolean,
+  showCageStatus: Boolean,
   showMarket: Boolean
 })
 
-const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'closeCageData', 'closeMarket'])
+const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'closeCageStatus', 'closeMarket'])
 </script>
 
 <template>
@@ -62,11 +62,11 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
     </Panel>
 
     <Panel 
-      :isOpen="showCageData" 
+      :isOpen="showCageStatus" 
       title="Cage Status" 
-      @close="emit('closeCageData')"
+      @close="emit('closeCageStatus')"
     >
-      <CageData />
+      <CageStatus />
     </Panel>
 
     <Panel 

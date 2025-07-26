@@ -6,8 +6,8 @@ import { useGuineaPigStore } from './stores/guineaPig'
 import { useCageStore } from './stores/cage'
 import { useThemeStore } from './stores/theme'
 import { useMarketStore } from './stores/market'
-import WelcomeScreen from './components/pages/WelcomeScreen.vue'
-import MainScreen from './components/pages/MainScreen.vue'
+import Welcome from './components/pages/Welcome.vue'
+import Main from './components/pages/Main.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
 import Panel from './components/shared/Panel.vue'
@@ -18,6 +18,7 @@ import Market from './components/market/Market.vue'
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const guineaPigStore = useGuineaPigStore()
+const cageStore = useCageStore()
 const themeStore = useThemeStore()
 const marketStore = useMarketStore()
 const nameInput = ref('')
@@ -37,7 +38,6 @@ function resetGame() {
     userStore.$reset()
     inventoryStore.$reset()
     guineaPigStore.$reset()
-    const cageStore = useCageStore()
     cageStore.$reset()
     marketStore.$reset()
     // Remove persisted state from localStorage
@@ -50,7 +50,7 @@ function resetGame() {
     showInventory.value = false
     showGuineaPig.value = false
     showNeeds.value = false
-    showCageData.value = false
+    showCageStatus.value = false
     showMarket.value = false
     // Reset name input
     nameInput.value = ''
@@ -61,7 +61,7 @@ function resetGame() {
 const showInventory = ref(false)
 const showGuineaPig = ref(false)
 const showNeeds = ref(false)
-const showCageData = ref(false)
+const showCageStatus = ref(false)
 const showMarket = ref(false)
 const showButtonSpecimen = ref(false)
 
@@ -87,20 +87,20 @@ function toggleNeeds() {
   if (!showNeeds.value) {
     showInventory.value = false
     showGuineaPig.value = false
-    showCageData.value = false
+    showCageStatus.value = false
     showMarket.value = false
   }
   showNeeds.value = !showNeeds.value
 }
 
-function toggleCageData() {
-  if (!showCageData.value) {
+function toggleCageStatus() {
+  if (!showCageStatus.value) {
     showInventory.value = false
     showGuineaPig.value = false
     showNeeds.value = false
     showMarket.value = false
   }
-  showCageData.value = !showCageData.value
+  showCageStatus.value = !showCageStatus.value
 }
 
 function toggleMarket() {
@@ -108,14 +108,13 @@ function toggleMarket() {
     showInventory.value = false
     showGuineaPig.value = false
     showNeeds.value = false
-    showCageData.value = false
+    showCageStatus.value = false
   }
   showMarket.value = !showMarket.value
 }
 
 function clearCage() {
   if (window.confirm('Are you sure you want to clear the cage? This cannot be undone.')) {
-    const cageStore = useCageStore()
     cageStore.$reset()
     localStorage.removeItem('cage')
   }
@@ -133,31 +132,31 @@ function toggleButtonSpecimen() {
       :onInventory="toggleInventory"
       :onGuineaPig="toggleGuineaPig"
       :onNeeds="toggleNeeds"
-      :onCageData="toggleCageData"
+      :onCageStatus="toggleCageStatus"
       :onMarket="toggleMarket"
       :onReset="resetGame"
       :onClearCage="clearCage"
       :showInventory="showInventory"
       :showGuineaPig="showGuineaPig"
       :showNeeds="showNeeds"
-      :showCageData="showCageData"
+      :showCageStatus="showCageStatus"
       :showMarket="showMarket"
     />
     <TopBar v-if="userStore.name" />
     <div class="gps-app__content">
-      <MainScreen 
+      <Main 
         v-if="userStore.name"
         :userStore="userStore" 
         :inventoryStore="inventoryStore" 
         :showInventory="showInventory"
         :showGuineaPig="showGuineaPig"
         :showNeeds="showNeeds"
-        :showCageData="showCageData"
+        :showCageStatus="showCageStatus"
         :showMarket="showMarket"
         @closeInventory="showInventory = false"
         @closeGuineaPig="showGuineaPig = false"
         @closeNeeds="showNeeds = false"
-        @closeCageData="showCageData = false"
+        @closeCageStatus="showCageStatus = false"
         @closeMarket="showMarket = false"
       />
     </div>
@@ -173,7 +172,7 @@ function toggleButtonSpecimen() {
       title="Welcome to Guinea Pig Simulator!" 
       :showClose="false"
     >
-      <WelcomeScreen 
+      <Welcome 
         :nameInput="nameInput" 
         @update:nameInput="val => nameInput = val" 
         @submit="submitName" 
@@ -201,6 +200,8 @@ function toggleButtonSpecimen() {
 </template>
 
 <style>
+@import './styles/shared.css';
+
 .gps-app {
   min-height: 100vh;
   display: flex;

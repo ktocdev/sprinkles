@@ -34,8 +34,8 @@
       <!-- Cage Data -->
       <button 
         class="gps-icon-sidebar__button"
-        @click="props.onCageData"
-        :class="{ 'gps-icon-sidebar__button--active': props.showCageData }"
+        @click="props.onCageStatus"
+        :class="{ 'gps-icon-sidebar__button--active': props.showCageStatus }"
         title="Show Cage Data"
       >
         🏠
@@ -82,14 +82,14 @@ const props = defineProps({
   onInventory: Function,
   onGuineaPig: Function,
   onNeeds: Function,
-  onCageData: Function,
+      onCageStatus: Function,
   onMarket: Function,
   onReset: Function,
   onClearCage: Function,
   showInventory: Boolean,
   showGuineaPig: Boolean,
   showNeeds: Boolean,
-  showCageData: Boolean,
+      showCageStatus: Boolean,
   showMarket: Boolean
 })
 </script>

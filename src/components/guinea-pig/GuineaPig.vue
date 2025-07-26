@@ -76,8 +76,8 @@ function cancelEditInfo() {
         <label class="gps-guinea-pig__label">Gender:
           <select class="gps-guinea-pig__input" v-model="tempInfo.gender">
             <option value="">Select</option>
-            <option value="neutered boar">Neutered Boar</option>
-            <option value="sow">Sow</option>
+            <option value="Neutered Boar">Neutered Boar</option>
+            <option value="Sow">Sow</option>
           </select>
         </label><br />
         <div class="gps-guinea-pig__edit-actions">
