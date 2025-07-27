@@ -266,29 +266,30 @@ const moveY = ref(null)
 // Item definitions
 const itemDefinitions = {
   // Consumables
-  bedding: { name: 'Bedding', type: 'bedding', isConsumable: true },
-  hay: { name: 'Hay', type: 'food', isConsumable: true },
-  pellets: { name: 'Pellets', type: 'food', isConsumable: true },
-  lettuce: { name: 'Lettuce', type: 'food', isConsumable: true },
-  blueberries: { name: 'Blueberries', type: 'food', isConsumable: true },
-  carrots: { name: 'Carrots', type: 'food', isConsumable: true },
-  cucumbers: { name: 'Cucumbers', type: 'food', isConsumable: true },
-  small_chew_stick: { name: 'Small Chew Stick', type: 'chew', isConsumable: true },
-  large_chew_stick: { name: 'Large Chew Stick', type: 'chew', isConsumable: true },
-  chew_cube: { name: 'Chew Cube', type: 'chew', isConsumable: true },
+  hay: { name: 'Hay', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  pellets: { name: 'Pellets', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  lettuce: { name: 'Lettuce', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  blueberries: { name: 'Blueberries', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  carrots: { name: 'Carrots', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  cucumbers: { name: 'Cucumbers', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  small_chew_stick: { name: 'Small Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
+  large_chew_stick: { name: 'Large Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
+  chew_cube: { name: 'Chew Cube', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
   
   // Permanents
-  small_ball: { name: 'Small Ball', type: 'toy', isConsumable: false },
-  large_ball: { name: 'Large Ball', type: 'toy', isConsumable: false },
-  small_tunnel: { name: 'Small Tunnel', type: 'toy', isConsumable: false },
-  large_tunnel: { name: 'Large Tunnel', type: 'toy', isConsumable: false },
-  small_hammock: { name: 'Small Hammock', type: 'bed', isConsumable: false },
-  large_hammock: { name: 'Large Hammock', type: 'bed', isConsumable: false },
-  small_bed: { name: 'Small Bed', type: 'bed', isConsumable: false },
-  large_bed: { name: 'Large Bed', type: 'bed', isConsumable: false },
-  small_house: { name: 'Small House', type: 'shelter', isConsumable: false },
-  large_house: { name: 'Large House', type: 'shelter', isConsumable: false }
+  small_ball: { name: 'Small Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  large_ball: { name: 'Large Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  small_tunnel: { name: 'Small Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  large_tunnel: { name: 'Large Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  small_hammock: { name: 'Small Hammock', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
+  large_hammock: { name: 'Large Hammock', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
+  small_bed: { name: 'Small Bed', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
+  large_bed: { name: 'Large Bed', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
+  small_house: { name: 'Small House', type: 'shelter', isConsumable: false, size: { width: 1, height: 1 } },
+  large_house: { name: 'Large House', type: 'shelter', isConsumable: false, size: { width: 2, height: 2 } }
 }
+
+
 
 // Computed properties
 const availableConsumables = computed(() => {
@@ -348,13 +349,6 @@ function formatItemName(itemName) {
 function addItemToCage() {
   if (!selectedItem.value || itemX.value === null || itemY.value === null) return
   
-  // Validate coordinates are within bounds
-  if (itemX.value < 1 || itemX.value > cageStore.size.width || 
-      itemY.value < 1 || itemY.value > cageStore.size.height) {
-    alert(`Please enter coordinates between 1 and ${cageStore.size.width} for X, and 1 and ${cageStore.size.height} for Y.`)
-    return
-  }
-  
   const itemDef = itemDefinitions[selectedItem.value]
   if (!itemDef) return
   
@@ -362,30 +356,48 @@ function addItemToCage() {
   const x = itemX.value - 1
   const y = itemY.value - 1
   
-  // Check what's at the position before attempting to add
-  const isOccupiedByItem = cageStore.items.some(i => i.x === x && i.y === y)
-  const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
-  const isOccupiedByPoop = cageStore.poop.some(p => p.x === x && p.y === y)
-  const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
+  // Check if item fits within grid bounds
+  const itemWidth = itemDef.size.width
+  const itemHeight = itemDef.size.height
   
-  if (isOccupiedByItem) {
-    alert('Position is occupied by another item! Please choose a different location.')
+  if (x + itemWidth > cageStore.size.width || y + itemHeight > cageStore.size.height) {
+    alert(`This ${formatItemName(itemDef.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${itemX.value}, ${itemY.value}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
     return
-  } else if (isOccupiedByGuineaPig) {
-    alert('Position is occupied by the guinea pig! Please choose a different location.')
-    return
-  } else if (isOccupiedByPoop) {
-    alert('Position is occupied by poop! Please clean the cage or choose a different location.')
-    return
-  } else if (isWaterBottlePosition) {
-    alert('Cannot place items on the water bottle position! Please choose a different location.')
-    return
+  }
+  
+  // Check if all required positions are available
+  for (let checkY = y; checkY < y + itemHeight; checkY++) {
+    for (let checkX = x; checkX < x + itemWidth; checkX++) {
+      // Check if position is occupied by another item
+      const isOccupiedByItem = cageStore.items.some(i => i.x === checkX && i.y === checkY)
+      // Check if position is occupied by guinea pig
+      const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === checkX && cageStore.guineaPigPos.y === checkY)
+      // Check if position is occupied by poop
+      const isOccupiedByPoop = cageStore.poop.some(p => p.x === checkX && p.y === checkY)
+      // Check if position is water bottle position
+      const isWaterBottlePosition = (checkX === cageStore.size.width - 1 && checkY === 0)
+      
+      if (isOccupiedByItem) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by another item! Please choose a different location.`)
+        return
+      } else if (isOccupiedByGuineaPig) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by the guinea pig! Please choose a different location.`)
+        return
+      } else if (isOccupiedByPoop) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by poop! Please clean the cage or choose a different location.`)
+        return
+      } else if (isWaterBottlePosition) {
+        alert(`Cannot place items on the water bottle position (${checkX + 1}, ${checkY + 1})! Please choose a different location.`)
+        return
+      }
+    }
   }
   
   const success = cageStore.addItem({
     name: selectedItem.value,
     type: itemDef.type,
-    isConsumable: itemDef.isConsumable
+    isConsumable: itemDef.isConsumable,
+    size: itemDef.size
   }, x, y)
   
   if (success) {
@@ -395,7 +407,7 @@ function addItemToCage() {
     itemX.value = null
     itemY.value = null
   } else {
-    alert('Position is occupied! Please choose a different location.')
+    alert('Failed to add item! Please choose a different location.')
   }
 }
 
@@ -410,35 +422,47 @@ function moveItem(item) {
 function confirmMoveItem() {
   if (!itemToMove.value || moveX.value === null || moveY.value === null) return
   
-  // Validate coordinates are within bounds
-  if (moveX.value < 1 || moveX.value > cageStore.size.width || 
-      moveY.value < 1 || moveY.value > cageStore.size.height) {
-    alert(`Please enter coordinates between 1 and ${cageStore.size.width} for X, and 1 and ${cageStore.size.height} for Y.`)
-    return
-  }
-  
   // Convert from 1-based to 0-based coordinates
   const x = moveX.value - 1
   const y = moveY.value - 1
   
-  // Check what's at the position before attempting to move
-  const isOccupiedByItem = cageStore.items.some(i => i.id !== itemToMove.value.id && i.x === x && i.y === y)
-  const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
-  const isOccupiedByPoop = cageStore.poop.some(p => p.x === x && p.y === y)
-  const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
+  // Get item size (default to 1x1 if not specified)
+  const itemSize = itemToMove.value.size || { width: 1, height: 1 }
+  const itemWidth = itemSize.width
+  const itemHeight = itemSize.height
   
-  if (isOccupiedByItem) {
-    alert('Position is occupied by another item! Please choose a different location.')
+  // Check if item fits within grid bounds
+  if (x + itemWidth > cageStore.size.width || y + itemHeight > cageStore.size.height) {
+    alert(`This ${formatItemName(itemToMove.value.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${moveX.value}, ${moveY.value}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
     return
-  } else if (isOccupiedByGuineaPig) {
-    alert('Position is occupied by the guinea pig! Please choose a different location.')
-    return
-  } else if (isOccupiedByPoop) {
-    alert('Position is occupied by poop! Please clean the cage or choose a different location.')
-    return
-  } else if (isWaterBottlePosition) {
-    alert('Cannot move items to the water bottle position! Please choose a different location.')
-    return
+  }
+  
+  // Check if all required positions are available
+  for (let checkY = y; checkY < y + itemHeight; checkY++) {
+    for (let checkX = x; checkX < x + itemWidth; checkX++) {
+      // Check if position is occupied by another item (excluding the item being moved)
+      const isOccupiedByItem = cageStore.items.some(i => i.id !== itemToMove.value.id && i.x === checkX && i.y === checkY)
+      // Check if position is occupied by guinea pig
+      const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === checkX && cageStore.guineaPigPos.y === checkY)
+      // Check if position is occupied by poop
+      const isOccupiedByPoop = cageStore.poop.some(p => p.x === checkX && p.y === checkY)
+      // Check if position is water bottle position
+      const isWaterBottlePosition = (checkX === cageStore.size.width - 1 && checkY === 0)
+      
+      if (isOccupiedByItem) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by another item! Please choose a different location.`)
+        return
+      } else if (isOccupiedByGuineaPig) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by the guinea pig! Please choose a different location.`)
+        return
+      } else if (isOccupiedByPoop) {
+        alert(`Position (${checkX + 1}, ${checkY + 1}) is occupied by poop! Please clean the cage or choose a different location.`)
+        return
+      } else if (isWaterBottlePosition) {
+        alert(`Cannot move items to the water bottle position (${checkX + 1}, ${checkY + 1})! Please choose a different location.`)
+        return
+      }
+    }
   }
   
   const success = cageStore.moveItem(itemToMove.value.id, x, y)
@@ -449,7 +473,7 @@ function confirmMoveItem() {
     moveX.value = null
     moveY.value = null
   } else {
-    alert('Position is occupied! Please choose a different location.')
+    alert('Failed to move item! Please choose a different location.')
   }
 }
 
@@ -473,6 +497,8 @@ function throwOutItem(item) {
     cageStore.removeItem(item.id)
   }
 }
+
+
 
 
 </script>

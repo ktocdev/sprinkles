@@ -18,12 +18,15 @@ function cellContent(cell, x, y) {
   if (cell && typeof cell === 'object' && cell.name) {
     // Return appropriate emoji based on item type
     const itemType = cell.type
+    const itemSize = cell.size || { width: 1, height: 1 }
+    const isLarge = itemSize.width > 1 || itemSize.height > 1
+    
     if (itemType === 'food') return '🥕'
     if (itemType === 'bedding') return '🛏️'
     if (itemType === 'chew') return '🦷'
     if (itemType === 'toy') return '🎾'
-    if (itemType === 'bed') return '🛏️'
-    if (itemType === 'shelter') return '🏠'
+    if (itemType === 'bed') return isLarge ? '🛌' : '🛏️'
+    if (itemType === 'shelter') return isLarge ? '🏘️' : '🏠'
     return '📦' // Default item emoji
   }
   return ''
@@ -133,6 +136,7 @@ onUnmounted(() => {
           'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name,
           'gps-cage__cell--water': item.x === width - 1 && item.y === 0
         }"
+        :data-item-size="item.cell && typeof item.cell === 'object' && item.cell.size ? `${item.cell.size.width}x${item.cell.size.height}` : null"
         @click="handleCellClick(item.cell, item.x, item.y)"
       >
         <span v-if="item.x === width - 1 && item.y === 0" class="gps-cage__water-emoji">
@@ -183,6 +187,29 @@ onUnmounted(() => {
 .gps-cage__cell--item {
   background: var(--color-accent);
   color: var(--color-white);
+}
+
+/* Large item styling - make cells appear connected */
+.gps-cage__cell--item[data-item-size="2x2"] {
+  border-width: 2px;
+  border-color: var(--color-accent);
+  /* font-size: 1.2em; */
+  background: var(--color-accent-hover);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Add a subtle pattern to large items */
+.gps-cage__cell--item[data-item-size="2x2"]::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 .gps-cage__grid-wrapper {

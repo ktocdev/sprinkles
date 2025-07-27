@@ -44,6 +44,12 @@ const statusItems = computed(() => [
     label: 'Water',
     value: cageStore.waterLevel,
     color: '#4a90e2'
+  },
+  {
+    key: 'habitat',
+    label: 'Habitat',
+    value: cageStore.habitatValue,
+    color: '#8e44ad'
   }
 ])
 

@@ -161,9 +161,13 @@ function toggleMarket() {
 }
 
 function clearCage() {
-  if (window.confirm('Are you sure you want to clear the cage? This cannot be undone.')) {
-    cageStore.$reset()
-    localStorage.removeItem('cage')
+  cageStore.$reset()
+  localStorage.removeItem('cage')
+}
+
+function resetInventory() {
+  if (window.confirm('Are you sure you want to reset the inventory to default values? This will restore all items including large beds and houses.')) {
+    inventoryStore.resetToDefaults()
   }
 }
 
@@ -463,6 +467,7 @@ function toggleDebugPanel() {
       <DebugPanel 
         @resetGame="resetGame"
         @clearCage="clearCage"
+        @resetInventory="resetInventory"
       />
     </Panel>
   </div>

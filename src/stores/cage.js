@@ -34,8 +34,17 @@ export const useCageStore = defineStore('cage', {
       }
       // Place items
       for (const item of state.items) {
-        if (grid[item.y] && grid[item.y][item.x] !== undefined) {
-          grid[item.y][item.x] = item
+        const itemSize = item.size || { width: 1, height: 1 }
+        const itemWidth = itemSize.width
+        const itemHeight = itemSize.height
+        
+        // Place item across all its occupied cells
+        for (let itemY = item.y; itemY < item.y + itemHeight; itemY++) {
+          for (let itemX = item.x; itemX < item.x + itemWidth; itemX++) {
+            if (grid[itemY] && grid[itemY][itemX] !== undefined) {
+              grid[itemY][itemX] = item
+            }
+          }
         }
       }
       // Place guinea pig
@@ -102,14 +111,23 @@ export const useCageStore = defineStore('cage', {
       this.poop = []
     },
     addItem(item, x, y) {
-      // Check if position is available
-      const isOccupied = this.items.some(i => i.x === x && i.y === y) ||
-                        (this.guineaPigPos.x === x && this.guineaPigPos.y === y) ||
-                        this.poop.some(p => p.x === x && p.y === y) ||
-                        (x === this.size.width - 1 && y === 0) // Water bottle position
+      // Get item size (default to 1x1 if not specified)
+      const itemSize = item.size || { width: 1, height: 1 }
+      const itemWidth = itemSize.width
+      const itemHeight = itemSize.height
       
-      if (isOccupied) {
-        return false
+      // Check if all required positions are available
+      for (let checkY = y; checkY < y + itemHeight; checkY++) {
+        for (let checkX = x; checkX < x + itemWidth; checkX++) {
+          const isOccupied = this.items.some(i => i.x === checkX && i.y === checkY) ||
+                            (this.guineaPigPos.x === checkX && this.guineaPigPos.y === checkY) ||
+                            this.poop.some(p => p.x === checkX && p.y === checkY) ||
+                            (checkX === this.size.width - 1 && checkY === 0) // Water bottle position
+          
+          if (isOccupied) {
+            return false
+          }
+        }
       }
       
       this.items.push({
@@ -119,7 +137,8 @@ export const useCageStore = defineStore('cage', {
         x: x,
         y: y,
         isConsumable: item.isConsumable,
-        quantity: item.quantity || 1
+        quantity: item.quantity || 1,
+        size: itemSize
       })
       return true
     },
@@ -130,14 +149,23 @@ export const useCageStore = defineStore('cage', {
       const item = this.items.find(i => i.id === itemId)
       if (!item) return false
       
-      // Check if new position is available
-      const isOccupied = this.items.some(i => i.id !== itemId && i.x === newX && i.y === newY) ||
-                        (this.guineaPigPos.x === newX && this.guineaPigPos.y === newY) ||
-                        this.poop.some(p => p.x === newX && p.y === newY) ||
-                        (newX === this.size.width - 1 && newY === 0) // Water bottle position
+      // Get item size (default to 1x1 if not specified)
+      const itemSize = item.size || { width: 1, height: 1 }
+      const itemWidth = itemSize.width
+      const itemHeight = itemSize.height
       
-      if (isOccupied) {
-        return false
+      // Check if all required positions are available
+      for (let checkY = newY; checkY < newY + itemHeight; checkY++) {
+        for (let checkX = newX; checkX < newX + itemWidth; checkX++) {
+          const isOccupied = this.items.some(i => i.id !== itemId && i.x === checkX && i.y === checkY) ||
+                            (this.guineaPigPos.x === checkX && this.guineaPigPos.y === checkY) ||
+                            this.poop.some(p => p.x === checkX && p.y === checkY) ||
+                            (checkX === this.size.width - 1 && checkY === 0) // Water bottle position
+          
+          if (isOccupied) {
+            return false
+          }
+        }
       }
       
       item.x = newX
