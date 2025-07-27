@@ -1,7 +1,14 @@
 <script setup>
 import Button from '../shared/Button.vue'
+import { useCageStore } from '../../stores/cage'
+
+const cageStore = useCageStore()
 
 defineEmits(['showDebug'])
+
+function togglePause() {
+  cageStore.togglePause()
+}
 </script>
 
 <template>
@@ -10,16 +17,30 @@ defineEmits(['showDebug'])
       <!-- Title -->
       <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
       
-      <!-- Debug Button -->
-      <Button 
-        type="flat"
-        size="compact"
-        @click="$emit('showDebug')"
-        class="gps-topbar__debug-button"
-        title="Debug Panel"
-      >
-        🐛 Debug
-      </Button>
+      <!-- Control Buttons -->
+      <div class="gps-topbar__controls">
+        <!-- Pause Button -->
+        <Button 
+          type="flat"
+          size="compact"
+          @click="togglePause"
+          class="gps-topbar__pause-button"
+          :title="cageStore.paused ? 'Resume Game' : 'Pause Game'"
+        >
+          {{ cageStore.paused ? '▶️' : '⏸️' }} {{ cageStore.paused ? 'Resume' : 'Pause' }}
+        </Button>
+        
+        <!-- Debug Button -->
+        <Button 
+          type="flat"
+          size="compact"
+          @click="$emit('showDebug')"
+          class="gps-topbar__debug-button"
+          title="Debug Panel"
+        >
+          🐛 Debug
+        </Button>
+      </div>
     </div>
   </header>
 </template>
@@ -56,6 +77,17 @@ defineEmits(['showDebug'])
   font-family: var(--font-family-header);
 }
 
+.gps-topbar__controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.gps-topbar__pause-button {
+  font-size: var(--font-size-sm);
+  padding: 0.25rem 0.75rem;
+}
+
 .gps-topbar__debug-button {
   font-size: var(--font-size-sm);
   padding: 0.25rem 0.75rem;
@@ -76,6 +108,11 @@ defineEmits(['showDebug'])
     gap: 0.5em;
   }
   
+  .gps-topbar__controls {
+    gap: 0.25rem;
+  }
+  
+  .gps-topbar__pause-button,
   .gps-topbar__debug-button {
     padding: 0.25rem 0.5rem;
   }

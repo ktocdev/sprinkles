@@ -42,10 +42,7 @@ import Button from './Button.vue'
 const emit = defineEmits(['resetGame', 'clearCage'])
 
 function handleResetGame() {
-  const confirmed = confirm('Are you sure you want to reset your game? This cannot be undone.')
-  if (confirmed) {
-    emit('resetGame')
-  }
+  emit('resetGame')
 }
 
 function handleClearCage() {

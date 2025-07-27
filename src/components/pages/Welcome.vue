@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits, defineProps } from 'vue'
+import { ref, defineEmits, defineProps, computed } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import Button from '../shared/Button.vue'
 import Input from '../shared/Input.vue'
@@ -13,6 +13,40 @@ const emits = defineEmits(['update:nameInput', 'submit'])
 
 const guineaPigStore = useGuineaPigStore()
 const guineaPigInfo = ref({ ...guineaPigStore.info })
+
+// Validation computed property
+const isFormValid = computed(() => {
+  const userNameValid = props.nameInput && props.nameInput.trim().length > 0
+  const guineaPigNameValid = guineaPigInfo.value.name && guineaPigInfo.value.name.trim().length > 0
+  const birthdayValid = guineaPigInfo.value.birthday && guineaPigInfo.value.birthday.trim().length > 0
+  const coatValid = guineaPigInfo.value.coat && guineaPigInfo.value.coat.trim().length > 0
+  const genderValid = guineaPigInfo.value.gender && guineaPigInfo.value.gender.trim().length > 0
+  
+  return userNameValid && guineaPigNameValid && birthdayValid && coatValid && genderValid
+})
+
+// Validation messages
+const validationMessages = computed(() => {
+  const messages = []
+  
+  if (!props.nameInput || props.nameInput.trim().length === 0) {
+    messages.push('Please enter your name')
+  }
+  if (!guineaPigInfo.value.name || guineaPigInfo.value.name.trim().length === 0) {
+    messages.push('Please enter your guinea pig\'s name')
+  }
+  if (!guineaPigInfo.value.birthday || guineaPigInfo.value.birthday.trim().length === 0) {
+    messages.push('Please enter your guinea pig\'s birthday')
+  }
+  if (!guineaPigInfo.value.coat || guineaPigInfo.value.coat.trim().length === 0) {
+    messages.push('Please enter your guinea pig\'s coat type')
+  }
+  if (!guineaPigInfo.value.gender || guineaPigInfo.value.gender.trim().length === 0) {
+    messages.push('Please select your guinea pig\'s gender')
+  }
+  
+  return messages
+})
 
 // Predefined data sets for random generation
 const guineaPigNames = [
@@ -28,6 +62,11 @@ const guineaPigCoats = [
   'Tricolor', 'Solid Black', 'Solid White', 'Solid Brown', 'Solid Cream',
   'Agouti', 'Brindle', 'Dalmatian', 'Himalayan', 'Dutch', 'English Crested'
 ]
+
+const guineaPigCoatOptions = guineaPigCoats.map(coat => ({
+  value: coat,
+  label: coat
+}))
 
 const guineaPigGenders = [
   { value: 'Neutered Boar', label: 'Neutered Boar' },
@@ -60,6 +99,10 @@ function generateRandomData() {
 }
 
 function handleSubmit() {
+  if (!isFormValid.value) {
+    return // Don't proceed if form is not valid
+  }
+  
   // Save guinea pig info to store
   for (const key in guineaPigInfo.value) {
     guineaPigStore.setInfoField(key, guineaPigInfo.value[key])
@@ -96,7 +139,7 @@ function handleSubmit() {
         />
       </FormGroup>
       
-      <FormGroup label="Birthday">
+      <FormGroup label="Birthday" required>
         <Input 
           v-model="guineaPigInfo.birthday"
           type="date"
@@ -104,15 +147,16 @@ function handleSubmit() {
         />
       </FormGroup>
       
-      <FormGroup label="Coat">
-        <Input 
+      <FormGroup label="Coat" required>
+        <Dropdown 
           v-model="guineaPigInfo.coat"
-          placeholder="Enter coat type"
-          icon="🎨"
+          :options="guineaPigCoatOptions"
+          placeholder="Select coat type"
+          trigger-class="gps-welcome__dropdown"
         />
       </FormGroup>
       
-      <FormGroup label="Gender">
+      <FormGroup label="Gender" required>
         <Dropdown 
           v-model="guineaPigInfo.gender"
           :options="guineaPigGenders"
@@ -127,7 +171,13 @@ function handleSubmit() {
     </div>
 
     <div class="gps-welcome__actions">
-      <Button type="primary" @click="handleSubmit">Start Simulation</Button>
+      <Button 
+        :type="isFormValid ? 'primary' : 'disabled'"
+        @click="handleSubmit"
+        :title="!isFormValid ? 'Please fill in all required fields' : 'Start playing'"
+      >
+        Play
+      </Button>
     </div>
   </div>
 </template>
@@ -169,4 +219,6 @@ function handleSubmit() {
   justify-content: center;
   margin-block-start: 2rem;
 }
+
+
 </style> 

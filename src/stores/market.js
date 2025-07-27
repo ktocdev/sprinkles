@@ -4,31 +4,190 @@ import { useUserStore } from './user.js'
 
 export const useMarketStore = defineStore('market', {
   state: () => ({
-    // Base prices for all items
-    basePrices: {
-      // Food items
-      bedding: 5,
-      hay: 3,
-      pellets: 4,
-      lettuce: 2,
-      blueberries: 6,
-      carrots: 3,
-      cucumbers: 2,
+    // Comprehensive item data
+    items: {
+      // Food items (consumables, improve hunger)
+      bedding: {
+        price: 5,
+        size: 1,
+        consumable: true,
+        placeable: false,
+        needType: 'hunger',
+        needImprovement: 10
+      },
+      hay: {
+        price: 3,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 8,
+        actionWord: 'eating'
+      },
+      pellets: {
+        price: 4,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 12,
+        actionWord: 'eating'
+      },
+      lettuce: {
+        price: 2,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 6,
+        actionWord: 'eating'
+      },
+      blueberries: {
+        price: 6,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 15,
+        actionWord: 'eating'
+      },
+      carrots: {
+        price: 3,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 10,
+        actionWord: 'eating'
+      },
+      cucumbers: {
+        price: 2,
+        size: 1,
+        consumable: true,
+        placeable: true,
+        needType: 'hunger',
+        needImprovement: 5,
+        actionWord: 'eating'
+      },
       
-      // Toys and enrichment
-      small_chew_stick: 8,
-      large_chew_stick: 15,
-      small_ball: 12,
-      large_ball: 20,
-      small_tunnel: 18,
-      large_tunnel: 30,
-      small_hammock: 25,
-      large_hammock: 40,
-      small_bed: 20,
-      large_bed: 35,
-      small_house: 30,
-      large_house: 50,
-      chew_cube: 15,
+      // Toys and enrichment (permanent, improve enrichment)
+      small_chew_stick: {
+        price: 8,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'chew',
+        needImprovement: 15,
+        actionWord: 'chewing'
+      },
+      large_chew_stick: {
+        price: 15,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'chew',
+        needImprovement: 25,
+        actionWord: 'chewing'
+      },
+      small_ball: {
+        price: 12,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'enrichment',
+        needImprovement: 20,
+        actionWord: 'playing with'
+      },
+      large_ball: {
+        price: 20,
+        size: 4,
+        consumable: false,
+        placeable: true,
+        needType: 'enrichment',
+        needImprovement: 35,
+        actionWord: 'playing with'
+      },
+      small_tunnel: {
+        price: 18,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'enrichment',
+        needImprovement: 25,
+        actionWord: 'exploring'
+      },
+      large_tunnel: {
+        price: 30,
+        size: 4,
+        consumable: false,
+        placeable: true,
+        needType: 'enrichment',
+        needImprovement: 40,
+        actionWord: 'exploring'
+      },
+      small_hammock: {
+        price: 25,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 20,
+        actionWord: 'resting in'
+      },
+      large_hammock: {
+        price: 40,
+        size: 4,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 30,
+        actionWord: 'resting in'
+      },
+      small_bed: {
+        price: 20,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 25,
+        actionWord: 'sleeping in'
+      },
+      large_bed: {
+        price: 35,
+        size: 4,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 40,
+        actionWord: 'sleeping in'
+      },
+      small_house: {
+        price: 30,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 30,
+        actionWord: 'in'
+      },
+      large_house: {
+        price: 50,
+        size: 4,
+        consumable: false,
+        placeable: true,
+        needType: 'shelter',
+        needImprovement: 50,
+        actionWord: 'in'
+      },
+      chew_cube: {
+        price: 15,
+        size: 1,
+        consumable: false,
+        placeable: true,
+        needType: 'chew',
+        needImprovement: 20,
+        actionWord: 'chewing'
+      },
     },
     
     // Purchase history for analytics
@@ -39,7 +198,17 @@ export const useMarketStore = defineStore('market', {
   getters: {
     // Get current price for an item
     getItemPrice: (state) => (itemName) => {
-      return state.basePrices[itemName] || 0
+      return state.items[itemName]?.price || 0
+    },
+    
+    // Get item data
+    getItemData: (state) => (itemName) => {
+      return state.items[itemName] || null
+    },
+    
+    // Get all items
+    getAllItems: (state) => {
+      return state.items
     }
   },
   
@@ -50,7 +219,7 @@ export const useMarketStore = defineStore('market', {
       const inventoryStore = useInventoryStore()
       const userStore = useUserStore()
       
-      if (!this.basePrices[itemName]) {
+      if (!this.items[itemName]) {
         throw new Error('Item not available in market')
       }
       
@@ -88,7 +257,7 @@ export const useMarketStore = defineStore('market', {
       const inventoryStore = useInventoryStore()
       const userStore = useUserStore()
       
-      if (!this.basePrices[itemName]) {
+      if (!this.items[itemName]) {
         throw new Error('Item not available for sale')
       }
       
@@ -119,12 +288,6 @@ export const useMarketStore = defineStore('market', {
         totalEarnings
       }
     },
-    
-
-    
-
-    
-
     
     // Get market statistics
     getMarketStats() {

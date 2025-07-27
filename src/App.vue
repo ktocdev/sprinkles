@@ -63,6 +63,7 @@ function resetGame() {
     showCageStatus.value = false
     showCageInteractions.value = false
     showMarket.value = false
+    showDebugPanel.value = false
     // Reset name input
     nameInput.value = ''
   }
@@ -134,7 +135,10 @@ function handleCageInteraction(action) {
     case 'refreshWater':
       cageStore.refreshWater()
       break
-    case 'cleanCage':
+    case 'refreshBedding':
+      cageStore.refreshBedding()
+      break
+    case 'cleanPoop':
       cageStore.cleanCage()
       break
     case 'manageItems':
@@ -260,10 +264,17 @@ function toggleDebugPanel() {
           class: 'gps-sidebar-subnav__button--primary'
         },
         {
-          id: 'cleanCage',
+          id: 'refreshBedding',
+          icon: '🛏️',
+          title: 'Refresh Bedding',
+          action: 'refreshBedding',
+          class: 'gps-sidebar-subnav__button--primary'
+        },
+        {
+          id: 'cleanPoop',
           icon: '🧹',
-          title: 'Clean Cage',
-          action: 'cleanCage',
+          title: 'Clean Poop',
+          action: 'cleanPoop',
           class: 'gps-sidebar-subnav__button--warning'
         },
         {

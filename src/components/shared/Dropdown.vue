@@ -1,13 +1,14 @@
 <template>
-  <div class="gps-dropdown" :class="{ 'gps-dropdown--open': isOpen }">
+  <div class="gps-dropdown" :class="{ 'gps-dropdown--open': isOpen, 'gps-dropdown--disabled': disabled }">
     <button
       ref="triggerRef"
       class="gps-dropdown__trigger"
-      :class="triggerClass"
+      :class="[triggerClass, { 'gps-dropdown__trigger--disabled': disabled }]"
       @click="toggleDropdown"
       @keydown="handleKeydown"
       :aria-expanded="isOpen"
       :aria-haspopup="true"
+      :aria-disabled="disabled"
       type="button"
     >
       <span class="gps-dropdown__trigger-text">{{ selectedLabel || placeholder }}</span>
@@ -74,7 +75,8 @@ const props = defineProps({
   ariaLabel: {
     type: String,
     default: 'Dropdown menu'
-  }
+  },
+
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -89,7 +91,9 @@ const selectedLabel = computed(() => {
 })
 
 function toggleDropdown() {
-  if (props.disabled) return
+  if (props.disabled) {
+    return
+  }
   isOpen.value = !isOpen.value
 }
 
@@ -104,7 +108,9 @@ function closeDropdown() {
 }
 
 function handleKeydown(event) {
-  if (props.disabled) return
+  if (props.disabled) {
+    return
+  }
   
   switch (event.key) {
     case 'Enter':
@@ -167,7 +173,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
@@ -177,10 +183,12 @@ onUnmounted(() => {
   cursor: pointer;
   transition: var(--transition);
   min-width: 120px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .gps-dropdown__trigger:hover:not(:disabled) {
   border-color: var(--color-accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .gps-dropdown__trigger:focus {
@@ -188,9 +196,31 @@ onUnmounted(() => {
   outline-offset: 2px;
 }
 
+.gps-dropdown__trigger--disabled,
 .gps-dropdown__trigger:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: var(--color-border);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.gps-dropdown__trigger--disabled .gps-dropdown__trigger-icon,
+.gps-dropdown__trigger:disabled .gps-dropdown__trigger-icon {
+  opacity: 0.5;
+  transform: none !important;
+}
+
+.gps-dropdown__trigger--disabled:hover,
+.gps-dropdown__trigger:disabled:hover {
+  border-color: var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gps-dropdown__trigger--disabled:focus,
+.gps-dropdown__trigger:disabled:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .gps-dropdown__trigger-text {
@@ -209,25 +239,27 @@ onUnmounted(() => {
 
 .gps-dropdown__menu {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   z-index: 1000;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-block-start: 0.25rem;
   max-height: 275px;
-  max-width: 320px;
-  width: max-content;
+  width: 100%;
   overflow-y: auto;
+  backdrop-filter: blur(8px);
 }
+
+
 
 .gps-dropdown__option {
   display: block;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   background: none;
   border: none;
   color: var(--color-text);
@@ -235,17 +267,20 @@ onUnmounted(() => {
   text-align: start;
   cursor: pointer;
   transition: var(--transition);
+  border-block-end: 1px solid transparent;
 }
 
 .gps-dropdown__option:hover {
   background: var(--color-accent);
   color: var(--color-white);
+  border-block-end-color: var(--color-accent);
 }
 
 .gps-dropdown__option--selected {
   background: var(--color-accent);
   color: var(--color-white);
   font-weight: var(--font-weight-semibold);
+  border-block-end-color: var(--color-accent);
 }
 
 .gps-dropdown__option:focus {
@@ -256,13 +291,13 @@ onUnmounted(() => {
 /* Transition animations */
 .gps-dropdown-enter-active,
 .gps-dropdown-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .gps-dropdown-enter-from,
 .gps-dropdown-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-4px) scale(0.98);
 }
 
 /* Scrollbar styling */

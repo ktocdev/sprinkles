@@ -30,6 +30,11 @@ function cellContent(cell, x, y) {
 }
 
 function moveGuineaPig() {
+  // Don't move if game is paused
+  if (cageStore.paused) {
+    return
+  }
+  
   // 65% chance to sit
   if (Math.random() < 0.65) {
     guineaPigStore.setSitting(true)
@@ -46,6 +51,13 @@ function moveGuineaPig() {
   if (moves.length > 0) {
     const next = moves[Math.floor(Math.random() * moves.length)]
     cageStore.setGuineaPigPos(next.x, next.y)
+    
+    // Check if guinea pig moved onto an item and interact with it
+    const itemAtNewPos = cageStore.items.find(item => item.x === next.x && item.y === next.y)
+    if (itemAtNewPos) {
+      cageStore.interactWithItem()
+    }
+    
     // Drop a poop if it's time
     if (shouldDropPoop.value) {
       cageStore.addPoop(next.x, next.y)
