@@ -1,14 +1,11 @@
 <template>
   <nav class="gps-icon-sidebar">
     <div class="gps-icon-sidebar__container">
-      <!-- Logo -->
       <div class="gps-icon-sidebar__logo">
         🐹
       </div>
       
-      <!-- Show navigation buttons only when user is logged in -->
       <template v-if="userStore.name">
-        <!-- Inventory -->
         <button 
           class="gps-icon-sidebar__button"
           @click="props.onInventory"
@@ -18,7 +15,6 @@
           📦
         </button>
 
-        <!-- Guinea Pig Info -->
         <button 
           class="gps-icon-sidebar__button"
           @click="props.onGuineaPig"
@@ -28,7 +24,6 @@
           📋
         </button>
 
-        <!-- Needs -->
         <button 
           class="gps-icon-sidebar__button"
           @click="props.onNeeds"
@@ -38,7 +33,6 @@
           📊
         </button>
 
-        <!-- Cage Data -->
         <button 
           class="gps-icon-sidebar__button"
           @click="props.onCageStatus"
@@ -48,7 +42,6 @@
           🏠
         </button>
 
-        <!-- Cage Interactions -->
         <button 
           class="gps-icon-sidebar__button"
           @click="props.onCageInteractions"
@@ -58,7 +51,6 @@
           🛠️
         </button>
 
-        <!-- Market -->
         <button 
           class="gps-icon-sidebar__button gps-icon-sidebar__button--primary"
           @click="props.onMarket"
@@ -68,7 +60,6 @@
           🛒
         </button>
 
-        <!-- Divider -->
         <div class="gps-icon-sidebar__divider"></div>
       </template>
     </div>
@@ -123,17 +114,18 @@ const userStore = useUserStore()
   gap: 0.5rem;
   width: 100%;
   align-items: center;
-  padding-block-start: 80px; /* Account for TopBar height */
 }
 
 .gps-icon-sidebar__logo {
   font-size: var(--font-size-3xl);
-  margin-block-end: 1rem;
+  margin-block-end: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-accent);
   font-weight: var(--font-weight-semibold);
+  text-align: center;
+  line-height: 1;
 }
 
 .gps-icon-sidebar__button {
@@ -214,7 +206,7 @@ const userStore = useUserStore()
   
   .gps-icon-sidebar__logo {
     font-size: var(--font-size-2xl);
-    margin-block-end: 0.75rem;
+    margin-block-end: 1.5rem;
   }
   
   .gps-icon-sidebar__button {
