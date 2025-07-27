@@ -6,6 +6,9 @@
           Guinea Pig Simulator - A text-based pet care game
         </p>
         <nav class="gps-footer__nav">
+          <button class="gps-footer__link" @click="showThemeExplorer">
+            🎨 Theme Explorer
+          </button>
           <button class="gps-footer__link" @click="showSpecimenLanding">
             Component Specimens
           </button>
@@ -18,22 +21,25 @@
 <script setup>
 import { defineEmits } from 'vue'
 
-const emit = defineEmits(['showSpecimenLanding'])
+const emit = defineEmits(['showSpecimenLanding', 'showThemeExplorer'])
 
 function showSpecimenLanding() {
   emit('showSpecimenLanding')
+}
+
+function showThemeExplorer() {
+  emit('showThemeExplorer')
 }
 </script>
 
 <style>
 .gps-footer {
-  width: 100%;
   background: var(--color-panel);
   border-block-start: 2px solid var(--color-accent);
   margin-block-start: auto;
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 60px;
   right: 0;
   z-index: 200;
 }
@@ -84,8 +90,6 @@ function showSpecimenLanding() {
 
 @media (max-width: 1250px) {
   .gps-footer__content-wrapper {
-    margin-inline-start: 60px;
-    width: calc(100% - 60px);
     max-width: 1200px;
     margin-inline: auto;
     padding: 1rem 1.5rem;
@@ -99,9 +103,11 @@ function showSpecimenLanding() {
 }
 
 @media (max-width: 768px) {
+  .gps-footer {
+    left: 50px;
+  }
+  
   .gps-footer__content-wrapper {
-    margin-inline-start: 60px;
-    width: calc(100% - 60px);
     margin-inline: auto;
     padding: 1rem;
   }

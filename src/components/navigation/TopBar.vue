@@ -1,93 +1,25 @@
 <script setup>
-import { ref } from 'vue'
-import ThemeToggle from '../shared/ThemeToggle.vue'
-import Dropdown from '../shared/Dropdown.vue'
+import Button from '../shared/Button.vue'
 
-const headerFont = ref('Inter')
-const bodyFont = ref('Inter')
-
-const headerFontOptions = [
-  { value: 'Inter', label: 'Inter' },
-  { value: 'Montserrat', label: 'Montserrat' },
-  { value: 'Poppins', label: 'Poppins' },
-  { value: 'Roboto', label: 'Roboto' }
-]
-
-const bodyFontOptions = [
-  { value: 'Inter', label: 'Inter' },
-  { value: 'Open Sans', label: 'Open Sans' },
-  { value: 'Lato', label: 'Lato' },
-  { value: 'Source Sans Pro', label: 'Source Sans Pro' }
-]
-
-const debugOptions = [
-  { value: 'reset', label: '🔄 Reset Game' },
-  { value: 'clear', label: '🧹 Clear Cage' }
-]
-
-const selectedDebugAction = ref(null)
-
-function updateHeaderFont(font) {
-  headerFont.value = font.value
-  document.documentElement.style.setProperty('--font-family-header', `'${font.value}', sans-serif`)
-}
-
-function updateBodyFont(font) {
-  bodyFont.value = font.value
-  document.documentElement.style.setProperty('--font-family-body', `'${font.value}', sans-serif`)
-}
-
-function handleDebugAction(action) {
-  if (action.value === 'reset') {
-    emit('resetGame')
-  } else if (action.value === 'clear') {
-    emit('clearCage')
-  }
-  selectedDebugAction.value = null
-}
-
-const emit = defineEmits(['resetGame', 'clearCage'])
+defineEmits(['showDebug'])
 </script>
 
 <template>
   <header class="gps-topbar">
     <div class="gps-topbar__container gps-container">
-      <!-- Logo -->
-      <div class="gps-topbar__logo">
-        🐹
-      </div>
       <!-- Title -->
       <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
       
-      <!-- Font Controls -->
-      <div class="gps-topbar__font-controls">
-        <Dropdown
-          v-model="headerFont"
-          :options="headerFontOptions"
-          placeholder="Header Font"
-          trigger-class="gps-topbar__font-dropdown"
-          @change="updateHeaderFont"
-        />
-        <Dropdown
-          v-model="bodyFont"
-          :options="bodyFontOptions"
-          placeholder="Body Font"
-          trigger-class="gps-topbar__font-dropdown"
-          @change="updateBodyFont"
-        />
-      </div>
-      
-      <!-- Debug Dropdown -->
-      <Dropdown
-        v-model="selectedDebugAction"
-        :options="debugOptions"
-        placeholder="🐛 Debug"
-        trigger-class="gps-topbar__debug-dropdown"
-        @change="handleDebugAction"
-      />
-      
-      <!-- Theme toggle -->
-      <ThemeToggle class="gps-topbar__theme-toggle gps-margin-start-auto" />
+      <!-- Debug Button -->
+      <Button 
+        type="flat"
+        size="compact"
+        @click="$emit('showDebug')"
+        class="gps-topbar__debug-button"
+        title="Debug Panel"
+      >
+        🐛 Debug
+      </Button>
     </div>
   </header>
 </template>
@@ -101,25 +33,19 @@ const emit = defineEmits(['resetGame', 'clearCage'])
   position: sticky;
   top: 0;
   z-index: 100;
+  margin-inline-start: 60px;
+  width: calc(100% - 60px);
 }
 
 .gps-topbar__container {
   padding: 0.5rem 0.75rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.25em;
   position: relative;
   container-type: inline-size;
   container-name: topbar;
-}
-
-.gps-topbar__logo {
-  font-size: var(--font-size-3xl);
-  margin-inline-end: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2rem;
 }
 
 .gps-topbar__title {
@@ -130,24 +56,9 @@ const emit = defineEmits(['resetGame', 'clearCage'])
   font-family: var(--font-family-header);
 }
 
-.gps-topbar__font-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-inline-start: auto;
-  margin-inline-end: 1rem;
-}
-
-.gps-topbar__font-dropdown {
-  min-width: 100px !important;
-  font-size: var(--font-size-sm) !important;
-  padding: 0.25rem 0.5rem !important;
-}
-
-.gps-topbar__debug-dropdown {
-  min-width: 80px !important;
-  font-size: var(--font-size-sm) !important;
-  padding: 0.25rem 0.5rem !important;
-  margin-inline-end: 1rem;
+.gps-topbar__debug-button {
+  font-size: var(--font-size-sm);
+  padding: 0.25rem 0.75rem;
 }
 
 /* Container query for larger containers */
@@ -165,27 +76,16 @@ const emit = defineEmits(['resetGame', 'clearCage'])
     gap: 0.5em;
   }
   
-  .gps-topbar__font-controls {
-    gap: 0.25rem;
-  }
-  
-  .gps-topbar__font-dropdown {
-    min-width: 80px !important;
-  }
-  
-  .gps-topbar__debug-dropdown {
-    min-width: 70px !important;
+  .gps-topbar__debug-button {
+    padding: 0.25rem 0.5rem;
   }
 }
 
-/* Hide font controls and debug on small screens */
-@container topbar (max-width: 599px) {
-  .gps-topbar__font-controls {
-    display: none;
-  }
-  
-  .gps-topbar__debug-dropdown {
-    display: none;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gps-topbar {
+    margin-inline-start: 50px;
+    width: calc(100% - 50px);
   }
 }
 </style> 

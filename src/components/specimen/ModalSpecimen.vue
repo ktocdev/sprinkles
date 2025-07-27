@@ -271,7 +271,6 @@ const formData = ref({
 })
 
 function saveFormData() {
-  console.log('Saving form data:', formData.value)
   showFormModal.value = false
   // Reset form
   formData.value = {
@@ -283,7 +282,6 @@ function saveFormData() {
 }
 
 function confirmAction() {
-  console.log('Action confirmed!')
   showConfirmationModal.value = false
 }
 </script>

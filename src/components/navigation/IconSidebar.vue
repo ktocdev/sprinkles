@@ -1,76 +1,74 @@
 <template>
   <nav class="gps-icon-sidebar">
     <div class="gps-icon-sidebar__container">
-      <!-- Inventory -->
-      <button 
-        class="gps-icon-sidebar__button"
-        @click="props.onInventory"
-        :class="{ 'gps-icon-sidebar__button--active': props.showInventory }"
-        title="Show Inventory"
-      >
-        📦
-      </button>
+      <div class="gps-icon-sidebar__logo">
+        🐹
+      </div>
+      
+      <template v-if="userStore.name">
+        <button 
+          class="gps-icon-sidebar__button"
+          @click="props.onInventory"
+          :class="{ 'gps-icon-sidebar__button--active': props.showInventory }"
+          title="Show Inventory"
+        >
+          📦
+        </button>
 
-      <!-- Guinea Pig Info -->
-      <button 
-        class="gps-icon-sidebar__button"
-        @click="props.onGuineaPig"
-        :class="{ 'gps-icon-sidebar__button--active': props.showGuineaPig }"
-        title="Show Guinea Pig Info"
-      >
-        📋
-      </button>
+        <button 
+          class="gps-icon-sidebar__button"
+          @click="props.onGuineaPig"
+          :class="{ 'gps-icon-sidebar__button--active': props.showGuineaPig }"
+          title="Show Guinea Pig Info"
+        >
+          📋
+        </button>
 
-      <!-- Needs -->
-      <button 
-        class="gps-icon-sidebar__button"
-        @click="props.onNeeds"
-        :class="{ 'gps-icon-sidebar__button--active': props.showNeeds }"
-        title="Show Needs"
-      >
-        📊
-      </button>
+        <button 
+          class="gps-icon-sidebar__button"
+          @click="props.onNeeds"
+          :class="{ 'gps-icon-sidebar__button--active': props.showNeeds }"
+          title="Show Needs"
+        >
+          📊
+        </button>
 
-      <!-- Cage Data -->
-      <button 
-        class="gps-icon-sidebar__button"
-        @click="props.onCageStatus"
-        :class="{ 'gps-icon-sidebar__button--active': props.showCageStatus }"
-        title="Show Cage Status"
-      >
-        🏠
-      </button>
+        <button 
+          class="gps-icon-sidebar__button"
+          @click="props.onCageStatus"
+          :class="{ 'gps-icon-sidebar__button--active': props.showCageStatus }"
+          title="Show Cage Status"
+        >
+          🏠
+        </button>
 
-      <!-- Cage Interactions -->
-      <button 
-        class="gps-icon-sidebar__button"
-        @click="props.onCageInteractions"
-        :class="{ 'gps-icon-sidebar__button--active': props.showCageInteractions }"
-        title="Cage Interactions"
-      >
-        🛠️
-      </button>
+        <button 
+          class="gps-icon-sidebar__button"
+          @click="props.onCageInteractions"
+          :class="{ 'gps-icon-sidebar__button--active': props.showCageInteractions }"
+          title="Cage Interactions"
+        >
+          🛠️
+        </button>
 
-      <!-- Market -->
-      <button 
-        class="gps-icon-sidebar__button gps-icon-sidebar__button--primary"
-        @click="props.onMarket"
-        :class="{ 'gps-icon-sidebar__button--active': props.showMarket }"
-        title="Show Market"
-      >
-        🛒
-      </button>
+        <button 
+          class="gps-icon-sidebar__button gps-icon-sidebar__button--primary"
+          @click="props.onMarket"
+          :class="{ 'gps-icon-sidebar__button--active': props.showMarket }"
+          title="Show Market"
+        >
+          🛒
+        </button>
 
-      <!-- Divider -->
-      <div class="gps-icon-sidebar__divider"></div>
-
-
+        <div class="gps-icon-sidebar__divider"></div>
+      </template>
     </div>
   </nav>
 </template>
 
 <script setup>
 import { defineProps } from 'vue'
+import { useUserStore } from '../../stores/user'
 
 const props = defineProps({
   onInventory: Function,
@@ -86,6 +84,8 @@ const props = defineProps({
   showCageInteractions: Boolean,
   showMarket: Boolean
 })
+
+const userStore = useUserStore()
 </script>
 
 <style>
@@ -93,13 +93,19 @@ const props = defineProps({
   width: 60px;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
+  border-radius: 0;
+  border-inline-end: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem 0;
   flex-shrink: 0;
-  height: fit-content;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--box-shadow);
 }
 
 .gps-icon-sidebar__container {
@@ -108,6 +114,18 @@ const props = defineProps({
   gap: 0.5rem;
   width: 100%;
   align-items: center;
+}
+
+.gps-icon-sidebar__logo {
+  font-size: var(--font-size-3xl);
+  margin-block-end: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  line-height: 1;
 }
 
 .gps-icon-sidebar__button {
@@ -180,4 +198,25 @@ const props = defineProps({
   opacity: 1;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gps-icon-sidebar {
+    width: 50px;
+  }
+  
+  .gps-icon-sidebar__logo {
+    font-size: var(--font-size-2xl);
+    margin-block-end: 1.5rem;
+  }
+  
+  .gps-icon-sidebar__button {
+    width: 35px;
+    height: 35px;
+    font-size: 1em;
+  }
+  
+  .gps-icon-sidebar__container {
+    padding-block-start: 70px;
+  }
+}
 </style> 
