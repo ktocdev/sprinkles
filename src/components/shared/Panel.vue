@@ -51,7 +51,7 @@ function handleEscapeKey(event) {
   </Teleport>
 </template>
 
-<style scoped>
+<style>
 .gps-panel {
   position: fixed;
   inset: 0;
@@ -74,6 +74,7 @@ function handleEscapeKey(event) {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .gps-panel__header {
@@ -115,6 +116,7 @@ function handleEscapeKey(event) {
 .gps-panel__body {
   padding: 1.5rem;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
 }
 
@@ -135,6 +137,59 @@ function handleEscapeKey(event) {
   
   .gps-panel__body {
     padding: 1rem;
+  }
+  
+  .gps-panel-content {
+    padding: 0 0.5rem 1rem;
+  }
+}
+
+.gps-panel-content {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 1rem 1rem;
+  box-sizing: border-box;
+}
+
+.gps-panel-section {
+  margin-block-end: 3rem;
+  padding: 2rem;
+  background: var(--color-panel);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+}
+
+.gps-panel-section:last-child {
+  margin-block-end: 0;
+}
+
+.gps-panel-section-title {
+  font-size: var(--font-size-3xl);
+  color: var(--color-accent);
+  margin-block-end: 0.5rem;
+  font-family: var(--font-family-header);
+}
+
+.gps-panel-controls {
+  display: flex;
+  gap: 1rem;
+  margin-block-end: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .gps-panel-content {
+    padding: 1rem;
+  }
+  
+  .gps-panel-section {
+    padding: 1.5rem;
+    margin-block-end: 2rem;
+  }
+  
+  .gps-panel-controls {
+    flex-direction: column;
   }
 }
 

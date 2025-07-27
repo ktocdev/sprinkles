@@ -78,6 +78,13 @@ const flatGrid = computed(() => {
   return grid.value.flatMap((row, y) => row.map((cell, x) => ({ cell, x, y })))
 })
 
+const waterBottleEmoji = computed(() => {
+  const waterLevel = cageStore.waterLevel
+  if (waterLevel === 0) return '🥤' // Empty cup
+  if (waterLevel <= 25) return '🥛' // Low water (milk glass)
+  return '💧' // Full water bottle
+})
+
 onMounted(() => {
   // Place guinea pig at a random position
   const x = Math.floor(Math.random() * width.value)
@@ -96,28 +103,41 @@ onUnmounted(() => {
 <template>
   <div class="gps-cage">
     <div class="gps-cage__layout">
-      <div class="gps-cage__grid-wrapper">
-        <div
-          class="gps-cage__grid"
-          :style="{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${width}, 1.2em)`,
-            gridTemplateRows: `repeat(${height}, 1.2em)`
-          }"
-        >
+      <div class="gps-cage__main-content">
+        <div class="gps-cage__grid-wrapper">
           <div
-            v-for="item in flatGrid"
-            :key="item.x + '-' + item.y"
-            class="gps-cage__cell"
-            :class="{
-              'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
-              'gps-cage__cell--poop': item.cell === 'poop',
-              'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name
+            class="gps-cage__grid"
+            :style="{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${width}, 1.2em)`,
+              gridTemplateRows: `repeat(${height}, 1.2em)`
             }"
-            @click="handleCellClick(item.cell, item.x, item.y)"
           >
-            {{ cellContent(item.cell, item.x, item.y) }}
+            <div
+              v-for="item in flatGrid"
+              :key="item.x + '-' + item.y"
+              class="gps-cage__cell"
+              :class="{
+                'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
+                'gps-cage__cell--poop': item.cell === 'poop',
+                'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name,
+                'gps-cage__cell--water': item.x === width - 1 && item.y === 0
+              }"
+              @click="handleCellClick(item.cell, item.x, item.y)"
+            >
+              <span v-if="item.x === width - 1 && item.y === 0" class="gps-cage__water-emoji">
+                {{ waterBottleEmoji }}
+              </span>
+              <span v-else>
+                {{ cellContent(item.cell, item.x, item.y) }}
+              </span>
+            </div>
           </div>
+        </div>
+        
+        <div class="gps-cage__status">
+          <div v-if="guineaPigStore.sitting" class="gps-cage__status-text">The guinea pig is sitting.</div>
+          <div v-else class="gps-cage__status-text">The guinea pig is moving...</div>
         </div>
       </div>
       
@@ -139,6 +159,12 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.gps-cage__main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .gps-cage__sidebar {
@@ -186,6 +212,22 @@ onUnmounted(() => {
   justify-content: center;
 }
 
+.gps-cage__water-emoji {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.gps-cage__status {
+  margin-block-start: 1rem;
+  text-align: center;
+}
+
+.gps-cage__status-text {
+  font-style: italic;
+  color: var(--color-text);
+  opacity: 0.8;
+}
+
 /* Container query for medium containers */
 @container cage (min-width: 400px) {
   
@@ -202,6 +244,11 @@ onUnmounted(() => {
     flex-direction: row;
     align-items: flex-start;
     gap: 2em;
+  }
+  
+  .gps-cage__main-content {
+    flex: 1;
+    align-items: center;
   }
   
   .gps-cage__sidebar {

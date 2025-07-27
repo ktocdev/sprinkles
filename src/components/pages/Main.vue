@@ -29,10 +29,6 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
     <div class="gps-main__content-grid gps-flex--justify-center">
       <div class="gps-main__content-cage gps-container">
         <Cage class="gps-main__cage" />
-        <div class="gps-main__status">
-          <div v-if="guineaPigStore.sitting" class="gps-main__status-text">The guinea pig is sitting.</div>
-          <div v-else class="gps-main__status-text">The guinea pig is moving...</div>
-        </div>
       </div>
     </div>
 
@@ -90,16 +86,7 @@ const emit = defineEmits(['closeInventory', 'closeGuineaPig', 'closeNeeds', 'clo
   box-sizing: border-box;
 }
 
-.gps-main__status {
-  margin-block-start: 1rem;
-  text-align: center;
-}
 
-.gps-main__status-text {
-  font-style: italic;
-  color: var(--color-text);
-  opacity: 0.8;
-}
 
 
 </style> 

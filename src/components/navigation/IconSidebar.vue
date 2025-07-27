@@ -36,7 +36,7 @@
         class="gps-icon-sidebar__button"
         @click="props.onCageStatus"
         :class="{ 'gps-icon-sidebar__button--active': props.showCageStatus }"
-        title="Show Cage Data"
+        title="Show Cage Status"
       >
         🏠
       </button>
