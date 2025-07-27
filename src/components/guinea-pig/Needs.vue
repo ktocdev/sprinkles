@@ -1,24 +1,21 @@
 <template>
-  <div class="gps-needs">
-    <div class="gps-needs__container gps-status-grid gps-panel-content">
+  <div class="gps-needs gps-panel-content">
+    <div class="gps-needs__container gps-panel-section">
       <div v-if="Object.keys(guineaPigStore.needs).length === 0" class="gps-needs__empty">
         No needs data available
       </div>
-      <StatusBar 
+      <StatusGrid 
         v-else
-        v-for="(value, need) in guineaPigStore.needs" 
-        :key="need"
-        :label="need.charAt(0).toUpperCase() + need.slice(1)"
-        :value="value"
-        :color="getNeedColor(need)"
+        :items="statusItems"
       />
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
-import StatusBar from '../shared/StatusBar.vue'
+import StatusGrid from '../shared/StatusGrid.vue'
 
 const guineaPigStore = useGuineaPigStore()
 
@@ -31,11 +28,20 @@ const getNeedColor = (need) => {
     chew: '#f39c12',        // Orange
     enrichment: '#9b59b6',  // Purple
     love: '#e91e63',        // Pink
-    cleanliness: '#27ae60', // Green
-    nails: '#8e44ad'        // Purple (darker shade)
+    nails: '#16a085'        // Teal
   }
   return colors[need] || 'var(--color-accent)'
 }
+
+// Transform needs data for StatusGrid
+const statusItems = computed(() => {
+  return Object.entries(guineaPigStore.needs).map(([need, value]) => ({
+    key: need,
+    label: need.charAt(0).toUpperCase() + need.slice(1),
+    value: value,
+    color: getNeedColor(need)
+  }))
+})
 </script>
 
 <style>

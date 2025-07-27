@@ -1,20 +1,22 @@
 <template>
   <div class="gps-inventory">
     <div class="gps-inventory__container gps-panel-content">
-      <div v-if="Object.keys(inventoryStore.items).length === 0">
-        <p class="gps-inventory__empty">Your inventory is empty.</p>
-      </div>
-      <div v-else>
-        <ul class="gps-inventory__list">
-          <li 
-            v-for="(qty, item) in inventoryStore.items" 
-            :key="item"
-            class="gps-inventory__item"
-          >
-            <span class="gps-inventory__item-name">{{ formatItemName(item) }}</span>
-            <span class="gps-inventory__item-quantity">{{ qty }}</span>
-          </li>
-        </ul>
+      <div class="gps-inventory__content gps-panel-section">
+        <div v-if="Object.keys(inventoryStore.items).length === 0">
+          <p class="gps-inventory__empty">Your inventory is empty.</p>
+        </div>
+        <div v-else>
+          <ul class="gps-inventory__list">
+            <li 
+              v-for="(qty, item) in inventoryStore.items" 
+              :key="item"
+              class="gps-inventory__item"
+            >
+              <span class="gps-inventory__item-name">{{ formatItemName(item) }}</span>
+              <span class="gps-inventory__item-quantity">{{ qty }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

@@ -1,25 +1,39 @@
 <template>
-  <div class="gps-cage-status">
-    <div class="gps-cage-status__container gps-status-grid--two-columns gps-panel-content">
-      <StatusBar 
-        label="Bedding Freshness" 
-        :value="cageStore.beddingFreshness" 
-        color="var(--color-accent)"
-      />
-      <StatusBar 
-        label="Water Level" 
-        :value="cageStore.waterLevel" 
-        color="#4a90e2"
-      />
+  <div class="gps-cage-status gps-panel-content">
+    <div class="gps-cage-status__container gps-panel-section">
+      <StatusGrid :items="statusItems" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useCageStore } from '../../stores/cage'
-import StatusBar from '../shared/StatusBar.vue'
+import StatusGrid from '../shared/StatusGrid.vue'
 
 const cageStore = useCageStore()
+
+// Transform cage data for StatusGrid
+const statusItems = computed(() => [
+  {
+    key: 'bedding',
+    label: 'Bedding',
+    value: cageStore.beddingFreshness,
+    color: 'var(--color-accent)'
+  },
+  {
+    key: 'water',
+    label: 'Water',
+    value: cageStore.waterLevel,
+    color: '#4a90e2'
+  },
+  {
+    key: 'habitat',
+    label: 'Habitat',
+    value: cageStore.habitatValue,
+    color: '#27ae60'
+  }
+])
 </script>
 
 <style>

@@ -1,13 +1,13 @@
 <template>
   <div class="gps-status-bar">
-    <span class="gps-status-bar__label">{{ label }}:</span>
+    <span v-if="showLabel" class="gps-status-bar__label">{{ label }}:</span>
     <progress 
       class="gps-status-bar__progress" 
       :value="value" 
       max="100"
       :style="{ '--progress-color': color }"
     ></progress>
-    <span class="gps-status-bar__value">{{ value }}</span>
+    <span v-if="showValue" class="gps-status-bar__value">{{ value }}</span>
   </div>
 </template>
 
@@ -17,7 +17,7 @@ import { defineProps } from 'vue'
 const props = defineProps({
   label: {
     type: String,
-    required: true
+    default: ''
   },
   value: {
     type: Number,
@@ -27,6 +27,14 @@ const props = defineProps({
   color: {
     type: String,
     default: 'var(--color-accent)'
+  },
+  showLabel: {
+    type: Boolean,
+    default: true
+  },
+  showValue: {
+    type: Boolean,
+    default: true
   }
 })
 </script>
