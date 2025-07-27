@@ -63,6 +63,7 @@ function resetGame() {
     showCageStatus.value = false
     showCageInteractions.value = false
     showMarket.value = false
+    showDebugPanel.value = false
     // Reset name input
     nameInput.value = ''
   }
@@ -134,7 +135,10 @@ function handleCageInteraction(action) {
     case 'refreshWater':
       cageStore.refreshWater()
       break
-    case 'cleanCage':
+    case 'refreshBedding':
+      cageStore.refreshBedding()
+      break
+    case 'cleanPoop':
       cageStore.cleanCage()
       break
     case 'manageItems':
@@ -157,9 +161,13 @@ function toggleMarket() {
 }
 
 function clearCage() {
-  if (window.confirm('Are you sure you want to clear the cage? This cannot be undone.')) {
-    cageStore.$reset()
-    localStorage.removeItem('cage')
+  cageStore.$reset()
+  localStorage.removeItem('cage')
+}
+
+function resetInventory() {
+  if (window.confirm('Are you sure you want to reset the inventory to default values? This will restore all items including large beds and houses.')) {
+    inventoryStore.resetToDefaults()
   }
 }
 
@@ -260,10 +268,17 @@ function toggleDebugPanel() {
           class: 'gps-sidebar-subnav__button--primary'
         },
         {
-          id: 'cleanCage',
+          id: 'refreshBedding',
+          icon: '🛏️',
+          title: 'Refresh Bedding',
+          action: 'refreshBedding',
+          class: 'gps-sidebar-subnav__button--primary'
+        },
+        {
+          id: 'cleanPoop',
           icon: '🧹',
-          title: 'Clean Cage',
-          action: 'cleanCage',
+          title: 'Clean Poop',
+          action: 'cleanPoop',
           class: 'gps-sidebar-subnav__button--warning'
         },
         {
@@ -452,6 +467,7 @@ function toggleDebugPanel() {
       <DebugPanel 
         @resetGame="resetGame"
         @clearCage="clearCage"
+        @resetInventory="resetInventory"
       />
     </Panel>
   </div>

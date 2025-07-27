@@ -62,6 +62,8 @@
           />
         </div>
       </div>
+
+
   </SpecimenPage>
 </template>
 
@@ -163,6 +165,8 @@ function handleFruitChange(option) {
   background: var(--color-accent-hover) !important;
   border-color: var(--color-accent-hover) !important;
 }
+
+
 
 /* Responsive */
 @media (max-width: 768px) {

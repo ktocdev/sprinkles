@@ -2,13 +2,66 @@
 import { computed, ref, watch } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
+import { useMarketStore } from '../../stores/market'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
+const marketStore = useMarketStore()
 
 const shouldBounce = ref(false)
 
+// Helper function to format item names
+const formatItemName = (itemName) => {
+  return itemName
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+// Get the item at the guinea pig's current position
+const currentItem = computed(() => {
+  const { x, y } = cageStore.guineaPigPos
+  return cageStore.items.find(item => item.x === x && item.y === y)
+})
+
+// Check if guinea pig is on poop
+const isOnPoop = computed(() => {
+  const { x, y } = cageStore.guineaPigPos
+  return cageStore.poop.some(p => p.x === x && p.y === y)
+})
+
+// Check if guinea pig is on fresh poop (just created)
+const isOnFreshPoop = computed(() => {
+  const { x, y } = cageStore.guineaPigPos
+  const poopAtPosition = cageStore.poop.find(p => p.x === x && p.y === y)
+  
+  if (!poopAtPosition) return false
+  
+  const poopAge = Date.now() - poopAtPosition.timestamp
+  return poopAge < 2000 // 2 seconds
+})
+
 const statusText = computed(() => {
+  // Check if guinea pig is on fresh poop
+  if (isOnFreshPoop.value) {
+    return 'The guinea pig just made a poop!'
+  }
+  
+  // Check if guinea pig is on old poop
+  if (isOnPoop.value) {
+    return 'The guinea pig stepped on poop!'
+  }
+  
+  // Check if guinea pig is on an item
+  if (currentItem.value) {
+    const itemData = marketStore.getItemData(currentItem.value.name)
+    if (itemData && itemData.actionWord) {
+      const itemName = formatItemName(currentItem.value.name)
+      return `The guinea pig is ${itemData.actionWord} the ${itemName}.`
+    }
+  }
+  
+  // Default status based on sitting/moving
   if (guineaPigStore.sitting) {
     return 'The guinea pig is sitting.'
   } else {
@@ -17,6 +70,30 @@ const statusText = computed(() => {
 })
 
 const statusEmoji = computed(() => {
+  // Check if guinea pig is on fresh poop
+  if (isOnFreshPoop.value) {
+    return '💩'
+  }
+  
+  // Check if guinea pig is on old poop
+  if (isOnPoop.value) {
+    return '💩'
+  }
+  
+  // Check if guinea pig is on an item
+  if (currentItem.value) {
+    const itemData = marketStore.getItemData(currentItem.value.name)
+    if (itemData) {
+      // Return appropriate emoji based on item type
+      const needType = itemData.needType
+      if (needType === 'hunger') return '🥕'
+      if (needType === 'chew') return '🦷'
+      if (needType === 'enrichment') return '🎾'
+      if (needType === 'shelter') return '🏠'
+    }
+  }
+  
+  // Default emoji based on sitting/moving
   if (guineaPigStore.sitting) {
     return '🛋️'
   } else {
@@ -25,14 +102,14 @@ const statusEmoji = computed(() => {
 })
 
 // Watch for status changes and trigger bounce animation
-watch(() => guineaPigStore.sitting, (newValue, oldValue) => {
+watch(() => [guineaPigStore.sitting, currentItem.value, isOnPoop.value, isOnFreshPoop.value], (newValue, oldValue) => {
   if (oldValue !== undefined) { // Don't trigger on initial mount
     shouldBounce.value = true
     setTimeout(() => {
       shouldBounce.value = false
     }, 2000) // Reset after animation duration
   }
-})
+}, { deep: true })
 </script>
 
 <template>

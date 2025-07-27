@@ -28,7 +28,8 @@ const getNeedColor = (need) => {
     chew: '#f39c12',        // Orange
     enrichment: '#9b59b6',  // Purple
     love: '#e91e63',        // Pink
-    nails: '#16a085'        // Teal
+    nails: '#16a085',       // Teal
+    hygiene: '#2ecc71'      // Green
   }
   return colors[need] || 'var(--color-accent)'
 }

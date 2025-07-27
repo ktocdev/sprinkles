@@ -20,6 +20,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       enrichment: 100,
       love: 100,
       nails: 100,
+      hygiene: 100,
     },
     sitting: true
   }),

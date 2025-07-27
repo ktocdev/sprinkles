@@ -30,6 +30,20 @@
               Remove all items from the cage and reset cage state while keeping other game data.
             </p>
           </div>
+          
+          <div class="gps-debug-panel__action-item">
+            <Button 
+              type="secondary"
+              size="large"
+              @click="handleResetInventory"
+              class="gps-debug-panel__action-button"
+            >
+              📦 Reset Inventory
+            </Button>
+            <p class="gps-debug-panel__action-description">
+              Reset inventory to default values, restoring all items including large beds and houses.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -39,19 +53,23 @@
 <script setup>
 import Button from './Button.vue'
 
-const emit = defineEmits(['resetGame', 'clearCage'])
+const emit = defineEmits(['resetGame', 'clearCage', 'resetInventory'])
 
 function handleResetGame() {
-  const confirmed = confirm('Are you sure you want to reset your game? This cannot be undone.')
-  if (confirmed) {
-    emit('resetGame')
-  }
+  emit('resetGame')
 }
 
 function handleClearCage() {
   const confirmed = confirm('Are you sure you want to clear the cage? This cannot be undone.')
   if (confirmed) {
     emit('clearCage')
+  }
+}
+
+function handleResetInventory() {
+  const confirmed = confirm('Are you sure you want to reset the inventory to default values? This will restore all items including large beds and houses.')
+  if (confirmed) {
+    emit('resetInventory')
   }
 }
 </script>
