@@ -22,6 +22,8 @@ import InputSpecimen from './components/specimen/InputSpecimen.vue'
 import FormGroupSpecimen from './components/specimen/FormGroupSpecimen.vue'
 import ToggleSpecimen from './components/specimen/ToggleSpecimen.vue'
 import Market from './components/market/Market.vue'
+import ThemeExplorer from './components/shared/ThemeExplorer.vue'
+import DebugPanel from './components/shared/DebugPanel.vue'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
@@ -81,6 +83,8 @@ const showStatusBarSpecimen = ref(false)
 const showInputSpecimen = ref(false)
 const showFormGroupSpecimen = ref(false)
 const showToggleSpecimen = ref(false)
+const showThemeExplorer = ref(false)
+const showDebugPanel = ref(false)
 
 function toggleInventory() {
   if (!showInventory.value) {
@@ -231,6 +235,14 @@ function toggleToggleSpecimen() {
   showFormGroupSpecimen.value = false
   showToggleSpecimen.value = !showToggleSpecimen.value
 }
+
+function toggleThemeExplorer() {
+  showThemeExplorer.value = !showThemeExplorer.value
+}
+
+function toggleDebugPanel() {
+  showDebugPanel.value = !showDebugPanel.value
+}
 </script>
 
 <template>
@@ -266,45 +278,48 @@ function toggleToggleSpecimen() {
       @action="handleCageInteraction"
     />
 
-          <TopBar 
-        v-if="userStore.name" 
-        @resetGame="resetGame"
-        @clearCage="clearCage"
-      />
+    <TopBar 
+      v-if="userStore.name" 
+      @resetGame="resetGame"
+      @clearCage="clearCage"
+      @showDebug="toggleDebugPanel"
+    />
 
-    <div class="gps-app__content">
-                     <IconSidebar
-                 v-if="userStore.name"
-                 :onInventory="toggleInventory"
-                 :onGuineaPig="toggleGuineaPig"
-                 :onNeeds="toggleNeeds"
-                 :onCageStatus="toggleCageStatus"
-                 :onCageInteractions="toggleCageInteractions"
-                 :onMarket="toggleMarket"
-                 :showInventory="showInventory"
-                 :showGuineaPig="showGuineaPig"
-                 :showNeeds="showNeeds"
-                 :showCageStatus="showCageStatus"
-                 :showCageInteractions="showCageInteractions"
-                 :showMarket="showMarket"
-               />
-      <div class="gps-app__content-layout">
-        <div class="gps-app__content-main">
-          <Main 
-            v-if="userStore.name"
-            :userStore="userStore" 
-            :inventoryStore="inventoryStore" 
-            :showInventory="showInventory"
-            :showGuineaPig="showGuineaPig"
-            :showNeeds="showNeeds"
-            :showCageStatus="showCageStatus"
-            :showMarket="showMarket"
-            @closeInventory="showInventory = false"
-            @closeGuineaPig="showGuineaPig = false"
-            @closeNeeds="showNeeds = false"
-            @closeCageStatus="showCageStatus = false"
-            @closeMarket="showMarket = false"
-          />
+    <div class="gps-app__main-layout">
+      <IconSidebar
+        :onInventory="toggleInventory"
+        :onGuineaPig="toggleGuineaPig"
+        :onNeeds="toggleNeeds"
+        :onCageStatus="toggleCageStatus"
+        :onCageInteractions="toggleCageInteractions"
+        :onMarket="toggleMarket"
+        :showInventory="showInventory"
+        :showGuineaPig="showGuineaPig"
+        :showNeeds="showNeeds"
+        :showCageStatus="showCageStatus"
+        :showCageInteractions="showCageInteractions"
+        :showMarket="showMarket"
+      />
+      
+      <div class="gps-app__content-area">
+        <div class="gps-app__content-layout">
+          <div class="gps-app__content-main">
+            <Main 
+              v-if="userStore.name"
+              :userStore="userStore" 
+              :inventoryStore="inventoryStore" 
+              :showInventory="showInventory"
+              :showGuineaPig="showGuineaPig"
+              :showNeeds="showNeeds"
+              :showCageStatus="showCageStatus"
+              :showMarket="showMarket"
+              @closeInventory="showInventory = false"
+              @closeGuineaPig="showGuineaPig = false"
+              @closeNeeds="showNeeds = false"
+              @closeCageStatus="showCageStatus = false"
+              @closeMarket="showMarket = false"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -313,6 +328,7 @@ function toggleToggleSpecimen() {
       <Footer 
         v-if="userStore.name"
         @showSpecimenLanding="toggleSpecimenLanding"
+        @showThemeExplorer="toggleThemeExplorer"
       />
     </div>
 
@@ -417,6 +433,27 @@ function toggleToggleSpecimen() {
     >
       <ToggleSpecimen @backToLanding="toggleSpecimenLanding" />
     </Panel>
+
+    <!-- Theme Explorer Panel -->
+    <Panel 
+      :isOpen="showThemeExplorer" 
+      title="🎨 Theme Explorer" 
+      @close="showThemeExplorer = false"
+    >
+      <ThemeExplorer />
+    </Panel>
+
+    <!-- Debug Panel -->
+    <Panel 
+      :isOpen="showDebugPanel" 
+      title="🐛 Debug Panel" 
+      @close="showDebugPanel = false"
+    >
+      <DebugPanel 
+        @resetGame="resetGame"
+        @clearCage="clearCage"
+      />
+    </Panel>
   </div>
 </template>
 
@@ -430,18 +467,27 @@ function toggleToggleSpecimen() {
   flex-direction: column;
 }
 
-.gps-app__content {
+.gps-app__main-layout {
   display: flex;
-  gap: 3rem;
-  max-width: 1400px; 
-  margin-inline: auto; 
+  flex: 1;
+  min-height: 0;
+  margin-inline-start: 60px;
+  width: calc(100% - 60px);
+}
+
+.gps-app__content-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
   padding: 2rem 1rem;
+  min-width: 0;
+  padding-block-start: 80px; /* Account for TopBar height */
+  padding-block-end: 80px; /* Account for Footer height */
 }
 
 .gps-app__content-layout {
   display: flex;
   max-width: 1200px;
-  margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
   gap: 2rem;
@@ -459,17 +505,21 @@ function toggleToggleSpecimen() {
 
 /* Responsive breakpoints */
 @media (max-width: 1250px) {
-  .gps-app__content {
-    max-width: 1200px;
-    margin-inline: auto; /* Center the content horizontally */
+  .gps-app__content-area {
     padding: 2rem 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .gps-app__content {
-    margin-inline: auto; /* Center the content horizontally */
+  .gps-app__main-layout {
+    margin-inline-start: 50px;
+    width: calc(100% - 50px);
+  }
+  
+  .gps-app__content-area {
     padding: 1rem 0.75rem;
+    padding-block-start: 70px;
+    padding-block-end: 70px;
   }
   
   .gps-app__content-layout {

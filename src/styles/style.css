@@ -58,18 +58,6 @@ button:focus-visible {
   min-height: 100vh;
 }
 
-
-
-.gps-app, .gps-main__inventory-menu, .gps-main__guinea-pig-panel, .gps-main__needs-panel, .gps-cage__sidebar, .gps-cage__grid-wrapper {
-  background: var(--color-panel);
-  color: var(--color-text);
-  border-color: var(--color-border);
-  box-shadow: var(--box-shadow);
-  border-radius: var(--border-radius);
-}
-
-
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -80,9 +68,5 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
-  }
-  
-  .gps-cage__grid-wrapper {
-    box-shadow: none;
   }
 } 

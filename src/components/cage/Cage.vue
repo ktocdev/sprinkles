@@ -67,8 +67,8 @@ function handleCellClick(cell, x, y) {
   if (cell === 'poop') {
     cageStore.removePoop(x, y)
   } else if (cell && typeof cell === 'object' && cell.name) {
-    // Handle item click - could show item info or actions
-    console.log('Clicked on item:', cell.name, 'at position', x, y)
+    // Handle item click
+    // This could be expanded to show item details or allow interaction
   }
 }
 

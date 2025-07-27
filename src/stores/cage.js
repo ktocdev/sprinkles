@@ -100,7 +100,8 @@ export const useCageStore = defineStore('cage', {
       // Check if position is available
       const isOccupied = this.items.some(i => i.x === x && i.y === y) ||
                         (this.guineaPigPos.x === x && this.guineaPigPos.y === y) ||
-                        this.poop.some(p => p.x === x && p.y === y)
+                        this.poop.some(p => p.x === x && p.y === y) ||
+                        (x === this.size.width - 1 && y === 0) // Water bottle position
       
       if (isOccupied) {
         return false
@@ -127,7 +128,8 @@ export const useCageStore = defineStore('cage', {
       // Check if new position is available
       const isOccupied = this.items.some(i => i.id !== itemId && i.x === newX && i.y === newY) ||
                         (this.guineaPigPos.x === newX && this.guineaPigPos.y === newY) ||
-                        this.poop.some(p => p.x === newX && p.y === newY)
+                        this.poop.some(p => p.x === newX && p.y === newY) ||
+                        (newX === this.size.width - 1 && newY === 0) // Water bottle position
       
       if (isOccupied) {
         return false

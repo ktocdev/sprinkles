@@ -156,7 +156,7 @@
           type="number" 
           :min="1" 
           :max="cageStore.size.width"
-          placeholder="Enter X position (1-24)"
+          :placeholder="`Enter X position (1-${cageStore.size.width})`"
           icon="📍"
         />
       </FormGroup>
@@ -167,7 +167,7 @@
           type="number" 
           :min="1" 
           :max="cageStore.size.height"
-          placeholder="Enter Y position (1-16)"
+          :placeholder="`Enter Y position (1-${cageStore.size.height})`"
           icon="📍"
         />
       </FormGroup>
@@ -203,7 +203,7 @@
           type="number" 
           :min="1" 
           :max="cageStore.size.width"
-          placeholder="Enter X position (1-24)"
+          :placeholder="`Enter X position (1-${cageStore.size.width})`"
           icon="📍"
         />
       </FormGroup>
@@ -214,7 +214,7 @@
           type="number" 
           :min="1" 
           :max="cageStore.size.height"
-          placeholder="Enter Y position (1-16)"
+          :placeholder="`Enter Y position (1-${cageStore.size.height})`"
           icon="📍"
         />
       </FormGroup>
@@ -298,7 +298,6 @@ const availableConsumables = computed(() => {
       consumables[item] = inventoryStore.items[item]
     }
   })
-  console.log('Available consumables:', consumables)
   return consumables
 })
 
@@ -309,7 +308,6 @@ const availablePermanents = computed(() => {
       permanents[item] = inventoryStore.items[item]
     }
   })
-  console.log('Available permanents:', permanents)
   return permanents
 })
 
@@ -350,12 +348,39 @@ function formatItemName(itemName) {
 function addItemToCage() {
   if (!selectedItem.value || itemX.value === null || itemY.value === null) return
   
+  // Validate coordinates are within bounds
+  if (itemX.value < 1 || itemX.value > cageStore.size.width || 
+      itemY.value < 1 || itemY.value > cageStore.size.height) {
+    alert(`Please enter coordinates between 1 and ${cageStore.size.width} for X, and 1 and ${cageStore.size.height} for Y.`)
+    return
+  }
+  
   const itemDef = itemDefinitions[selectedItem.value]
   if (!itemDef) return
   
   // Convert from 1-based to 0-based coordinates
   const x = itemX.value - 1
   const y = itemY.value - 1
+  
+  // Check what's at the position before attempting to add
+  const isOccupiedByItem = cageStore.items.some(i => i.x === x && i.y === y)
+  const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
+  const isOccupiedByPoop = cageStore.poop.some(p => p.x === x && p.y === y)
+  const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
+  
+  if (isOccupiedByItem) {
+    alert('Position is occupied by another item! Please choose a different location.')
+    return
+  } else if (isOccupiedByGuineaPig) {
+    alert('Position is occupied by the guinea pig! Please choose a different location.')
+    return
+  } else if (isOccupiedByPoop) {
+    alert('Position is occupied by poop! Please clean the cage or choose a different location.')
+    return
+  } else if (isWaterBottlePosition) {
+    alert('Cannot place items on the water bottle position! Please choose a different location.')
+    return
+  }
   
   const success = cageStore.addItem({
     name: selectedItem.value,
@@ -385,9 +410,36 @@ function moveItem(item) {
 function confirmMoveItem() {
   if (!itemToMove.value || moveX.value === null || moveY.value === null) return
   
+  // Validate coordinates are within bounds
+  if (moveX.value < 1 || moveX.value > cageStore.size.width || 
+      moveY.value < 1 || moveY.value > cageStore.size.height) {
+    alert(`Please enter coordinates between 1 and ${cageStore.size.width} for X, and 1 and ${cageStore.size.height} for Y.`)
+    return
+  }
+  
   // Convert from 1-based to 0-based coordinates
   const x = moveX.value - 1
   const y = moveY.value - 1
+  
+  // Check what's at the position before attempting to move
+  const isOccupiedByItem = cageStore.items.some(i => i.id !== itemToMove.value.id && i.x === x && i.y === y)
+  const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
+  const isOccupiedByPoop = cageStore.poop.some(p => p.x === x && p.y === y)
+  const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
+  
+  if (isOccupiedByItem) {
+    alert('Position is occupied by another item! Please choose a different location.')
+    return
+  } else if (isOccupiedByGuineaPig) {
+    alert('Position is occupied by the guinea pig! Please choose a different location.')
+    return
+  } else if (isOccupiedByPoop) {
+    alert('Position is occupied by poop! Please clean the cage or choose a different location.')
+    return
+  } else if (isWaterBottlePosition) {
+    alert('Cannot move items to the water bottle position! Please choose a different location.')
+    return
+  }
   
   const success = cageStore.moveItem(itemToMove.value.id, x, y)
   

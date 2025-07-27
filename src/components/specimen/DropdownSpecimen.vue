@@ -137,7 +137,7 @@ const subcategoryOptions = computed(() => {
 })
 
 function handleFruitChange(option) {
-  console.log('Fruit changed to:', option)
+  selectedFruit.value = option.value
 }
 </script>
 
