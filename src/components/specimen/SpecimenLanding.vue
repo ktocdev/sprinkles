@@ -147,6 +147,29 @@
         </Button>
       </div>
 
+      <!-- Toggle Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">🔘</div>
+          <h3 class="gps-specimen-landing__card-title">Toggle Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Physical switch-like toggle component that functions like a checkbox but with a sliding dot animation.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Switch design</span>
+          <span class="gps-specimen-landing__feature">Smooth animation</span>
+          <span class="gps-specimen-landing__feature">Accessible</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showToggleSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View Toggle Specimen
+        </Button>
+      </div>
+
 
     </div>
 
@@ -172,7 +195,8 @@ const emit = defineEmits([
   'showModalSpecimen',
   'showStatusBarSpecimen',
   'showInputSpecimen',
-  'showFormGroupSpecimen'
+  'showFormGroupSpecimen',
+  'showToggleSpecimen'
 ])
 </script>
 

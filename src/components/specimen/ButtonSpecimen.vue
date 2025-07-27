@@ -66,6 +66,38 @@
     </div>
 
     <div class="gps-specimen__section">
+      <h2 class="gps-specimen__section-title">Compact Size Variant</h2>
+      <p class="gps-specimen__section-desc">Smaller buttons for dense interfaces and secondary actions.</p>
+      <div class="gps-specimen__examples">
+        <Button type="primary" size="compact">Compact Primary</Button>
+        <Button type="secondary" size="compact">Compact Secondary</Button>
+        <Button type="flat" size="compact">Compact Flat</Button>
+        <Button type="danger" size="compact">Compact Danger</Button>
+      </div>
+    </div>
+
+    <div class="gps-specimen__section">
+      <h2 class="gps-specimen__section-title">Size Comparison</h2>
+      <p class="gps-specimen__section-desc">Normal vs Compact size variants side by side.</p>
+      <div class="gps-specimen__examples">
+        <div class="gps-specimen__size-comparison">
+          <div class="gps-specimen__size-group">
+            <h4>Normal Size</h4>
+            <Button type="primary">Normal Primary</Button>
+            <Button type="secondary">Normal Secondary</Button>
+            <Button type="flat">Normal Flat</Button>
+          </div>
+          <div class="gps-specimen__size-group">
+            <h4>Compact Size</h4>
+            <Button type="primary" size="compact">Compact Primary</Button>
+            <Button type="secondary" size="compact">Compact Secondary</Button>
+            <Button type="flat" size="compact">Compact Flat</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gps-specimen__section">
       <h2 class="gps-specimen__section-title">Mixed Examples</h2>
       <p class="gps-specimen__section-desc">How different button types work together in a form or interface.</p>
       <div class="gps-specimen__examples">
@@ -97,4 +129,34 @@ import Button from '../shared/Button.vue'
 import SpecimenPage from './SpecimenPage.vue'
 
 const emit = defineEmits(['backToLanding'])
-</script> 
+</script>
+
+<style>
+.gps-specimen__size-comparison {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.gps-specimen__size-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gps-specimen__size-group h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .gps-specimen__size-comparison {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+</style> 

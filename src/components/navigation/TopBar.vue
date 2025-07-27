@@ -20,6 +20,13 @@ const bodyFontOptions = [
   { value: 'Source Sans Pro', label: 'Source Sans Pro' }
 ]
 
+const debugOptions = [
+  { value: 'reset', label: '🔄 Reset Game' },
+  { value: 'clear', label: '🧹 Clear Cage' }
+]
+
+const selectedDebugAction = ref(null)
+
 function updateHeaderFont(font) {
   headerFont.value = font.value
   document.documentElement.style.setProperty('--font-family-header', `'${font.value}', sans-serif`)
@@ -29,6 +36,17 @@ function updateBodyFont(font) {
   bodyFont.value = font.value
   document.documentElement.style.setProperty('--font-family-body', `'${font.value}', sans-serif`)
 }
+
+function handleDebugAction(action) {
+  if (action.value === 'reset') {
+    emit('resetGame')
+  } else if (action.value === 'clear') {
+    emit('clearCage')
+  }
+  selectedDebugAction.value = null
+}
+
+const emit = defineEmits(['resetGame', 'clearCage'])
 </script>
 
 <template>
@@ -58,6 +76,15 @@ function updateBodyFont(font) {
           @change="updateBodyFont"
         />
       </div>
+      
+      <!-- Debug Dropdown -->
+      <Dropdown
+        v-model="selectedDebugAction"
+        :options="debugOptions"
+        placeholder="🐛 Debug"
+        trigger-class="gps-topbar__debug-dropdown"
+        @change="handleDebugAction"
+      />
       
       <!-- Theme toggle -->
       <ThemeToggle class="gps-topbar__theme-toggle gps-margin-start-auto" />
@@ -116,6 +143,13 @@ function updateBodyFont(font) {
   padding: 0.25rem 0.5rem !important;
 }
 
+.gps-topbar__debug-dropdown {
+  min-width: 80px !important;
+  font-size: var(--font-size-sm) !important;
+  padding: 0.25rem 0.5rem !important;
+  margin-inline-end: 1rem;
+}
+
 /* Container query for larger containers */
 @container topbar (min-width: 800px) {
   .gps-topbar__container {
@@ -138,11 +172,19 @@ function updateBodyFont(font) {
   .gps-topbar__font-dropdown {
     min-width: 80px !important;
   }
+  
+  .gps-topbar__debug-dropdown {
+    min-width: 70px !important;
+  }
 }
 
-/* Hide font controls on small screens */
+/* Hide font controls and debug on small screens */
 @container topbar (max-width: 599px) {
   .gps-topbar__font-controls {
+    display: none;
+  }
+  
+  .gps-topbar__debug-dropdown {
     display: none;
   }
 }

@@ -8,12 +8,19 @@ const props = defineProps({
     type: String,
     default: 'primary',
     validator: (value) => ['primary', 'secondary', 'flat', 'disabled', 'warning', 'danger'].includes(value)
+  },
+  size: {
+    type: String,
+    default: 'normal',
+    validator: (value) => ['normal', 'compact'].includes(value)
   }
 })
 
 const buttonClass = computed(() => {
   const baseClass = 'gps-button'
-  return `${baseClass}--${props.type}`
+  const typeClass = `${baseClass}--${props.type}`
+  const sizeClass = props.size === 'compact' ? `${baseClass}--compact` : ''
+  return `${typeClass} ${sizeClass}`.trim()
 })
 
 // Event handlers for disabled state
@@ -62,6 +69,12 @@ const handleKeydown = (event) => {
   cursor: pointer;
 }
 
+/* Compact size variant */
+.gps-button--compact {
+  padding: 0.4em 0.8em;
+  font-size: var(--font-size-sm);
+}
+
 /* Primary button */
 .gps-button--primary {
   background: var(--color-accent);
@@ -88,6 +101,11 @@ const handleKeydown = (event) => {
   color: var(--color-text);
   border: none;
   padding: 0.4em 0.8em;
+}
+
+/* Compact flat button - even smaller padding */
+.gps-button--flat.gps-button--compact {
+  padding: 0.3em 0.6em;
 }
 .gps-button--flat:hover {
   background: rgba(0, 0, 0, 0.3);

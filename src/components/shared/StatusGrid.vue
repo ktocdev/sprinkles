@@ -48,6 +48,7 @@ defineProps({
 
 .gps-status-grid__item {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
   border-radius: var(--border-radius);

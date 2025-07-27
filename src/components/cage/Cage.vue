@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
-import CageItemManager from './CageItemManager.vue'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
@@ -86,10 +85,12 @@ const waterBottleEmoji = computed(() => {
 })
 
 onMounted(() => {
-  // Place guinea pig at a random position
-  const x = Math.floor(Math.random() * width.value)
-  const y = Math.floor(Math.random() * height.value)
-  cageStore.setGuineaPigPos(x, y)
+  // Place guinea pig at a random position if not already set
+  if (cageStore.guineaPigPos.x === 0 && cageStore.guineaPigPos.y === 0) {
+    const x = Math.floor(Math.random() * width.value)
+    const y = Math.floor(Math.random() * height.value)
+    cageStore.setGuineaPigPos(x, y)
+  }
   resetPoopTimer()
   moveInterval = setInterval(moveGuineaPig, 2000)
 })
@@ -102,47 +103,32 @@ onUnmounted(() => {
 
 <template>
   <div class="gps-cage">
-    <div class="gps-cage__layout">
-      <div class="gps-cage__main-content">
-        <div class="gps-cage__grid-wrapper">
-          <div
-            class="gps-cage__grid"
-            :style="{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${width}, 1.2em)`,
-              gridTemplateRows: `repeat(${height}, 1.2em)`
-            }"
-          >
-            <div
-              v-for="item in flatGrid"
-              :key="item.x + '-' + item.y"
-              class="gps-cage__cell"
-              :class="{
-                'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
-                'gps-cage__cell--poop': item.cell === 'poop',
-                'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name,
-                'gps-cage__cell--water': item.x === width - 1 && item.y === 0
-              }"
-              @click="handleCellClick(item.cell, item.x, item.y)"
-            >
-              <span v-if="item.x === width - 1 && item.y === 0" class="gps-cage__water-emoji">
-                {{ waterBottleEmoji }}
-              </span>
-              <span v-else>
-                {{ cellContent(item.cell, item.x, item.y) }}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gps-cage__status">
-          <div v-if="guineaPigStore.sitting" class="gps-cage__status-text">The guinea pig is sitting.</div>
-          <div v-else class="gps-cage__status-text">The guinea pig is moving...</div>
-        </div>
-      </div>
-      
-      <div class="gps-cage__sidebar">
-        <CageItemManager />
+    <div
+      class="gps-cage__grid"
+      :style="{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${width}, 1.2em)`,
+        gridTemplateRows: `repeat(${height}, 1.2em)`
+      }"
+    >
+      <div
+        v-for="item in flatGrid"
+        :key="item.x + '-' + item.y"
+        class="gps-cage__cell"
+        :class="{
+          'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
+          'gps-cage__cell--poop': item.cell === 'poop',
+          'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name,
+          'gps-cage__cell--water': item.x === width - 1 && item.y === 0
+        }"
+        @click="handleCellClick(item.cell, item.x, item.y)"
+      >
+        <span v-if="item.x === width - 1 && item.y === 0" class="gps-cage__water-emoji">
+          {{ waterBottleEmoji }}
+        </span>
+        <span v-else>
+          {{ cellContent(item.cell, item.x, item.y) }}
+        </span>
       </div>
     </div>
   </div>
@@ -150,28 +136,8 @@ onUnmounted(() => {
 
 <style>
 .gps-cage {
-  margin-block-start: 2em;
-  container-type: inline-size;
-  container-name: cage;
+  width: 100%;
 }
-
-.gps-cage__layout {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.gps-cage__main-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.gps-cage__sidebar {
-  max-width: 100%;
-}
-
-
 
 .gps-cage__grid {
   display: grid;
@@ -217,16 +183,7 @@ onUnmounted(() => {
   opacity: 0.8;
 }
 
-.gps-cage__status {
-  margin-block-start: 1rem;
-  text-align: center;
-}
 
-.gps-cage__status-text {
-  font-style: italic;
-  color: var(--color-text);
-  opacity: 0.8;
-}
 
 /* Container query for medium containers */
 @container cage (min-width: 400px) {
@@ -238,25 +195,8 @@ onUnmounted(() => {
   }
 }
 
-/* Container query for large containers - expand to row layout */
+/* Container query for large containers */
 @container cage (min-width: 500px) {
-  .gps-cage__layout {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 2em;
-  }
-  
-  .gps-cage__main-content {
-    flex: 1;
-    align-items: center;
-  }
-  
-  .gps-cage__sidebar {
-    min-width: 300px;
-    max-width: 400px;
-    text-align: start;
-  }
-  
   .gps-cage__cell {
     width: 1.2em;
     height: 1.2em;
