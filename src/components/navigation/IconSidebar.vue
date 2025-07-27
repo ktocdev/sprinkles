@@ -64,23 +64,7 @@
       <!-- Divider -->
       <div class="gps-icon-sidebar__divider"></div>
 
-      <!-- Reset Game -->
-      <button 
-        class="gps-icon-sidebar__button gps-icon-sidebar__button--danger"
-        @click="props.onReset"
-        title="Reset Game"
-      >
-        🔄
-      </button>
 
-      <!-- Clear Cage -->
-      <button 
-        class="gps-icon-sidebar__button gps-icon-sidebar__button--warning"
-        @click="props.onClearCage"
-        title="Clear Cage"
-      >
-        🧹
-      </button>
     </div>
   </nav>
 </template>
@@ -95,8 +79,6 @@ const props = defineProps({
   onCageStatus: Function,
   onCageInteractions: Function,
   onMarket: Function,
-  onReset: Function,
-  onClearCage: Function,
   showInventory: Boolean,
   showGuineaPig: Boolean,
   showNeeds: Boolean,
@@ -108,19 +90,16 @@ const props = defineProps({
 
 <style>
 .gps-icon-sidebar {
-  position: fixed;
-  left: 0;
-  top: 60px; /* Start below the TopBar */
-  bottom: 0;
-  height: calc(100vh - 92px);
   width: 60px;
   background: var(--color-panel);
-  border-inline-end: 1px solid var(--color-border);
-  z-index: 200;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem 0;
+  flex-shrink: 0;
+  height: fit-content;
 }
 
 .gps-icon-sidebar__container {

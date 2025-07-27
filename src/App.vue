@@ -20,6 +20,7 @@ import ModalSpecimen from './components/specimen/ModalSpecimen.vue'
 import StatusBarSpecimen from './components/specimen/StatusBarSpecimen.vue'
 import InputSpecimen from './components/specimen/InputSpecimen.vue'
 import FormGroupSpecimen from './components/specimen/FormGroupSpecimen.vue'
+import ToggleSpecimen from './components/specimen/ToggleSpecimen.vue'
 import Market from './components/market/Market.vue'
 
 const userStore = useUserStore()
@@ -79,6 +80,7 @@ const showModalSpecimen = ref(false)
 const showStatusBarSpecimen = ref(false)
 const showInputSpecimen = ref(false)
 const showFormGroupSpecimen = ref(false)
+const showToggleSpecimen = ref(false)
 
 function toggleInventory() {
   if (!showInventory.value) {
@@ -164,6 +166,7 @@ function toggleSpecimenLanding() {
   showStatusBarSpecimen.value = false
   showInputSpecimen.value = false
   showFormGroupSpecimen.value = false
+  showToggleSpecimen.value = false
   showSpecimenLanding.value = !showSpecimenLanding.value
 }
 
@@ -214,30 +217,24 @@ function toggleFormGroupSpecimen() {
   showModalSpecimen.value = false
   showStatusBarSpecimen.value = false
   showInputSpecimen.value = false
+  showToggleSpecimen.value = false
   showFormGroupSpecimen.value = !showFormGroupSpecimen.value
+}
+
+function toggleToggleSpecimen() {
+  showSpecimenLanding.value = false
+  showButtonSpecimen.value = false
+  showDropdownSpecimen.value = false
+  showModalSpecimen.value = false
+  showStatusBarSpecimen.value = false
+  showInputSpecimen.value = false
+  showFormGroupSpecimen.value = false
+  showToggleSpecimen.value = !showToggleSpecimen.value
 }
 </script>
 
 <template>
   <div class="gps-app">
-    <IconSidebar
-      v-if="userStore.name"
-      :onInventory="toggleInventory"
-      :onGuineaPig="toggleGuineaPig"
-      :onNeeds="toggleNeeds"
-      :onCageStatus="toggleCageStatus"
-      :onCageInteractions="toggleCageInteractions"
-      :onMarket="toggleMarket"
-      :onReset="resetGame"
-      :onClearCage="clearCage"
-      :showInventory="showInventory"
-      :showGuineaPig="showGuineaPig"
-      :showNeeds="showNeeds"
-      :showCageStatus="showCageStatus"
-      :showCageInteractions="showCageInteractions"
-      :showMarket="showMarket"
-    />
-    
     <SidebarSubNav
       v-if="userStore.name"
       :isVisible="showCageInteractions"
@@ -268,24 +265,47 @@ function toggleFormGroupSpecimen() {
       @close="showCageInteractions = false"
       @action="handleCageInteraction"
     />
-    <TopBar v-if="userStore.name" />
+
+          <TopBar 
+        v-if="userStore.name" 
+        @resetGame="resetGame"
+        @clearCage="clearCage"
+      />
+
     <div class="gps-app__content">
-      <div class="gps-app__content-wrapper">
-        <Main 
-          v-if="userStore.name"
-          :userStore="userStore" 
-          :inventoryStore="inventoryStore" 
-          :showInventory="showInventory"
-          :showGuineaPig="showGuineaPig"
-          :showNeeds="showNeeds"
-          :showCageStatus="showCageStatus"
-          :showMarket="showMarket"
-          @closeInventory="showInventory = false"
-          @closeGuineaPig="showGuineaPig = false"
-          @closeNeeds="showNeeds = false"
-          @closeCageStatus="showCageStatus = false"
-          @closeMarket="showMarket = false"
-        />
+                     <IconSidebar
+                 v-if="userStore.name"
+                 :onInventory="toggleInventory"
+                 :onGuineaPig="toggleGuineaPig"
+                 :onNeeds="toggleNeeds"
+                 :onCageStatus="toggleCageStatus"
+                 :onCageInteractions="toggleCageInteractions"
+                 :onMarket="toggleMarket"
+                 :showInventory="showInventory"
+                 :showGuineaPig="showGuineaPig"
+                 :showNeeds="showNeeds"
+                 :showCageStatus="showCageStatus"
+                 :showCageInteractions="showCageInteractions"
+                 :showMarket="showMarket"
+               />
+      <div class="gps-app__content-layout">
+        <div class="gps-app__content-main">
+          <Main 
+            v-if="userStore.name"
+            :userStore="userStore" 
+            :inventoryStore="inventoryStore" 
+            :showInventory="showInventory"
+            :showGuineaPig="showGuineaPig"
+            :showNeeds="showNeeds"
+            :showCageStatus="showCageStatus"
+            :showMarket="showMarket"
+            @closeInventory="showInventory = false"
+            @closeGuineaPig="showGuineaPig = false"
+            @closeNeeds="showNeeds = false"
+            @closeCageStatus="showCageStatus = false"
+            @closeMarket="showMarket = false"
+          />
+        </div>
       </div>
     </div>
 
@@ -331,6 +351,7 @@ function toggleFormGroupSpecimen() {
         @showStatusBarSpecimen="toggleStatusBarSpecimen"
         @showInputSpecimen="toggleInputSpecimen"
         @showFormGroupSpecimen="toggleFormGroupSpecimen"
+        @showToggleSpecimen="toggleToggleSpecimen"
       />
     </Panel>
 
@@ -387,6 +408,15 @@ function toggleFormGroupSpecimen() {
     >
       <FormGroupSpecimen @backToLanding="toggleSpecimenLanding" />
     </Panel>
+
+    <!-- Toggle Specimen Panel -->
+    <Panel 
+      :isOpen="showToggleSpecimen" 
+      title="Toggle Component Specimen" 
+      @close="showToggleSpecimen = false"
+    >
+      <ToggleSpecimen @backToLanding="toggleSpecimenLanding" />
+    </Panel>
   </div>
 </template>
 
@@ -401,23 +431,25 @@ function toggleFormGroupSpecimen() {
 }
 
 .gps-app__content {
-  flex: 1;
-  margin-inline-start: 60px; /* Account for sidebar width */
-  margin-block-start: 60px; /* Account for TopBar height */
-  width: calc(100% - 60px); /* Take full width minus sidebar */
-  max-width: 1400px; /* Maximum width constraint */
-  margin-inline: auto; /* Center the content horizontally */
+  display: flex;
+  gap: 3rem;
+  max-width: 1400px; 
+  margin-inline: auto; 
   padding: 2rem 1rem;
-  text-align: center;
-  box-sizing: border-box; /* Include padding in width calculation */
-  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
-.gps-app__content-wrapper {
+.gps-app__content-layout {
+  display: flex;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  gap: 2rem;
+}
+
+.gps-app__content-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .gps-app__footer-wrapper {
@@ -428,8 +460,6 @@ function toggleFormGroupSpecimen() {
 /* Responsive breakpoints */
 @media (max-width: 1250px) {
   .gps-app__content {
-    margin-inline-start: 60px; /* Keep sidebar margin */
-    width: calc(100% - 60px); /* Keep sidebar width calculation */
     max-width: 1200px;
     margin-inline: auto; /* Center the content horizontally */
     padding: 2rem 1.5rem;
@@ -438,10 +468,13 @@ function toggleFormGroupSpecimen() {
 
 @media (max-width: 768px) {
   .gps-app__content {
-    margin-inline-start: 60px; /* Keep sidebar margin */
-    width: calc(100% - 60px); /* Keep sidebar width calculation */
     margin-inline: auto; /* Center the content horizontally */
     padding: 1rem 0.75rem;
+  }
+  
+  .gps-app__content-layout {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 </style>

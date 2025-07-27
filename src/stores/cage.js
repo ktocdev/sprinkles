@@ -10,13 +10,14 @@ function clampValue(value, min = 0, max = 100) {
 
 export const useCageStore = defineStore('cage', {
   state: () => ({
-    size: { width: 12, height: 8 },
+    size: { width: 18, height: 12 },
     beddingFreshness: 100,
     waterLevel: 100,
     poop: [], // array of { x, y }
     guineaPigPos: { x: 0, y: 0 },
     items: [] // array of { id, name, type, x, y, isConsumable, quantity }
   }),
+
   getters: {
     grid(state) {
       const grid = createEmptyGrid(state.size.width, state.size.height)
@@ -60,9 +61,9 @@ export const useCageStore = defineStore('cage', {
   actions: {
     setSize(width, height) {
       this.size = { width, height }
-      this.poop = []
-      this.guineaPigPos = { x: 0, y: 0 }
+      this.resetCage() // Reset everything when size changes
     },
+
     setBeddingFreshness(value) {
       this.beddingFreshness = clampValue(value)
     },
@@ -76,7 +77,10 @@ export const useCageStore = defineStore('cage', {
       this.poop = this.poop.filter(p => !(p.x === x && p.y === y))
     },
     setGuineaPigPos(x, y) {
-      this.guineaPigPos = { x, y }
+      // Ensure position is within grid bounds
+      const clampedX = Math.max(0, Math.min(x, this.size.width - 1))
+      const clampedY = Math.max(0, Math.min(y, this.size.height - 1))
+      this.guineaPigPos = { x: clampedX, y: clampedY }
     },
     resetCage() {
       this.beddingFreshness = 100
@@ -88,6 +92,7 @@ export const useCageStore = defineStore('cage', {
     refreshWater() {
       this.waterLevel = 100
     },
+
     cleanCage() {
       this.poop = []
     },
@@ -142,7 +147,8 @@ export const useCageStore = defineStore('cage', {
         this.removeItem(itemId)
       }
       return true
-    }
+    },
+
   },
   persist: true
 }) 

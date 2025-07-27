@@ -1,30 +1,13 @@
 <template>
   <div class="gps-cage-item-manager">
-    <div class="gps-cage-item-manager__header">
-      <h3 class="gps-cage-item-manager__title">Cage Items</h3>
-    </div>
-    
-    <div class="gps-cage-item-manager__actions">
+    <div v-if="cageStore.items.length > 0" class="gps-cage-item-manager__actions">
       <Button 
         type="primary"
+        size="compact"
         @click="showAddItemModal = true"
         title="Add Item to Cage"
       >
         ➕ Add Item
-      </Button>
-      <Button 
-        type="warning"
-        @click="resetInventory"
-        title="Reset Inventory (Debug)"
-      >
-        🔄 Reset
-      </Button>
-      <Button 
-        type="danger"
-        @click="clearInventory"
-        title="Clear All Inventory"
-      >
-        🗑️ Clear
       </Button>
     </div>
 
@@ -35,6 +18,7 @@
         <p>Add some items to your cage to get started!</p>
         <Button 
           type="primary"
+          size="compact"
           @click="showAddItemModal = true"
         >
           ➕ Add Your First Item
@@ -62,6 +46,7 @@
             <div class="gps-cage-item-manager__item-actions">
               <Button 
                 type="flat"
+                size="compact"
                 @click="moveItem(item)"
                 title="Move Item"
               >
@@ -69,6 +54,7 @@
               </Button>
               <Button 
                 type="flat"
+                size="compact"
                 @click="returnToInventory(item)"
                 title="Return to Inventory"
               >
@@ -76,6 +62,7 @@
               </Button>
               <Button 
                 type="danger"
+                size="compact"
                 @click="throwOutItem(item)"
                 title="Throw Out"
               >
@@ -106,6 +93,7 @@
             <div class="gps-cage-item-manager__item-actions">
               <Button 
                 type="flat"
+                size="compact"
                 @click="consumeItem(item)"
                 title="Consume Item"
               >
@@ -113,6 +101,7 @@
               </Button>
               <Button 
                 type="flat"
+                size="compact"
                 @click="moveItem(item)"
                 title="Move Item"
               >
@@ -120,6 +109,7 @@
               </Button>
               <Button 
                 type="flat"
+                size="compact"
                 @click="returnToInventory(item)"
                 title="Return to Inventory"
               >
@@ -127,6 +117,7 @@
               </Button>
               <Button 
                 type="danger"
+                size="compact"
                 @click="throwOutItem(item)"
                 title="Throw Out"
               >
@@ -144,8 +135,7 @@
       title="Add Item to Cage"
       @close="showAddItemModal = false"
     >
-      <div class="gps-cage-item-manager__form-group">
-        <label>Item:</label>
+      <FormGroup label="Item">
         <div v-if="!hasAnyItems" class="gps-cage-item-manager__no-items-message">
           <p>No items available in your inventory.</p>
           <p>Visit the Market to buy items first!</p>
@@ -158,15 +148,15 @@
           :disabled="!hasAnyItems"
           aria-label="Select item to add to cage"
         />
-      </div>
+      </FormGroup>
       
       <FormGroup label="Position X">
         <Input 
           v-model.number="itemX" 
           type="number" 
-          :min="0" 
-          :max="cageStore.size.width - 1"
-          placeholder="Enter X position"
+          :min="1" 
+          :max="cageStore.size.width"
+          placeholder="Enter X position (1-24)"
           icon="📍"
         />
       </FormGroup>
@@ -175,9 +165,9 @@
         <Input 
           v-model.number="itemY" 
           type="number" 
-          :min="0" 
-          :max="cageStore.size.height - 1"
-          placeholder="Enter Y position"
+          :min="1" 
+          :max="cageStore.size.height"
+          placeholder="Enter Y position (1-16)"
           icon="📍"
         />
       </FormGroup>
@@ -185,12 +175,14 @@
       <template #actions>
         <Button 
           type="secondary"
+          size="compact"
           @click="showAddItemModal = false"
         >
           Cancel
         </Button>
         <Button 
           type="primary"
+          size="compact"
           @click="addItemToCage"
           :class="{ 'gps-button--disabled': !hasAnyItems || !selectedItem || itemX === null || itemY === null }"
         >
@@ -209,9 +201,9 @@
         <Input 
           v-model.number="moveX" 
           type="number" 
-          :min="0" 
-          :max="cageStore.size.width - 1"
-          placeholder="Enter X position"
+          :min="1" 
+          :max="cageStore.size.width"
+          placeholder="Enter X position (1-24)"
           icon="📍"
         />
       </FormGroup>
@@ -220,9 +212,9 @@
         <Input 
           v-model.number="moveY" 
           type="number" 
-          :min="0" 
-          :max="cageStore.size.height - 1"
-          placeholder="Enter Y position"
+          :min="1" 
+          :max="cageStore.size.height"
+          placeholder="Enter Y position (1-16)"
           icon="📍"
         />
       </FormGroup>
@@ -230,12 +222,14 @@
       <template #actions>
         <Button 
           type="secondary"
+          size="compact"
           @click="showMoveModal = false"
         >
           Cancel
         </Button>
         <Button 
           type="primary"
+          size="compact"
           @click="confirmMoveItem"
           :class="{ 'gps-button--disabled': moveX === null || moveY === null }"
         >
@@ -359,11 +353,15 @@ function addItemToCage() {
   const itemDef = itemDefinitions[selectedItem.value]
   if (!itemDef) return
   
+  // Convert from 1-based to 0-based coordinates
+  const x = itemX.value - 1
+  const y = itemY.value - 1
+  
   const success = cageStore.addItem({
     name: selectedItem.value,
     type: itemDef.type,
     isConsumable: itemDef.isConsumable
-  }, itemX.value, itemY.value)
+  }, x, y)
   
   if (success) {
     inventoryStore.removeItem(selectedItem.value, 1)
@@ -378,15 +376,20 @@ function addItemToCage() {
 
 function moveItem(item) {
   itemToMove.value = item
-  moveX.value = item.x
-  moveY.value = item.y
+  // Convert from 0-based to 1-based for display
+  moveX.value = item.x + 1
+  moveY.value = item.y + 1
   showMoveModal.value = true
 }
 
 function confirmMoveItem() {
   if (!itemToMove.value || moveX.value === null || moveY.value === null) return
   
-  const success = cageStore.moveItem(itemToMove.value.id, moveX.value, moveY.value)
+  // Convert from 1-based to 0-based coordinates
+  const x = moveX.value - 1
+  const y = moveY.value - 1
+  
+  const success = cageStore.moveItem(itemToMove.value.id, x, y)
   
   if (success) {
     showMoveModal.value = false
@@ -419,19 +422,7 @@ function throwOutItem(item) {
   }
 }
 
-function resetInventory() {
-  inventoryStore.resetToDefaults()
-}
 
-function clearInventory() {
-  const confirmed = confirm('Are you sure you want to clear all items from your inventory? This action cannot be undone.')
-  if (confirmed) {
-    // Set all items to 0
-    Object.keys(inventoryStore.items).forEach(item => {
-      inventoryStore.setItemQuantity(item, 0)
-    })
-  }
-}
 </script>
 
 <style>
@@ -439,42 +430,29 @@ function clearInventory() {
   width: 100%;
 }
 
-.gps-cage-item-manager__header {
-  margin-block-end: 1rem;
-}
-
 .gps-cage-item-manager__actions {
   display: flex;
   gap: 0.5rem;
-  margin-block-end: 1.5rem;
+  margin-block-end: 1rem;
   flex-wrap: wrap;
 }
-
-.gps-cage-item-manager__title {
-  font-size: var(--font-size-2xl);
-  color: var(--color-accent);
-  margin: 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-/* Action buttons now use shared Button component */
 
 .gps-cage-item-manager__sections {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .gps-cage-item-manager__section {
   background: var(--color-panel);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .gps-cage-item-manager__section-title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: var(--color-accent);
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   font-weight: var(--font-weight-semibold);
 }
 
@@ -483,20 +461,21 @@ function clearInventory() {
   opacity: 0.6;
   font-style: italic;
   text-align: center;
-  padding: 1rem;
+  padding: 0.75rem;
+  font-size: var(--font-size-sm);
 }
 
 .gps-cage-item-manager__items {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .gps-cage-item-manager__item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: var(--color-bg);
   border-radius: var(--border-radius);
   border: 1px solid var(--color-border);
@@ -511,17 +490,18 @@ function clearInventory() {
 .gps-cage-item-manager__item-name {
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
 
 .gps-cage-item-manager__item-quantity {
   color: var(--color-accent);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
 }
 
 .gps-cage-item-manager__item-position {
   color: var(--color-text);
   opacity: 0.6;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
 }
 
 .gps-cage-item-manager__item-actions {
@@ -532,11 +512,11 @@ function clearInventory() {
 .gps-cage-item-manager__action-button {
   background: none;
   border: none;
-  padding: 0.25rem;
+  padding: 0.2rem;
   cursor: pointer;
   border-radius: var(--border-radius);
   transition: var(--transition);
-  font-size: 1.1em;
+  font-size: 1em;
 }
 
 .gps-cage-item-manager__action-button:hover {
@@ -548,21 +528,19 @@ function clearInventory() {
   background: var(--color-danger);
 }
 
-
-
 .gps-cage-item-manager__no-items-message {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: center;
   color: var(--color-text);
   opacity: 0.8;
 }
 
 .gps-cage-item-manager__no-items-message p {
-  margin: 0.5rem 0;
-  font-size: var(--font-size-sm);
+  margin: 0.4rem 0;
+  font-size: var(--font-size-xs);
 }
 
 .gps-cage-item-manager__no-items-message p:first-child {
@@ -573,22 +551,21 @@ function clearInventory() {
 .gps-cage-item-manager__no-cage-items {
   background: var(--color-panel);
   border-radius: var(--border-radius);
-  padding: 3rem 2rem;
-  text-align: center;
+  padding: 2rem 1.5rem;
 }
 
 .gps-cage-item-manager__no-cage-items-content h4 {
   color: var(--color-accent);
-  font-size: var(--font-size-lg);
-  margin: 0 0 1rem 0;
+  font-size: var(--font-size-base);
+  margin: 0 0 0.75rem 0;
   font-weight: var(--font-weight-semibold);
 }
 
 .gps-cage-item-manager__no-cage-items-content p {
   color: var(--color-text);
   opacity: 0.8;
-  margin: 0 0 2rem 0;
-  font-size: var(--font-size-base);
+  margin: 0 0 1.5rem 0;
+  font-size: var(--font-size-sm);
 }
 
 /* Responsive adjustments */
@@ -599,7 +576,7 @@ function clearInventory() {
   
   .gps-cage-item-manager__item {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: stretch;
   }
   
