@@ -2,72 +2,23 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useInventoryStore } from './stores/inventory'
-import { useGuineaPigStore } from './stores/guineaPig'
-import { useCageStore } from './stores/cage'
 import { useThemeStore } from './stores/theme'
-import { useMarketStore } from './stores/market'
-import Welcome from './components/pages/Welcome.vue'
 import Main from './components/pages/Main.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
-import SidebarSubNav from './components/navigation/SidebarSubNav.vue'
-import Panel from './components/shared/Panel.vue'
 import Footer from './components/navigation/Footer.vue'
-import SpecimenLanding from './components/specimen/SpecimenLanding.vue'
-import ButtonSpecimen from './components/specimen/ButtonSpecimen.vue'
-import DropdownSpecimen from './components/specimen/DropdownSpecimen.vue'
-import ModalSpecimen from './components/specimen/ModalSpecimen.vue'
-import StatusBarSpecimen from './components/specimen/StatusBarSpecimen.vue'
-import InputSpecimen from './components/specimen/InputSpecimen.vue'
-import FormGroupSpecimen from './components/specimen/FormGroupSpecimen.vue'
-import ToggleSpecimen from './components/specimen/ToggleSpecimen.vue'
-import Market from './components/market/Market.vue'
-import ThemeExplorer from './components/shared/ThemeExplorer.vue'
-import DebugPanel from './components/shared/DebugPanel.vue'
+import SpecimenPanels from './components/panels/SpecimenPanels.vue'
+import WelcomePanel from './components/panels/WelcomePanel.vue'
+import ThemeExplorerPanel from './components/panels/ThemeExplorerPanel.vue'
+import DebugPanel from './components/panels/DebugPanel.vue'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
-const guineaPigStore = useGuineaPigStore()
-const cageStore = useCageStore()
 const themeStore = useThemeStore()
-const marketStore = useMarketStore()
-const nameInput = ref('')
 
 onMounted(() => {
   themeStore.initTheme()
 })
-
-function submitName() {
-  if (nameInput.value.trim()) {
-    userStore.name = nameInput.value.trim()
-  }
-}
-
-function resetGame() {
-  if (window.confirm('Are you sure you want to reset your game? This cannot be undone.')) {
-    userStore.$reset()
-    inventoryStore.$reset()
-    guineaPigStore.$reset()
-    cageStore.$reset()
-    marketStore.$reset()
-    // Remove persisted state from localStorage
-    localStorage.removeItem('user')
-    localStorage.removeItem('inventory')
-    localStorage.removeItem('guineaPig')
-    localStorage.removeItem('cage')
-    localStorage.removeItem('market')
-    // Reset panel states
-    showInventory.value = false
-    showGuineaPig.value = false
-    showNeeds.value = false
-    showCageStatus.value = false
-    showCageInteractions.value = false
-    showMarket.value = false
-    showDebugPanel.value = false
-    // Reset name input
-    nameInput.value = ''
-  }
-}
 
 // Panel visibility state
 const showInventory = ref(false)
@@ -76,228 +27,75 @@ const showNeeds = ref(false)
 const showCageStatus = ref(false)
 const showCageInteractions = ref(false)
 const showMarket = ref(false)
-const showSpecimenLanding = ref(false)
-const showButtonSpecimen = ref(false)
-const showDropdownSpecimen = ref(false)
-const showModalSpecimen = ref(false)
-const showStatusBarSpecimen = ref(false)
-const showInputSpecimen = ref(false)
-const showFormGroupSpecimen = ref(false)
-const showToggleSpecimen = ref(false)
-const showThemeExplorer = ref(false)
-const showDebugPanel = ref(false)
+
+const specimenPanelsRef = ref(null)
+const themeExplorerPanelRef = ref(null)
+const debugPanelRef = ref(null)
+
+// Panel state management
+const panelStates = {
+  inventory: showInventory,
+  guineaPig: showGuineaPig,
+  needs: showNeeds,
+  cageStatus: showCageStatus,
+  cageInteractions: showCageInteractions,
+  market: showMarket
+}
+
+function togglePanel(panelName) {
+  const isOpening = !panelStates[panelName].value
+  
+  // Close other panels when opening a new one
+  if (isOpening) {
+    Object.keys(panelStates).forEach(key => {
+      if (key !== panelName) {
+        panelStates[key].value = false
+      }
+    })
+  }
+  
+  panelStates[panelName].value = !panelStates[panelName].value
+}
 
 function toggleInventory() {
-  if (!showInventory.value) {
-    showGuineaPig.value = false
-    showNeeds.value = false
-    showMarket.value = false
-  }
-  showInventory.value = !showInventory.value
+  togglePanel('inventory')
 }
 
 function toggleGuineaPig() {
-  if (!showGuineaPig.value) {
-    showInventory.value = false
-    showNeeds.value = false
-    showMarket.value = false
-  }
-  showGuineaPig.value = !showGuineaPig.value
+  togglePanel('guineaPig')
 }
 
 function toggleNeeds() {
-  if (!showNeeds.value) {
-    showInventory.value = false
-    showGuineaPig.value = false
-    showCageStatus.value = false
-    showMarket.value = false
-  }
-  showNeeds.value = !showNeeds.value
+  togglePanel('needs')
 }
 
 function toggleCageStatus() {
-  if (!showCageStatus.value) {
-    showInventory.value = false
-    showGuineaPig.value = false
-    showNeeds.value = false
-    showCageInteractions.value = false
-    showMarket.value = false
-  }
-  showCageStatus.value = !showCageStatus.value
+  togglePanel('cageStatus')
 }
 
 function toggleCageInteractions() {
-  showCageInteractions.value = !showCageInteractions.value
-}
-
-function handleCageInteraction(action) {
-  switch (action) {
-    case 'refreshWater':
-      cageStore.refreshWater()
-      break
-    case 'refreshBedding':
-      cageStore.refreshBedding()
-      break
-    case 'cleanPoop':
-      cageStore.cleanCage()
-      break
-    case 'manageItems':
-      // This will be handled by the Cage component itself
-      // The CageItemManager is already integrated into the Cage view
-      break
-  }
-  showCageInteractions.value = false
+  togglePanel('cageInteractions')
 }
 
 function toggleMarket() {
-  if (!showMarket.value) {
-    showInventory.value = false
-    showGuineaPig.value = false
-    showNeeds.value = false
-    showCageStatus.value = false
-    showCageInteractions.value = false
-  }
-  showMarket.value = !showMarket.value
+  togglePanel('market')
 }
 
-function clearCage() {
-  cageStore.$reset()
-  localStorage.removeItem('cage')
+function handleGameReset() {
+  // Reset all panel states
+  Object.values(panelStates).forEach(state => state.value = false)
+  // Reset specimen panels
+  specimenPanelsRef.value?.toggleSpecimenLanding()
 }
 
-function resetInventory() {
-  if (window.confirm('Are you sure you want to reset the inventory to default values? This will restore all items including large beds and houses.')) {
-    inventoryStore.resetToDefaults()
-  }
-}
-
-function toggleSpecimenLanding() {
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showFormGroupSpecimen.value = false
-  showToggleSpecimen.value = false
-  showSpecimenLanding.value = !showSpecimenLanding.value
-}
-
-function toggleButtonSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = !showButtonSpecimen.value
-}
-
-function toggleDropdownSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showDropdownSpecimen.value = !showDropdownSpecimen.value
-}
-
-function toggleModalSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showModalSpecimen.value = !showModalSpecimen.value
-}
-
-function toggleStatusBarSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showInputSpecimen.value = false
-  showStatusBarSpecimen.value = !showStatusBarSpecimen.value
-}
-
-function toggleInputSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showFormGroupSpecimen.value = false
-  showInputSpecimen.value = !showInputSpecimen.value
-}
-
-function toggleFormGroupSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showToggleSpecimen.value = false
-  showFormGroupSpecimen.value = !showFormGroupSpecimen.value
-}
-
-function toggleToggleSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showFormGroupSpecimen.value = false
-  showToggleSpecimen.value = !showToggleSpecimen.value
-}
-
-function toggleThemeExplorer() {
-  showThemeExplorer.value = !showThemeExplorer.value
-}
-
-function toggleDebugPanel() {
-  showDebugPanel.value = !showDebugPanel.value
-}
 </script>
 
 <template>
   <div class="gps-app">
-    <SidebarSubNav
-      v-if="userStore.name"
-      :isVisible="showCageInteractions"
-      title="Cage Interactions"
-      :buttons="[
-        {
-          id: 'refreshWater',
-          icon: '💧',
-          title: 'Refresh Water',
-          action: 'refreshWater',
-          class: 'gps-sidebar-subnav__button--primary'
-        },
-        {
-          id: 'refreshBedding',
-          icon: '🛏️',
-          title: 'Refresh Bedding',
-          action: 'refreshBedding',
-          class: 'gps-sidebar-subnav__button--primary'
-        },
-        {
-          id: 'cleanPoop',
-          icon: '🧹',
-          title: 'Clean Poop',
-          action: 'cleanPoop',
-          class: 'gps-sidebar-subnav__button--warning'
-        },
-        {
-          id: 'manageItems',
-          icon: '📦',
-          title: 'Manage Items',
-          action: 'manageItems',
-          class: 'gps-sidebar-subnav__button--primary'
-        }
-      ]"
-      @close="showCageInteractions = false"
-      @action="handleCageInteraction"
-    />
 
     <TopBar 
       v-if="userStore.name" 
-      @resetGame="resetGame"
-      @clearCage="clearCage"
-      @showDebug="toggleDebugPanel"
+      @showDebug="debugPanelRef?.toggleDebugPanel()"
     />
 
     <div class="gps-app__main-layout">
@@ -314,6 +112,7 @@ function toggleDebugPanel() {
         :showCageStatus="showCageStatus"
         :showCageInteractions="showCageInteractions"
         :showMarket="showMarket"
+        @closeCageInteractions="showCageInteractions = false"
       />
       
       <div class="gps-app__content-area">
@@ -342,134 +141,15 @@ function toggleDebugPanel() {
     <div class="gps-app__footer-wrapper">
       <Footer 
         v-if="userStore.name"
-        @showSpecimenLanding="toggleSpecimenLanding"
-        @showThemeExplorer="toggleThemeExplorer"
+        @showSpecimenLanding="specimenPanelsRef?.toggleSpecimenLanding()"
+        @showThemeExplorer="themeExplorerPanelRef?.toggleThemeExplorer()"
       />
     </div>
 
-    <!-- Welcome Panel -->
-    <Panel 
-      :isOpen="!userStore.name" 
-      title="Welcome to Guinea Pig Simulator!" 
-      :showClose="false"
-    >
-      <Welcome 
-        :nameInput="nameInput" 
-        @update:nameInput="val => nameInput = val" 
-        @submit="submitName" 
-      />
-    </Panel>
-
-    <!-- Market Panel -->
-    <Panel 
-      :isOpen="showMarket" 
-      title="🐹 Guinea Pig Market" 
-      @close="showMarket = false"
-    >
-      <Market />
-    </Panel>
-
-    <!-- Specimen Landing Panel -->
-    <Panel 
-      :isOpen="showSpecimenLanding" 
-      title="Component Specimens" 
-      @close="showSpecimenLanding = false"
-    >
-      <SpecimenLanding 
-        @showButtonSpecimen="toggleButtonSpecimen"
-        @showDropdownSpecimen="toggleDropdownSpecimen"
-        @showModalSpecimen="toggleModalSpecimen"
-        @showStatusBarSpecimen="toggleStatusBarSpecimen"
-        @showInputSpecimen="toggleInputSpecimen"
-        @showFormGroupSpecimen="toggleFormGroupSpecimen"
-        @showToggleSpecimen="toggleToggleSpecimen"
-      />
-    </Panel>
-
-    <!-- Button Specimen Panel -->
-    <Panel 
-      :isOpen="showButtonSpecimen" 
-      title="Button Component Specimen" 
-      @close="showButtonSpecimen = false"
-    >
-      <ButtonSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- Dropdown Specimen Panel -->
-    <Panel 
-      :isOpen="showDropdownSpecimen" 
-      title="Dropdown Component Specimen" 
-      @close="showDropdownSpecimen = false"
-    >
-      <DropdownSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- Modal Specimen Panel -->
-    <Panel 
-      :isOpen="showModalSpecimen" 
-      title="Modal Component Specimen" 
-      @close="showModalSpecimen = false"
-    >
-      <ModalSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- StatusBar Specimen Panel -->
-    <Panel 
-      :isOpen="showStatusBarSpecimen" 
-      title="StatusBar Component Specimen" 
-      @close="showStatusBarSpecimen = false"
-    >
-      <StatusBarSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- Input Specimen Panel -->
-    <Panel 
-      :isOpen="showInputSpecimen" 
-      title="Input Component Specimen" 
-      @close="showInputSpecimen = false"
-    >
-      <InputSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- FormGroup Specimen Panel -->
-    <Panel 
-      :isOpen="showFormGroupSpecimen" 
-      title="FormGroup Component Specimen" 
-      @close="showFormGroupSpecimen = false"
-    >
-      <FormGroupSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- Toggle Specimen Panel -->
-    <Panel 
-      :isOpen="showToggleSpecimen" 
-      title="Toggle Component Specimen" 
-      @close="showToggleSpecimen = false"
-    >
-      <ToggleSpecimen @backToLanding="toggleSpecimenLanding" />
-    </Panel>
-
-    <!-- Theme Explorer Panel -->
-    <Panel 
-      :isOpen="showThemeExplorer" 
-      title="🎨 Theme Explorer" 
-      @close="showThemeExplorer = false"
-    >
-      <ThemeExplorer />
-    </Panel>
-
-    <!-- Debug Panel -->
-    <Panel 
-      :isOpen="showDebugPanel" 
-      title="🐛 Debug Panel" 
-      @close="showDebugPanel = false"
-    >
-      <DebugPanel 
-        @resetGame="resetGame"
-        @clearCage="clearCage"
-        @resetInventory="resetInventory"
-      />
-    </Panel>
+    <WelcomePanel />
+    <SpecimenPanels ref="specimenPanelsRef" />
+    <ThemeExplorerPanel ref="themeExplorerPanelRef" />
+    <DebugPanel ref="debugPanelRef" @gameReset="handleGameReset" />
   </div>
 </template>
 
