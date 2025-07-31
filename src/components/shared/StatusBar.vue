@@ -41,26 +41,28 @@ const props = defineProps({
 
 <style>
 .gps-status-bar {
-  margin-block-end: 1em;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5em;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25em;
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .gps-status-bar__label {
-  margin-inline-end: 0.5em;
   color: var(--color-text);
   font-weight: var(--font-weight-medium);
-  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  text-align: start;
+  margin-block-end: 0.125em;
 }
 
 .gps-status-bar__progress {
   width: 100%;
-  margin-inline-end: 0.5em;
-  height: 1.2em;
+  height: 0.75em;
   border-radius: var(--border-radius);
   background: var(--color-border);
+  flex-shrink: 0;
 }
 
 .gps-status-bar__progress::-webkit-progress-bar {
@@ -80,11 +82,38 @@ const props = defineProps({
 }
 
 .gps-status-bar__value {
-  min-width: 2em;
   text-align: end;
   color: var(--color-text);
   font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  margin-block-start: 0.125em;
 }
 
+/* ===== RESPONSIVE DESIGN ===== */
 
+@container (min-width: 300px) {
+  .gps-status-bar {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+  }
+  
+  .gps-status-bar__label {
+    font-size: var(--font-size-sm);
+    margin-block-end: 0;
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+  
+  .gps-status-bar__progress {
+    height: 1.2em;
+    flex: 1;
+  }
+  
+  .gps-status-bar__value {
+    font-size: var(--font-size-sm);
+    margin-block-start: 0;
+    min-width: 2em;
+  }
+}
 </style> 

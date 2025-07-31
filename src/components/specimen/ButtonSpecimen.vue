@@ -20,7 +20,6 @@
       <p class="gps-specimen__section-desc">Secondary actions with transparent background and border.</p>
       <div class="gps-specimen__examples">
         <Button type="secondary">Secondary Button</Button>
-        <Button type="secondary">View Inventory</Button>
         <Button type="secondary">Show Info</Button>
       </div>
     </div>

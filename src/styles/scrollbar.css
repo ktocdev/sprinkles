@@ -1,0 +1,60 @@
+/* Scrollbar Mixin Styles */
+
+/* Light Mode Scrollbar */
+.gps-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.gps-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.gps-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.gps-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.gps-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+.gps-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Dark Mode Scrollbar */
+[data-theme="dark"] .gps-scrollbar {
+  scrollbar-color: var(--color-border) transparent;
+}
+
+[data-theme="dark"] .gps-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+[data-theme="dark"] .gps-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gps-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .gps-scrollbar::-webkit-scrollbar-track {
+    border-radius: 2px;
+  }
+  
+  .gps-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+  }
+} 
