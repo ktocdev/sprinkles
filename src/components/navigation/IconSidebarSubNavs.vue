@@ -3,11 +3,13 @@
     <NeedsSubNav 
       :isOpen="showNeeds"
       @close="$emit('closeNeeds')"
+      class="gps-icon-sidebar-subnavs__subnav"
     />
 
     <CageStatusSubNav 
       :isOpen="showCageStatus"
       @close="$emit('closeCageStatus')"
+      class="gps-icon-sidebar-subnavs__subnav"
     />
   </div>
 </template>

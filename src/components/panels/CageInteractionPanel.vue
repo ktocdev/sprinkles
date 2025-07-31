@@ -45,19 +45,6 @@
               Remove waste from the cage to maintain a clean and healthy environment for your guinea pig.
             </p>
           </div>
-          
-          <div class="gps-panel-action-item">
-            <Button 
-              type="secondary"
-              @click="handleManageItems"
-              class="gps-panel-action-button"
-            >
-              📦 Manage Items
-            </Button>
-            <p class="gps-panel-action-description">
-              Add or remove items from the cage to customize your guinea pig's living space.
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -93,10 +80,6 @@ function handleRefreshBedding() {
 
 function handleCleanPoop() {
   cageStore.cleanCage()
-  emit('close')
-}
-
-function handleManageItems() {
   emit('close')
 }
 </script>

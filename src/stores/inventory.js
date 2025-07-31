@@ -6,24 +6,32 @@ export const useInventoryStore = defineStore('inventory', {
       // Food items
       hay: 10,
       pellets: 10,
-      vegetables: 5,
-      fruits: 3,
+      lettuce: 5,
+      blueberries: 3,
+      carrots: 5,
+      cucumbers: 3,
       
       // Bedding
       bedding: 20,
       
-      // Toys and enrichment
-      chewToys: 2,
-      tunnels: 1,
-      hideouts: 1,
+      // Chew items
+      small_chew_stick: 2,
+      large_chew_stick: 1,
+      chew_cube: 1,
       
-      // Cage items
-      waterBottle: 1,
-      foodBowl: 1,
+      // Toys
+      small_ball: 1,
+      large_ball: 1,
+      small_tunnel: 1,
+      large_tunnel: 1,
       
-      // Large items
-      largeBed: 0,
-      largeHouse: 0
+      // Beds and shelters
+      small_hammock: 1,
+      large_hammock: 1,
+      small_bed: 1,
+      large_bed: 1,
+      small_house: 1,
+      large_house: 1
     }
   }),
 
@@ -66,16 +74,45 @@ export const useInventoryStore = defineStore('inventory', {
       this.items = {
         hay: 10,
         pellets: 10,
-        vegetables: 5,
-        fruits: 3,
+        lettuce: 5,
+        blueberries: 3,
+        carrots: 5,
+        cucumbers: 3,
         bedding: 20,
-        chewToys: 2,
-        tunnels: 1,
-        hideouts: 1,
-        waterBottle: 1,
-        foodBowl: 1,
-        largeBed: 1,
-        largeHouse: 1
+        small_chew_stick: 2,
+        large_chew_stick: 1,
+        chew_cube: 1,
+        small_ball: 1,
+        large_ball: 1,
+        small_tunnel: 1,
+        large_tunnel: 1,
+        small_hammock: 1,
+        large_hammock: 1,
+        small_bed: 1,
+        large_bed: 1,
+        small_house: 1,
+        large_house: 1
+      }
+    },
+
+    // Initialize inventory if empty
+    initializeIfEmpty() {
+      console.log('Initializing inventory, current items:', this.items)
+      if (Object.keys(this.items).length === 0) {
+        console.log('Inventory is empty, resetting to defaults')
+        this.resetToDefaults()
+      } else {
+        console.log('Inventory has items:', Object.keys(this.items))
+      }
+    },
+
+    // Force reset inventory to defaults
+    forceResetToDefaults() {
+      console.log('Force resetting inventory to defaults')
+      this.resetToDefaults()
+      // Clear any persisted state
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('inventory')
       }
     },
 

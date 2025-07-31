@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useThemeStore } from './stores/theme'
+import { useInventoryStore } from './stores/inventory'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/cage/StatusMarquee.vue'
 import CageItemManager from './components/cage/CageItemManager.vue'
@@ -11,9 +12,11 @@ import AppPanels from './components/panels/AppPanels.vue'
 
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const inventoryStore = useInventoryStore()
 
 onMounted(() => {
   themeStore.initTheme()
+  inventoryStore.forceResetToDefaults()
 })
 
 const showGuineaPig = ref(false)

@@ -1,5 +1,5 @@
 <template>
-  <div class="gps-subnav" v-if="isOpen">
+  <div class="gps-subnav gps-scrollbar" v-if="isOpen">
     <div class="gps-subnav__container">
       <div class="gps-subnav__header">
         <h3 class="gps-subnav__title">{{ title }}</h3>
@@ -12,7 +12,7 @@
         </button>
       </div>
       
-      <div class="gps-subnav__content gps-scrollbar">
+      <div class="gps-subnav__content">
         <slot />
       </div>
     </div>
@@ -51,7 +51,8 @@ const emit = defineEmits(['close'])
   box-shadow: var(--box-shadow-medium);
   z-index: 300;
   animation: gps-subnav-slide-in 0.2s ease-out;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   margin-inline-start: 0.5rem;
 }
 
@@ -70,7 +71,7 @@ const emit = defineEmits(['close'])
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 1rem;
+  padding: .75rem;
   box-sizing: border-box;
 }
 
@@ -111,21 +112,15 @@ const emit = defineEmits(['close'])
   color: var(--color-white);
 }
 
-.gps-subnav__content.gps-scrollbar {
-  scrollbar-gutter: stable;
-}
-
 /* ===== SHARED SUBNAV CONTENT STYLES ===== */
 
 .gps-subnav__content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding-inline-end: 0.5rem;
   min-height: 0; 
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
 }
 
 /* ===== SHARED GRID LAYOUT ===== */
@@ -143,6 +138,8 @@ const emit = defineEmits(['close'])
     width: 200px;
     min-height: 220px;
     max-height: 450px;
+    overflow: hidden;
+    overflow-y: auto;
   }
   
   .gps-subnav__grid {
