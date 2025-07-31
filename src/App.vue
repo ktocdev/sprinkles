@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from './stores/user'
-import { useInventoryStore } from './stores/inventory'
 import { useThemeStore } from './stores/theme'
 import Main from './components/pages/Main.vue'
 import TopBar from './components/navigation/TopBar.vue'
@@ -11,9 +10,9 @@ import SpecimenPanels from './components/panels/SpecimenPanels.vue'
 import WelcomePanel from './components/panels/WelcomePanel.vue'
 import ThemeExplorerPanel from './components/panels/ThemeExplorerPanel.vue'
 import DebugPanel from './components/panels/DebugPanel.vue'
+import IconSidebarPanels from './components/panels/IconSidebarPanels.vue'
 
 const userStore = useUserStore()
-const inventoryStore = useInventoryStore()
 const themeStore = useThemeStore()
 
 onMounted(() => {
@@ -92,7 +91,6 @@ function handleGameReset() {
 
 <template>
   <div class="gps-app">
-
     <TopBar 
       v-if="userStore.name" 
       @showDebug="debugPanelRef?.toggleDebugPanel()"
@@ -116,25 +114,7 @@ function handleGameReset() {
       />
       
       <div class="gps-app__content-area">
-        <div class="gps-app__content-layout">
-          <div class="gps-app__content-main">
-            <Main 
-              v-if="userStore.name"
-              :userStore="userStore" 
-              :inventoryStore="inventoryStore" 
-              :showInventory="showInventory"
-              :showGuineaPig="showGuineaPig"
-              :showNeeds="showNeeds"
-              :showCageStatus="showCageStatus"
-              :showMarket="showMarket"
-              @closeInventory="showInventory = false"
-              @closeGuineaPig="showGuineaPig = false"
-              @closeNeeds="showNeeds = false"
-              @closeCageStatus="showCageStatus = false"
-              @closeMarket="showMarket = false"
-            />
-          </div>
-        </div>
+        <Main v-if="userStore.name" />
       </div>
     </div>
 
@@ -150,18 +130,32 @@ function handleGameReset() {
     <SpecimenPanels ref="specimenPanelsRef" />
     <ThemeExplorerPanel ref="themeExplorerPanelRef" />
     <DebugPanel ref="debugPanelRef" @gameReset="handleGameReset" />
+    
+    <!-- IconSidebar Panels -->
+    <IconSidebarPanels 
+      :showInventory="showInventory"
+      :showGuineaPig="showGuineaPig"
+      :showNeeds="showNeeds"
+      :showCageStatus="showCageStatus"
+      :showMarket="showMarket"
+      @closeInventory="showInventory = false"
+      @closeGuineaPig="showGuineaPig = false"
+      @closeNeeds="showNeeds = false"
+      @closeCageStatus="showCageStatus = false"
+      @closeMarket="showMarket = false"
+    />
   </div>
 </template>
 
 <style>
 @import './styles/shared.css';
 
-.gps-app {
+/* .gps-app {
   width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
+} */
 
 .gps-app__main-layout {
   display: flex;
@@ -179,19 +173,6 @@ function handleGameReset() {
   min-width: 0;
   padding-block-start: 80px; /* Account for TopBar height */
   padding-block-end: 80px; /* Account for Footer height */
-}
-
-.gps-app__content-layout {
-  display: flex;
-  max-width: 1200px;
-  width: 100%;
-  box-sizing: border-box;
-  gap: 2rem;
-}
-
-.gps-app__content-main {
-  flex: 1;
-  min-width: 0;
 }
 
 .gps-app__footer-wrapper {

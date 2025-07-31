@@ -1,10 +1,7 @@
 <template>
   <nav class="gps-icon-sidebar">
     <div class="gps-icon-sidebar__container">
-      <div class="gps-icon-sidebar__logo">
-        🐹
-      </div>
-      
+
       <template v-if="userStore.name">
         <button 
           class="gps-icon-sidebar__button"
@@ -186,7 +183,7 @@ function handleCageInteraction(action) {
   height: 100vh;
   position: fixed;
   left: 0;
-  top: 0;
+  top: 46px; /* Account for TopBar height */
   z-index: 50;
   box-shadow: var(--box-shadow);
 }
@@ -197,18 +194,6 @@ function handleCageInteraction(action) {
   gap: 0.5rem;
   width: 100%;
   align-items: center;
-}
-
-.gps-icon-sidebar__logo {
-  font-size: var(--font-size-3xl);
-  margin-block-end: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-accent);
-  font-weight: var(--font-weight-semibold);
-  text-align: center;
-  line-height: 1;
 }
 
 .gps-icon-sidebar__button {
