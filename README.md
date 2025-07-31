@@ -5,8 +5,8 @@ A text-based browser game where you care for a virtual guinea pig! Built with Vu
 ## Features
 - Care for your guinea pig: manage hunger, thirst, cleanliness, and more
 - Interactive cage grid with movable guinea pig and droppable poops
-- Inventory system for food and items
-- Market, currency, and user profile
+- Market system for buying and selling items
+- Item management through the cage item manager
 - All game state is saved in your browser (localStorage)
 - Modern, modular UI with panels and menubar
 

@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import Panel from '../shared/Panel.vue'
-import DebugPanel from '../shared/DebugPanel.vue'
+import Button from '../shared/Button.vue'
 import { useUserStore } from '../../stores/user'
 import { useInventoryStore } from '../../stores/inventory'
 import { useGuineaPigStore } from '../../stores/guineaPig'
@@ -65,10 +65,49 @@ defineExpose({
     title="🐛 Debug Panel" 
     @close="showDebugPanel = false"
   >
-    <DebugPanel 
-      @resetGame="resetGame"
-      @clearCage="clearCage"
-      @resetInventory="resetInventory"
-    />
+    <div class="gps-panel-content">
+      <div class="gps-panel-section">
+        <div class="gps-panel-actions">
+          <div class="gps-panel-action-item">
+            <Button 
+              type="danger"
+              @click="resetGame"
+              class="gps-panel-action-button"
+            >
+              🔄 Reset Game
+            </Button>
+            <p class="gps-panel-action-description">
+              Reset all game data to initial state. This will clear all progress and cannot be undone.
+            </p>
+          </div>
+          
+          <div class="gps-panel-action-item">
+            <Button 
+              type="warning"
+              @click="clearCage"
+              class="gps-panel-action-button"
+            >
+              🧹 Clear Cage
+            </Button>
+            <p class="gps-panel-action-description">
+              Clear all items and poop from the cage, returning it to an empty state.
+            </p>
+          </div>
+          
+          <div class="gps-panel-action-item">
+            <Button 
+              type="secondary"
+              @click="resetInventory"
+              class="gps-panel-action-button"
+            >
+              📦 Reset Inventory
+            </Button>
+            <p class="gps-panel-action-description">
+              Reset inventory to default values, restoring all items including large beds and houses.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </Panel>
 </template> 

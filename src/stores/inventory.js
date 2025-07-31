@@ -3,70 +3,84 @@ import { defineStore } from 'pinia'
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
     items: {
-      bedding: 5,
+      // Food items
       hay: 10,
-      pellets: 8,
-      lettuce: 3,
-      blueberries: 2,
-      carrots: 4,
-      cucumbers: 2,
-      small_chew_stick: 3,
-      large_chew_stick: 2,
-      small_ball: 1,
-      large_ball: 1,
-      small_tunnel: 1,
-      large_tunnel: 1,
-      small_hammock: 1,
-      large_hammock: 1,
-      small_bed: 1,
-      large_bed: 1,
-      small_house: 1,
-      large_house: 1,
-      chew_cube: 2,
+      pellets: 10,
+      vegetables: 5,
+      fruits: 3,
+      
+      // Bedding
+      bedding: 20,
+      
+      // Toys and enrichment
+      chewToys: 2,
+      tunnels: 1,
+      hideouts: 1,
+      
+      // Cage items
+      waterBottle: 1,
+      foodBowl: 1,
+      
+      // Large items
+      largeBed: 0,
+      largeHouse: 0
     }
   }),
+
+  getters: {
+    getItemCount: (state) => (itemName) => {
+      return state.items[itemName] || 0
+    },
+    
+    hasItem: (state) => (itemName, quantity = 1) => {
+      return (state.items[itemName] || 0) >= quantity
+    },
+    
+    getTotalItems: (state) => {
+      return Object.values(state.items).reduce((total, count) => total + count, 0)
+    }
+  },
+
   actions: {
-    addItem(item, amount = 1) {
-      if (this.items[item] !== undefined) {
-        this.items[item] += amount
+    addItem(itemName, quantity = 1) {
+      if (this.items[itemName] !== undefined) {
+        this.items[itemName] += quantity
+      } else {
+        this.items[itemName] = quantity
       }
     },
-    removeItem(item, amount = 1) {
-      if (this.items[item] !== undefined && this.items[item] >= amount) {
-        this.items[item] -= amount
+
+    removeItem(itemName, quantity = 1) {
+      if (this.items[itemName] && this.items[itemName] >= quantity) {
+        this.items[itemName] -= quantity
         return true
       }
       return false
     },
-    setItemQuantity(item, amount) {
-      if (this.items[item] !== undefined) {
-        this.items[item] = amount
-      }
+
+    setItemCount(itemName, quantity) {
+      this.items[itemName] = Math.max(0, quantity)
     },
+
     resetToDefaults() {
       this.items = {
-        bedding: 5,
         hay: 10,
-        pellets: 8,
-        lettuce: 3,
-        blueberries: 2,
-        carrots: 4,
-        cucumbers: 2,
-        small_chew_stick: 3,
-        large_chew_stick: 2,
-        small_ball: 1,
-        large_ball: 1,
-        small_tunnel: 1,
-        large_tunnel: 1,
-        small_hammock: 1,
-        large_hammock: 1,
-        small_bed: 1,
-        large_bed: 1,
-        small_house: 1,
-        large_house: 1,
-        chew_cube: 2,
+        pellets: 10,
+        vegetables: 5,
+        fruits: 3,
+        bedding: 20,
+        chewToys: 2,
+        tunnels: 1,
+        hideouts: 1,
+        waterBottle: 1,
+        foodBowl: 1,
+        largeBed: 1,
+        largeHouse: 1
       }
+    },
+
+    $reset() {
+      this.items = {}
     }
-  },
-  persist: true
+  }
 }) 

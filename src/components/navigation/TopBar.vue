@@ -4,8 +4,6 @@ import { useCageStore } from '../../stores/cage'
 
 const cageStore = useCageStore()
 
-defineEmits(['showDebug'])
-
 function togglePause() {
   cageStore.togglePause()
 }
@@ -14,7 +12,6 @@ function togglePause() {
 <template>
   <header class="gps-topbar">
     <div class="gps-topbar__container gps-container">
-      <!-- Title and Logo Group -->
       <div class="gps-topbar__brand">
         <div class="gps-topbar__logo">
           🐹
@@ -22,30 +19,17 @@ function togglePause() {
         <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
       </div>
       
-      <!-- Control Buttons -->
-      <div class="gps-topbar__controls">
-        <!-- Pause Button -->
-        <Button 
-          type="flat"
-          size="compact"
-          @click="togglePause"
-          class="gps-topbar__pause-button"
-          :title="cageStore.paused ? 'Resume Game' : 'Pause Game'"
-        >
-          {{ cageStore.paused ? '▶️' : '⏸️' }} {{ cageStore.paused ? 'Resume' : 'Pause' }}
-        </Button>
-        
-        <!-- Debug Button -->
-        <Button 
-          type="flat"
-          size="compact"
-          @click="$emit('showDebug')"
-          class="gps-topbar__debug-button"
-          title="Debug Panel"
-        >
-          🐛 Debug
-        </Button>
-      </div>
+       <div class="gps-topbar__controls">
+         <Button 
+           type="flat"
+           size="compact"
+           @click="togglePause"
+           class="gps-topbar__pause-button"
+           :title="cageStore.paused ? 'Resume Game' : 'Pause Game'"
+         >
+           {{ cageStore.paused ? '▶️' : '⏸️' }} {{ cageStore.paused ? 'Resume' : 'Pause' }}
+         </Button>
+       </div>
     </div>
   </header>
 </template>
@@ -56,13 +40,15 @@ function togglePause() {
   background: var(--color-panel);
   border-block-end: 2px solid var(--color-accent);
   box-shadow: var(--box-shadow);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 100;
+  height: 3em;
 }
 
 .gps-topbar__container {
-  padding: 0.5rem 0.75rem;
+  padding: 0 .75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -70,6 +56,7 @@ function togglePause() {
   position: relative;
   container-type: inline-size;
   container-name: topbar;
+  height: 100%;
 }
 
 .gps-topbar__brand {
@@ -79,12 +66,12 @@ function togglePause() {
 }
 
 .gps-topbar__logo {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.25rem;
-  height: 2.25rem;
+  min-width: 2rem;
+  height: 2rem;
   background: var(--color-accent);
   border-radius: 50%;
   color: var(--color-panel);
@@ -98,7 +85,7 @@ function togglePause() {
 }
 
 .gps-topbar__title {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-lg);
   margin: 0;
   color: var(--color-accent);
   font-weight: var(--font-weight-semibold);
@@ -116,23 +103,8 @@ function togglePause() {
   padding: 0.25rem 0.75rem;
 }
 
-.gps-topbar__debug-button {
-  font-size: var(--font-size-sm);
-  padding: 0.25rem 0.75rem;
-}
-
-/* Container query for larger containers */
-@container topbar (min-width: 800px) {
+@media (min-width: 600px) {
   .gps-topbar__container {
-    padding: 0.75rem 1.5rem;
-    gap: 0.75em;
-  }
-}
-
-/* Container query for medium containers */
-@container topbar (min-width: 600px) and (max-width: 799px) {
-  .gps-topbar__container {
-    padding: 0.75rem 1rem;
     gap: 0.5em;
   }
   
@@ -140,17 +112,29 @@ function togglePause() {
     gap: 0.25rem;
   }
   
-  .gps-topbar__pause-button,
-  .gps-topbar__debug-button {
+  .gps-topbar__pause-button {
     padding: 0.25rem 0.5rem;
+  }
+  
+  .gps-topbar__title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .gps-topbar__logo {
+    font-size: 1.75rem;
+    min-width: 2.25rem;
+    height: 2.25rem;
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .gps-topbar {
-    margin-inline-start: 50px;
-    width: calc(100% - 50px);
+@media (min-width: 800px) {
+  .gps-topbar__container {
+    gap: 0.75em;
+  }
+  
+  .gps-topbar__title {
+    font-size: var(--font-size-2xl);
   }
 }
+
 </style> 

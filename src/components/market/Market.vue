@@ -9,8 +9,6 @@
         </div>
       </div>
 
-
-
       <!-- Market Items -->
       <div class="gps-market__sections">
         <!-- Food Section -->
@@ -100,8 +98,6 @@ const toyItems = ['small_chew_stick', 'large_chew_stick', 'small_ball', 'large_b
 
 // Recent transactions
 const recentTransactions = ref([])
-
-
 
 // Buy item
 const buyItem = (itemName) => {

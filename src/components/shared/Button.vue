@@ -20,7 +20,7 @@ const buttonClass = computed(() => {
   const baseClass = 'gps-button'
   const typeClass = `${baseClass}--${props.type}`
   const sizeClass = props.size === 'compact' ? `${baseClass}--compact` : ''
-  return `${typeClass} ${sizeClass}`.trim()
+  return `${baseClass} ${typeClass} ${sizeClass}`.trim()
 })
 
 // Event handlers for disabled state
@@ -67,6 +67,7 @@ const handleKeydown = (event) => {
   font-weight: var(--font-weight-medium);
   font-family: inherit;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 /* Compact size variant */
