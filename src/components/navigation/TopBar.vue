@@ -14,8 +14,13 @@ function togglePause() {
 <template>
   <header class="gps-topbar">
     <div class="gps-topbar__container gps-container">
-      <!-- Title -->
-      <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
+      <!-- Title and Logo Group -->
+      <div class="gps-topbar__brand">
+        <div class="gps-topbar__logo">
+          🐹
+        </div>
+        <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
+      </div>
       
       <!-- Control Buttons -->
       <div class="gps-topbar__controls">
@@ -54,8 +59,6 @@ function togglePause() {
   position: sticky;
   top: 0;
   z-index: 100;
-  margin-inline-start: 60px;
-  width: calc(100% - 60px);
 }
 
 .gps-topbar__container {
@@ -67,6 +70,31 @@ function togglePause() {
   position: relative;
   container-type: inline-size;
   container-name: topbar;
+}
+
+.gps-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gps-topbar__logo {
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  background: var(--color-accent);
+  border-radius: 50%;
+  color: var(--color-panel);
+  box-shadow: var(--box-shadow);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.gps-topbar__logo:hover {
+  transform: scale(1.1);
 }
 
 .gps-topbar__title {
