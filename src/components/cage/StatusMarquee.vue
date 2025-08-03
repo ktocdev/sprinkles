@@ -3,10 +3,12 @@ import { computed, ref, watch } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
+import { usePoopStore } from '../../stores/poop'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
+const poopStore = usePoopStore()
 
 const shouldBounce = ref(false)
 
@@ -27,13 +29,13 @@ const currentItem = computed(() => {
 // Check if guinea pig is on poop
 const isOnPoop = computed(() => {
   const { x, y } = cageStore.guineaPigPos
-  return cageStore.poop.some(p => p.x === x && p.y === y)
+  return poopStore.isPoopAtPosition(x, y)
 })
 
 // Check if guinea pig is on fresh poop (just created)
 const isOnFreshPoop = computed(() => {
   const { x, y } = cageStore.guineaPigPos
-  const poopAtPosition = cageStore.poop.find(p => p.x === x && p.y === y)
+  const poopAtPosition = poopStore.getPoopAtPosition(x, y)
   
   if (!poopAtPosition) return false
   

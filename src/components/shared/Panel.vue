@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, watch, onUnmounted } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -17,6 +17,29 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
+
+// Scroll prevention functions
+function preventScroll() {
+  document.body.classList.add('gps-no-scroll')
+}
+
+function allowScroll() {
+  document.body.classList.remove('gps-no-scroll')
+}
+
+// Watch for panel open/close state
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    preventScroll()
+  } else {
+    allowScroll()
+  }
+})
+
+// Clean up on component unmount
+onUnmounted(() => {
+  allowScroll()
+})
 
 function handleBackdropClick(event) {
   if (event.target === event.currentTarget) {
@@ -52,6 +75,15 @@ function handleEscapeKey(event) {
 </template>
 
 <style>
+/* ===== SCROLL PREVENTION ===== */
+
+.gps-no-scroll {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 /* ===== PANEL CORE STRUCTURE ===== */
 
 .gps-panel {

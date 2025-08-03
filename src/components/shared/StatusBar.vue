@@ -7,7 +7,7 @@
       max="100"
       :style="{ '--progress-color': color }"
     ></progress>
-    <span v-if="showValue" class="gps-status-bar__value">{{ value }}</span>
+    <span v-if="showValue" class="gps-status-bar__value">{{ displayValue || value }}</span>
   </div>
 </template>
 
@@ -23,6 +23,10 @@ const props = defineProps({
     type: Number,
     required: true,
     validator: (value) => value >= 0 && value <= 100
+  },
+  displayValue: {
+    type: String,
+    default: null
   },
   color: {
     type: String,

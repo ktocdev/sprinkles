@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Panel from '../shared/Panel.vue'
 import { useUserStore } from '../../stores/user'
 import { useGuineaPigStore } from '../../stores/guineaPig'
@@ -11,7 +11,12 @@ import Dropdown from '../shared/Dropdown.vue'
 const userStore = useUserStore()
 const guineaPigStore = useGuineaPigStore()
 const nameInput = ref('')
-const guineaPigInfo = ref({ ...guineaPigStore.info })
+const guineaPigInfo = ref({
+  name: '',
+  birthday: '',
+  coat: '',
+  gender: ''
+})
 
 // Validation computed property
 const isFormValid = computed(() => {
@@ -112,6 +117,24 @@ function handleSubmit() {
     guineaPigStore.setInfoField(key, guineaPigInfo.value[key])
   }
 }
+
+// Clear form values when user store is reset
+function clearForm() {
+  nameInput.value = ''
+  guineaPigInfo.value = {
+    name: '',
+    birthday: '',
+    coat: '',
+    gender: ''
+  }
+}
+
+// Watch for user store changes to clear form when reset
+watch(() => userStore.name, (newName) => {
+  if (!newName) {
+    clearForm()
+  }
+})
 </script>
 
 <style>

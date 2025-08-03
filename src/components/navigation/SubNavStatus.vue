@@ -3,6 +3,7 @@
     <StatusBar 
       :label="label"
       :value="percentage"
+      :displayValue="value"
       :color="color"
       :showLabel="true"
       :showValue="true"

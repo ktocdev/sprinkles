@@ -100,7 +100,7 @@ const userStore = useUserStore()
 
 <style>
 .gps-icon-sidebar {
-  width: 50px;
+  width: 40px;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: 0;
@@ -136,7 +136,7 @@ const userStore = useUserStore()
 
 @media (min-width: 768px) {
   .gps-icon-sidebar {
-    width: 60px;
+    width: 50px;
   }
   
   .gps-icon-sidebar__divider {

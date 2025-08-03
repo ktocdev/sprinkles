@@ -29,15 +29,15 @@
 
         <!-- Poop Count -->
         <SubNavStatus
-          label="Poop Count"
-          :value="cageStore.poop.length"
+          label="Poop Per Cage"
+          :value="`${Math.ceil(getPoopPercentage())}%`"
           :percentage="getPoopPercentage()"
         />
 
         <!-- Item Count -->
         <SubNavStatus
           label="Items in Cage"
-          :value="cageStore.items.length"
+          :value="`${cageStore.items.length}`"
           :percentage="getItemPercentage()"
         />
       </div>
@@ -48,6 +48,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { useCageStore } from '../../stores/cage'
+import { usePoopStore } from '../../stores/poop'
 import SubNav from '../navigation/SubNav.vue'
 import SubNavStatus from '../navigation/SubNavStatus.vue'
 
@@ -61,11 +62,12 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const cageStore = useCageStore()
+const poopStore = usePoopStore()
 
-// Calculate poop percentage (max 20 poops = 100%)
+// Calculate poop percentage based on available cells
 const getPoopPercentage = () => {
-  const maxPoops = 20
-  return Math.min((cageStore.poop.length / maxPoops) * 100, 100)
+  if (poopStore.availableCells === 0) return 0
+  return Math.min((poopStore.poopCount / poopStore.maxPoopCount) * 100, 100)
 }
 
 // Calculate item percentage (max 10 items = 100%)

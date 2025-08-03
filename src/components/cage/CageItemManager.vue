@@ -244,6 +244,7 @@
 import { ref, computed } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore } from '../../stores/inventory'
+import { usePoopStore } from '../../stores/poop'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
@@ -252,6 +253,7 @@ import FormGroup from '../shared/FormGroup.vue'
 
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
+const poopStore = usePoopStore()
 
 // Modal states
 const showAddItemModal = ref(false)
@@ -373,7 +375,7 @@ function addItemToCage() {
       // Check if position is occupied by guinea pig
       const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === checkX && cageStore.guineaPigPos.y === checkY)
       // Check if position is occupied by poop
-      const isOccupiedByPoop = cageStore.poop.some(p => p.x === checkX && p.y === checkY)
+      const isOccupiedByPoop = poopStore.poop.some(p => p.x === checkX && p.y === checkY)
       // Check if position is water bottle position
       const isWaterBottlePosition = (checkX === cageStore.size.width - 1 && checkY === 0)
       
@@ -445,7 +447,7 @@ function confirmMoveItem() {
       // Check if position is occupied by guinea pig
       const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === checkX && cageStore.guineaPigPos.y === checkY)
       // Check if position is occupied by poop
-      const isOccupiedByPoop = cageStore.poop.some(p => p.x === checkX && p.y === checkY)
+      const isOccupiedByPoop = poopStore.poop.some(p => p.x === checkX && p.y === checkY)
       // Check if position is water bottle position
       const isWaterBottlePosition = (checkX === cageStore.size.width - 1 && checkY === 0)
       

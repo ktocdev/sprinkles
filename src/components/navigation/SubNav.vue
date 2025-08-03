@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, watch, onUnmounted } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -34,6 +34,29 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
+
+// Scroll prevention functions
+function preventScroll() {
+  document.body.classList.add('gps-no-scroll')
+}
+
+function allowScroll() {
+  document.body.classList.remove('gps-no-scroll')
+}
+
+// Watch for subnav open/close state
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    preventScroll()
+  } else {
+    allowScroll()
+  }
+})
+
+// Clean up on component unmount
+onUnmounted(() => {
+  allowScroll()
+})
 </script>
 
 <style>
@@ -41,10 +64,10 @@ const emit = defineEmits(['close'])
 
 .gps-subnav {
   position: absolute;
-  top: 0;
+  top: 3rem;
   left: 100%;
   width: 160px;
-  max-height: 400px;
+  max-height: calc(100vh - 5rem);
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
@@ -136,8 +159,6 @@ const emit = defineEmits(['close'])
 @media (min-width: 768px) {
   .gps-subnav {
     width: 200px;
-    min-height: 220px;
-    max-height: 450px;
     overflow: hidden;
     overflow-y: auto;
   }

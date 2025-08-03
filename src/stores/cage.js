@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useInventoryStore } from './inventory.js'
 import { useMarketStore } from './market.js'
 import { useGuineaPigStore } from './guineaPig.js'
+import { usePoopStore } from './poop.js'
 
 function createEmptyGrid(width, height) {
   return Array.from({ length: height }, () => Array.from({ length: width }, () => null))
@@ -16,7 +17,6 @@ export const useCageStore = defineStore('cage', {
     size: { width: 18, height: 12 },
     beddingFreshness: 100,
     waterLevel: 100,
-    poop: [], // array of { x, y, timestamp }
     guineaPigPos: { x: 0, y: 0 },
     items: [], // array of { id, name, type, x, y, isConsumable, quantity }
     consumptionStats: {}, // Track consumption by item type
@@ -26,12 +26,34 @@ export const useCageStore = defineStore('cage', {
   getters: {
     grid(state) {
       const grid = createEmptyGrid(state.size.width, state.size.height)
-      // Place poops
-      for (const p of state.poop) {
+      const poopStore = usePoopStore()
+      
+      // Calculate occupied cells
+      let occupiedCells = 0
+      
+      // Count items (including their size)
+      for (const item of state.items) {
+        const itemSize = item.size || { width: 1, height: 1 }
+        occupiedCells += itemSize.width * itemSize.height
+      }
+      
+      // Count guinea pig position
+      occupiedCells += 1
+      
+      // Count water bottle position
+      occupiedCells += 1
+      
+      // Update poop store with grid information
+      const totalCells = state.size.width * state.size.height
+      poopStore.updateGridInfo(totalCells, occupiedCells)
+      
+      // Place poops from poop store
+      for (const p of poopStore.poop) {
         if (grid[p.y] && grid[p.y][p.x] !== undefined) {
           grid[p.y][p.x] = 'poop'
         }
       }
+      
       // Place items
       for (const item of state.items) {
         const itemSize = item.size || { width: 1, height: 1 }
@@ -85,10 +107,12 @@ export const useCageStore = defineStore('cage', {
       this.waterLevel = clampValue(value)
     },
     addPoop(x, y) {
-      this.poop.push({ x, y, timestamp: Date.now() })
+      const poopStore = usePoopStore()
+      return poopStore.addPoop(x, y)
     },
     removePoop(x, y) {
-      this.poop = this.poop.filter(p => !(p.x === x && p.y === y))
+      const poopStore = usePoopStore()
+      return poopStore.removePoop(x, y)
     },
     setGuineaPigPos(x, y) {
       // Ensure position is within grid bounds
@@ -99,7 +123,8 @@ export const useCageStore = defineStore('cage', {
     resetCage() {
       this.beddingFreshness = 100
       this.waterLevel = 100
-      this.poop = []
+      const poopStore = usePoopStore()
+      poopStore.reset()
       this.guineaPigPos = { x: 0, y: 0 }
       this.items = []
     },
@@ -108,7 +133,8 @@ export const useCageStore = defineStore('cage', {
     },
 
     cleanCage() {
-      this.poop = []
+      const poopStore = usePoopStore()
+      return poopStore.cleanAllPoop()
     },
     addItem(item, x, y) {
       // Get item size (default to 1x1 if not specified)
@@ -117,11 +143,12 @@ export const useCageStore = defineStore('cage', {
       const itemHeight = itemSize.height
       
       // Check if all required positions are available
+      const poopStore = usePoopStore()
       for (let checkY = y; checkY < y + itemHeight; checkY++) {
         for (let checkX = x; checkX < x + itemWidth; checkX++) {
           const isOccupied = this.items.some(i => i.x === checkX && i.y === checkY) ||
                             (this.guineaPigPos.x === checkX && this.guineaPigPos.y === checkY) ||
-                            this.poop.some(p => p.x === checkX && p.y === checkY) ||
+                            poopStore.isPoopAtPosition(checkX, checkY) ||
                             (checkX === this.size.width - 1 && checkY === 0) // Water bottle position
           
           if (isOccupied) {
@@ -155,11 +182,12 @@ export const useCageStore = defineStore('cage', {
       const itemHeight = itemSize.height
       
       // Check if all required positions are available
+      const poopStore = usePoopStore()
       for (let checkY = newY; checkY < newY + itemHeight; checkY++) {
         for (let checkX = newX; checkX < newX + itemWidth; checkX++) {
           const isOccupied = this.items.some(i => i.id !== itemId && i.x === checkX && i.y === checkY) ||
                             (this.guineaPigPos.x === checkX && this.guineaPigPos.y === checkY) ||
-                            this.poop.some(p => p.x === checkX && p.y === checkY) ||
+                            poopStore.isPoopAtPosition(checkX, checkY) ||
                             (checkX === this.size.width - 1 && checkY === 0) // Water bottle position
           
           if (isOccupied) {
@@ -222,7 +250,8 @@ export const useCageStore = defineStore('cage', {
       const { x, y } = this.guineaPigPos
       
       // Check if guinea pig is on poop
-      const poopAtPosition = this.poop.some(p => p.x === x && p.y === y)
+      const poopStore = usePoopStore()
+      const poopAtPosition = poopStore.isPoopAtPosition(x, y)
       if (poopAtPosition) {
         return this.interactWithPoop()
       }
@@ -250,36 +279,19 @@ export const useCageStore = defineStore('cage', {
     // Handle poop interaction
     interactWithPoop() {
       const guineaPigStore = useGuineaPigStore()
+      const poopStore = usePoopStore()
       const { x, y } = this.guineaPigPos
       
-      // Find the poop at this position
-      const poopAtPosition = this.poop.find(p => p.x === x && p.y === y)
+      const interaction = poopStore.interactWithPoop(x, y)
       
-      if (!poopAtPosition) {
-        return { success: false, message: 'No poop found' }
+      if (interaction.success && interaction.hygieneImpact > 0) {
+        guineaPigStore.adjustNeed('hygiene', -interaction.hygieneImpact)
       }
-      
-      // Check if this is a fresh poop (less than 2 seconds old)
-      const poopAge = Date.now() - poopAtPosition.timestamp
-      const isFreshPoop = poopAge < 2000 // 2 seconds
-      
-      if (isFreshPoop) {
-        // Don't count as stepping on poop if it's fresh
-        return {
-          success: true,
-          message: 'Fresh poop - no hygiene penalty',
-          hygieneDecrease: 0,
-          consumed: false
-        }
-      }
-      
-      // Decrease hygiene when stepping on old poop
-      guineaPigStore.adjustNeed('hygiene', -5)
       
       return {
-        success: true,
-        message: 'Stepped on poop - hygiene decreased',
-        hygieneDecrease: 5,
+        success: interaction.success,
+        message: interaction.message,
+        hygieneDecrease: interaction.hygieneImpact,
         consumed: false
       }
     },
