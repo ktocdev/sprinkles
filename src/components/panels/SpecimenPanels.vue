@@ -20,76 +20,55 @@ const showInputSpecimen = ref(false)
 const showFormGroupSpecimen = ref(false)
 const showToggleSpecimen = ref(false)
 
+// Helper function to close all panels except the specified one
+function closeAllPanelsExcept(exceptPanel) {
+  showSpecimenLanding.value = exceptPanel === 'landing' ? showSpecimenLanding.value : false
+  showButtonSpecimen.value = exceptPanel === 'button' ? showButtonSpecimen.value : false
+  showDropdownSpecimen.value = exceptPanel === 'dropdown' ? showDropdownSpecimen.value : false
+  showModalSpecimen.value = exceptPanel === 'modal' ? showModalSpecimen.value : false
+  showStatusBarSpecimen.value = exceptPanel === 'statusBar' ? showStatusBarSpecimen.value : false
+  showInputSpecimen.value = exceptPanel === 'input' ? showInputSpecimen.value : false
+  showFormGroupSpecimen.value = exceptPanel === 'formGroup' ? showFormGroupSpecimen.value : false
+  showToggleSpecimen.value = exceptPanel === 'toggle' ? showToggleSpecimen.value : false
+}
+
 function toggleSpecimenLanding() {
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showFormGroupSpecimen.value = false
-  showToggleSpecimen.value = false
+  closeAllPanelsExcept('landing')
   showSpecimenLanding.value = !showSpecimenLanding.value
 }
 
 function toggleButtonSpecimen() {
-  showSpecimenLanding.value = false
+  closeAllPanelsExcept('button')
   showButtonSpecimen.value = !showButtonSpecimen.value
 }
 
 function toggleDropdownSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
+  closeAllPanelsExcept('dropdown')
   showDropdownSpecimen.value = !showDropdownSpecimen.value
 }
 
 function toggleModalSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showStatusBarSpecimen.value = false
+  closeAllPanelsExcept('modal')
   showModalSpecimen.value = !showModalSpecimen.value
 }
 
 function toggleStatusBarSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showInputSpecimen.value = false
+  closeAllPanelsExcept('statusBar')
   showStatusBarSpecimen.value = !showStatusBarSpecimen.value
 }
 
 function toggleInputSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showFormGroupSpecimen.value = false
+  closeAllPanelsExcept('input')
   showInputSpecimen.value = !showInputSpecimen.value
 }
 
 function toggleFormGroupSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showToggleSpecimen.value = false
+  closeAllPanelsExcept('formGroup')
   showFormGroupSpecimen.value = !showFormGroupSpecimen.value
 }
 
 function toggleToggleSpecimen() {
-  showSpecimenLanding.value = false
-  showButtonSpecimen.value = false
-  showDropdownSpecimen.value = false
-  showModalSpecimen.value = false
-  showStatusBarSpecimen.value = false
-  showInputSpecimen.value = false
-  showFormGroupSpecimen.value = false
+  closeAllPanelsExcept('toggle')
   showToggleSpecimen.value = !showToggleSpecimen.value
 }
 

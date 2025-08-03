@@ -12,7 +12,7 @@
         </button>
       </div>
       
-      <div class="gps-subnav__content">
+      <div class="gps-subnav__content" :class="{ 'gps-subnav__grid': useGrid }">
         <slot />
       </div>
     </div>
@@ -30,6 +30,10 @@ const props = defineProps({
   title: {
     type: String,
     required: true
+  },
+  useGrid: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -142,8 +146,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding-inline-end: 0.5rem;
-  min-height: 0; 
-  /* padding: 0.5rem; */
+  min-height: 0;
 }
 
 /* ===== SHARED GRID LAYOUT ===== */

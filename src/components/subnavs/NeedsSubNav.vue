@@ -2,23 +2,17 @@
   <SubNav 
     :isOpen="isOpen" 
     title="Guinea Pig Needs"
+    :useGrid="true"
     @close="$emit('close')"
   >
-    <div class="gps-needs-subnav__content">
-      <div v-if="Object.keys(guineaPigStore.needs).length === 0" class="gps-needs-subnav__empty">
-        No needs data available
-      </div>
-      <div v-else class="gps-subnav__grid">
-        <SubNavStatus
-          v-for="(value, need) in guineaPigStore.needs" 
-          :key="need"
-          :label="formatNeedLabel(need)"
-          :value="`${value}%`"
-          :percentage="value"
-          :color="getNeedColor(need)"
-        />
-      </div>
-    </div>
+    <SubNavStatus
+      v-for="(value, need) in guineaPigStore.needs" 
+      :key="need"
+      :label="formatNeedLabel(need)"
+      :value="`${value}%`"
+      :percentage="value"
+      :color="getNeedColor(need)"
+    />
   </SubNav>
 </template>
 
@@ -59,14 +53,3 @@ const formatNeedLabel = (need) => {
   return need.charAt(0).toUpperCase() + need.slice(1)
 }
 </script>
-
-<style>
-.gps-needs-subnav__empty {
-  text-align: center;
-  color: var(--color-text);
-  opacity: 0.7;
-  font-style: italic;
-  padding: 1rem 0;
-  font-size: var(--font-size-sm);
-}
-</style> 

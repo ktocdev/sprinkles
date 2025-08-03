@@ -130,7 +130,6 @@ function handleGameReset() {
 </template>
 
 <style>
-@import './styles/shared.css';
 
 .gps-app__main-layout {
   display: flex;

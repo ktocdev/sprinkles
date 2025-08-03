@@ -202,89 +202,17 @@ defineExpose({
 </template>
 
 <style>
-/* Panel section styles - Mobile First */
-.gps-panel-section {
-  margin-block-end: 1.5rem;
-}
-
-.gps-panel-section:last-child {
-  margin-block-end: 0;
-}
-
-.gps-panel-section-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
-  margin-block-end: 0.75rem;
-  padding-block-end: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* Panel controls layout */
+/* Panel controls layout - specific to DebugPanel */
 .gps-panel-controls {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-/* Panel actions layout */
-.gps-panel-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.gps-panel-action-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background: var(--color-panel);
-}
-
-.gps-panel-action-button {
-  align-self: center;
-}
-
-.gps-panel-action-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  opacity: 0.7;
-  margin: 0;
-  line-height: 1.4;
-}
-
 /* Desktop enhancements */
 @media (min-width: 768px) {
-  .gps-panel-section {
-    margin-block-end: 2rem;
-  }
-  
-  .gps-panel-section-title {
-    font-size: var(--font-size-lg);
-    margin-block-end: 1rem;
-  }
-  
   .gps-panel-controls {
     gap: 1rem;
-  }
-  
-  .gps-panel-actions {
-    gap: 1.5rem;
-  }
-  
-  .gps-panel-action-item {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-  }
-  
-  .gps-panel-action-button {
-    flex-shrink: 0;
   }
 }
 </style> 

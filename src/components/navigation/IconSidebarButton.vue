@@ -19,18 +19,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  primary: {
-    type: Boolean,
-    default: false
-  },
-  danger: {
-    type: Boolean,
-    default: false
-  },
-  warning: {
-    type: Boolean,
-    default: false
-  },
   title: {
     type: String,
     default: ''
@@ -41,10 +29,7 @@ const emit = defineEmits(['click'])
 
 const buttonClasses = computed(() => ({
   'gps-icon-sidebar-button': true,
-  'gps-icon-sidebar-button--active': props.active,
-  'gps-icon-sidebar-button--primary': props.primary,
-  'gps-icon-sidebar-button--danger': props.danger,
-  'gps-icon-sidebar-button--warning': props.warning
+  'gps-icon-sidebar-button--active': props.active
 }))
 </script>
 
@@ -80,26 +65,7 @@ const buttonClasses = computed(() => ({
     }
   }
 
-  &.gps-icon-sidebar-button--primary {
-    background: var(--color-accent) !important;
-    color: var(--color-white) !important;
-    border-color: var(--color-accent) !important;
 
-    &:hover {
-      background: var(--color-accent-hover) !important;
-      color: var(--color-white) !important;
-    }
-  }
-
-  &.gps-icon-sidebar-button--danger:hover {
-    background: var(--color-danger) !important;
-    color: var(--color-white) !important;
-  }
-
-  &.gps-icon-sidebar-button--warning:hover {
-    background: var(--color-warning) !important;
-    color: var(--color-white) !important;
-  }
 
   /* Tooltip styles */
   &::before {

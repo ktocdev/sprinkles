@@ -84,6 +84,4 @@ function handleCleanPoop() {
 }
 </script>
 
-<style>
-/* Cage interaction panel specific styles are now consolidated in Panel.vue */
-</style> 
+ 
