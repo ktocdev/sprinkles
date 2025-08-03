@@ -2,52 +2,50 @@
   <SubNav 
     :isOpen="isOpen" 
     title="Cage Status"
+    :useGrid="true"
     @close="$emit('close')"
   >
-    <div class="gps-cage-status-subnav__content">
-      <div class="gps-subnav__grid">
-        <!-- Bedding Freshness -->
-        <SubNavStatus
-          label="Bedding Freshness"
-          :value="`${cageStore.beddingFreshness}%`"
-          :percentage="cageStore.beddingFreshness"
-        />
+    <!-- Bedding Freshness -->
+    <SubNavStatus
+      label="Bedding Freshness"
+      :value="`${cageStore.beddingFreshness}%`"
+      :percentage="cageStore.beddingFreshness"
+    />
 
-        <!-- Water Level -->
-        <SubNavStatus
-          label="Water Level"
-          :value="`${cageStore.waterLevel}%`"
-          :percentage="cageStore.waterLevel"
-        />
+    <!-- Water Level -->
+    <SubNavStatus
+      label="Water Level"
+      :value="`${cageStore.waterLevel}%`"
+      :percentage="cageStore.waterLevel"
+    />
 
-        <!-- Habitat Value -->
-        <SubNavStatus
-          label="Habitat Value"
-          :value="`${cageStore.habitatValue}%`"
-          :percentage="cageStore.habitatValue"
-        />
+    <!-- Habitat Value -->
+    <SubNavStatus
+      label="Habitat Value"
+      :value="`${cageStore.habitatValue}%`"
+      :percentage="cageStore.habitatValue"
+    />
 
-        <!-- Poop Count -->
-        <SubNavStatus
-          label="Poop Count"
-          :value="cageStore.poop.length"
-          :percentage="getPoopPercentage()"
-        />
+    <!-- Poop Count -->
+    <SubNavStatus
+      label="Poop Per Cage"
+      :value="`${Math.ceil(getPoopPercentage())}%`"
+      :percentage="getPoopPercentage()"
+    />
 
-        <!-- Item Count -->
-        <SubNavStatus
-          label="Items in Cage"
-          :value="cageStore.items.length"
-          :percentage="getItemPercentage()"
-        />
-      </div>
-    </div>
+    <!-- Item Count -->
+    <SubNavStatus
+      label="Items in Cage"
+      :value="`${cageStore.items.length}`"
+      :percentage="getItemPercentage()"
+    />
   </SubNav>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { useCageStore } from '../../stores/cage'
+import { usePoopStore } from '../../stores/poop'
 import SubNav from '../navigation/SubNav.vue'
 import SubNavStatus from '../navigation/SubNavStatus.vue'
 
@@ -61,11 +59,12 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const cageStore = useCageStore()
+const poopStore = usePoopStore()
 
-// Calculate poop percentage (max 20 poops = 100%)
+// Calculate poop percentage based on available cells
 const getPoopPercentage = () => {
-  const maxPoops = 20
-  return Math.min((cageStore.poop.length / maxPoops) * 100, 100)
+  if (poopStore.availableCells === 0) return 0
+  return Math.min((poopStore.poopCount / poopStore.maxPoopCount) * 100, 100)
 }
 
 // Calculate item percentage (max 10 items = 100%)
@@ -74,6 +73,3 @@ const getItemPercentage = () => {
   return Math.min((cageStore.items.length / maxItems) * 100, 100)
 }
 </script>
-
-<style>
-</style> 

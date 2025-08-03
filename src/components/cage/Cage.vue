@@ -2,15 +2,16 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import { usePoopStore } from '../../stores/poop'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
+const poopStore = usePoopStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
 const height = computed(() => cageStore.size.height)
 let moveInterval = null
-let poopTimeout = null
 
 function cellContent(cell, x, y) {
   if (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y) return '🐹'
@@ -62,21 +63,14 @@ function moveGuineaPig() {
     }
     
     // Drop a poop if it's time
-    if (shouldDropPoop.value) {
+    if (poopStore.shouldDropPoop) {
       cageStore.addPoop(next.x, next.y)
-      resetPoopTimer()
+      poopStore.resetPoopTimer()
     }
   }
 }
 
-const shouldDropPoop = ref(false)
-function resetPoopTimer() {
-  shouldDropPoop.value = false
-  if (poopTimeout) clearTimeout(poopTimeout)
-  poopTimeout = setTimeout(() => {
-    shouldDropPoop.value = true
-  }, 5000 + Math.random() * 7000) // 5-12 seconds
-}
+
 
 function handleCellClick(cell, x, y) {
   if (cell === 'poop') {
@@ -106,13 +100,13 @@ onMounted(() => {
     const y = Math.floor(Math.random() * height.value)
     cageStore.setGuineaPigPos(x, y)
   }
-  resetPoopTimer()
+  poopStore.startPoopTimer()
   moveInterval = setInterval(moveGuineaPig, 2000)
 })
 
 onUnmounted(() => {
   if (moveInterval) clearInterval(moveInterval)
-  if (poopTimeout) clearTimeout(poopTimeout)
+  poopStore.stopPoopTimer()
 })
 </script>
 

@@ -130,27 +130,26 @@ function handleGameReset() {
 </template>
 
 <style>
-@import './styles/shared.css';
 
 .gps-app__main-layout {
   display: flex;
   flex: 1;
-  margin-inline-start: 50px;
-  width: calc(100% - 50px);
+  margin-inline-start: 40px;
+  width: calc(100% - 40px);
 }
 
 .gps-app__content-area {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 5rem 0;
+  padding: 5rem 0 1rem;
 }
 
 /* Mobile-first responsive styles */
 @media (min-width: 768px) {
   .gps-app__main-layout {
-    margin-inline-start: 60px;
-    width: calc(100% - 60px);
+    margin-inline-start: 50px;
+    width: calc(100% - 50px);
   }
 }
 
