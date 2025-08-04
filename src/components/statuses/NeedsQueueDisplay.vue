@@ -42,24 +42,23 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useNeedsStore } from '../../stores/needs/needs'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import { useHungerStore } from '../../stores/needs/hunger'
 import { useFoodStore } from '../../stores/food'
 import Button from '../shared/Button.vue'
 
-const needsStore = useNeedsStore()
+const needsQueueStore = useNeedsQueueStore()
 const hungerStore = useHungerStore()
 const foodStore = useFoodStore()
 
-const bestAction = computed(() => needsStore.getBestAction())
-const needsQueueStore = computed(() => needsStore.needsQueue)
+const bestAction = computed(() => needsQueueStore.getBestAction())
 
 function updateNeeds() {
-  needsStore.updateAllNeeds()
+  needsQueueStore.updateAllNeeds()
 }
 
 function resetAll() {
-  needsStore.resetNeeds()
+  needsQueueStore.resetAllNeeds()
 }
 
 function formatNeedName(name) {
@@ -68,7 +67,7 @@ function formatNeedName(name) {
 
 onMounted(() => {
   // Start the needs system automatically
-  needsStore.startNeedsSystem()
+  needsQueueStore.startNeedsSystem()
 })
 </script>
 

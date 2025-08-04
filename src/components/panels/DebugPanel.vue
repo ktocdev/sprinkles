@@ -14,7 +14,7 @@ import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
 import NeedsQueueDisplay from '../statuses/NeedsQueueDisplay.vue'
 import { useHungerStore } from '../../stores/needs/hunger'
-import { useNeedsStore } from '../../stores/needs/needs'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import { useNeedMessagesStore } from '../../stores/needs/needMessages'
 
 const userStore = useUserStore()
@@ -24,7 +24,7 @@ const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
 const hungerStore = useHungerStore()
-const needsStore = useNeedsStore()
+const needsQueueStore = useNeedsQueueStore()
 const needMessagesStore = useNeedMessagesStore()
 
 const showDebugPanel = ref(false)
@@ -35,8 +35,9 @@ const minPoopInterval = ref(5) // 5 seconds default
 const maxPoopInterval = ref(12) // 12 seconds default
 
 // Hunger system controls
-const isHungerEnabled = ref(needsStore.isActive)
+const isHungerEnabled = ref(needsQueueStore.isActive)
 const hungerDegradationPerMinute = ref((hungerStore.degradationRate * 60).toFixed(1))
+const hungerUrgency = ref(Math.round(hungerStore.urgency))
 
 const emit = defineEmits(['gameReset'])
 
@@ -54,9 +55,9 @@ function togglePooping(enabled) {
 
 function toggleHunger(enabled) {
   if (enabled) {
-    needsStore.startNeedsSystem()
+    needsQueueStore.startNeedsSystem()
   } else {
-    needsStore.stopNeedsSystem()
+    needsQueueStore.stopNeedsSystem()
   }
 }
 
@@ -64,6 +65,28 @@ function updateHungerDegradation() {
   // Convert per-minute rate back to per-second rate
   const perSecondRate = hungerDegradationPerMinute.value / 60
   hungerStore.setDegradationPerSecond(perSecondRate)
+}
+
+
+
+function resetHunger() {
+  hungerStore.reset()
+  // Force clear any current hunger messages
+  needMessagesStore.currentMessage = null
+  // Reset the message timer to force immediate update
+  needMessagesStore.lastMessageTime = 0
+  // Also update the needs queue to reflect the reset
+  needsQueueStore.updateQueue()
+  // Small delay to ensure the reset takes effect
+  setTimeout(() => {
+    // Force update the need messages to clear any active hunger messages
+    try {
+      needMessagesStore.updateCurrentMessage()
+    } catch (error) {
+      console.warn('Error updating need messages:', error)
+    }
+    needsQueueStore.updateQueue()
+  }, 100)
 }
 
 function updatePoopInterval() {
@@ -98,7 +121,7 @@ function resetGame() {
     // Reset hunger controls
     isHungerEnabled.value = false
     hungerDegradationPerMinute.value = "2.0"
-    needsStore.stopNeedsSystem()
+    needsQueueStore.stopNeedsSystem()
     // Emit event to notify parent about reset
     emit('gameReset')
   }
@@ -121,8 +144,9 @@ onMounted(() => {
   isPoopingEnabled.value = poopStore.poopTimer !== null
   updatePoopInterval()
   // Set initial hunger controls
-  isHungerEnabled.value = needsStore.isActive
+  isHungerEnabled.value = needsQueueStore.isActive
   hungerDegradationPerMinute.value = (hungerStore.degradationRate * 60).toFixed(1)
+  hungerUrgency.value = Math.round(hungerStore.urgency)
 })
 
 // Watch for changes in the poop timer state
@@ -136,8 +160,13 @@ watch([minPoopInterval, maxPoopInterval], () => {
 })
 
 // Watch for changes in needs system state
-watch(() => needsStore.isActive, (newState) => {
+watch(() => needsQueueStore.isActive, (newState) => {
   isHungerEnabled.value = newState
+})
+
+// Watch for changes in hunger urgency
+watch(() => hungerStore.urgency, (newUrgency) => {
+  hungerUrgency.value = Math.round(newUrgency)
 })
 
 // Expose toggle function for external use
@@ -206,12 +235,22 @@ defineExpose({
                 />
               </FormGroup>
 
-              <FormGroup label="Urgency Level">
-                <Input
-                  :model-value="`${Math.round(hungerStore.urgency)}%`"
-                  type="readonly"
-                  hint="Current urgency level (0-100%)"
-                />
+                             <FormGroup label="Urgency Level">
+                 <Input
+                   :model-value="hungerUrgency"
+                   type="readonly"
+                   hint="Current urgency level (0-100%)"
+                 />
+               </FormGroup>
+              
+              <FormGroup label="Reset Hunger">
+                <Button 
+                  type="primary"
+                  @click="resetHunger"
+                  hint="Reset hunger value to 100"
+                >
+                  🍽️ Reset to 100
+                </Button>
               </FormGroup>
             </div>
           </div>

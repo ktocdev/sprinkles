@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import { useInventoryStore } from './inventory.js'
 import { useMarketStore } from './market.js'
 import { useGuineaPigStore } from './guineaPig.js'
-import { useNeedsStore } from './needs/needs.js'
+import { useNeedsQueueStore } from './needs/needsQueue.js'
+import { useHungerStore } from './needs/hunger.js'
 import { usePoopStore } from './poop.js'
 
 function createEmptyGrid(width, height) {
@@ -234,8 +235,9 @@ export const useCageStore = defineStore('cage', {
       this.beddingFreshness = clampValue(currentFreshness + freshnessGained)
       
       // Reset hygiene to 100%
-      const needsStore = useNeedsStore()
-      needsStore.setNeed('hygiene', 100)
+      const needsQueueStore = useNeedsQueueStore()
+      // Note: Hygiene store not implemented yet, so we'll skip this for now
+      // needsQueueStore.resetAllNeeds() // This would reset all needs
       
       return {
         success: true,
@@ -280,14 +282,15 @@ export const useCageStore = defineStore('cage', {
 
     // Handle poop interaction
     interactWithPoop() {
-      const needsStore = useNeedsStore()
+      const needsQueueStore = useNeedsQueueStore()
       const poopStore = usePoopStore()
       const { x, y } = this.guineaPigPos
       
       const interaction = poopStore.interactWithPoop(x, y)
       
       if (interaction.success && interaction.hygieneImpact > 0) {
-        needsStore.adjustNeed('hygiene', -interaction.hygieneImpact)
+        // Note: Hygiene store not implemented yet, so we'll skip this for now
+        // needsQueueStore.adjustNeed('hygiene', -interaction.hygieneImpact)
       }
       
       return {
@@ -314,9 +317,13 @@ export const useCageStore = defineStore('cage', {
       }
       
       // Improve guinea pig needs
-      const needsStore = useNeedsStore()
+      const needsQueueStore = useNeedsQueueStore()
       if (itemData.needType && itemData.needImprovement) {
-        needsStore.adjustNeed(itemData.needType, itemData.needImprovement)
+        // Note: Only hunger store is implemented, so we'll only handle hunger for now
+        if (itemData.needType === 'hunger') {
+          const hungerStore = useHungerStore()
+          hungerStore.currentValue = Math.min(100, hungerStore.currentValue + itemData.needImprovement)
+        }
       }
       
       // Track consumption statistics
@@ -365,18 +372,18 @@ export const useCageStore = defineStore('cage', {
 
     // Get the guinea pig's next best action using the needs queue
     getGuineaPigAction() {
-      const needsStore = useNeedsStore()
+      const needsQueueStore = useNeedsQueueStore()
       
       // Update needs before getting action
-      needsStore.updateAllNeeds()
+      needsQueueStore.updateAllNeeds()
       
-      return needsStore.getBestAction()
+      return needsQueueStore.getBestAction()
     },
 
     // Fulfill a specific need using the needs queue
     fulfillGuineaPigNeed(needName, methodName) {
-      const needsStore = useNeedsStore()
-      return needsStore.fulfillNeed(needName, methodName)
+      const needsQueueStore = useNeedsQueueStore()
+      return needsQueueStore.fulfillNeed(needName, methodName)
     },
 
   },

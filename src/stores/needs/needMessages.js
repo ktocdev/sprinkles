@@ -55,7 +55,7 @@ export const useNeedMessagesStore = defineStore('needMessages', {
     currentMessage: null,
     
     // Message rotation settings
-    messageInterval: 5000, // 5 seconds between messages
+    messageInterval: 2000, // 2 seconds between messages
     messageTimer: null,
     lastMessageTime: 0
   }),
@@ -119,12 +119,21 @@ export const useNeedMessagesStore = defineStore('needMessages', {
   actions: {
     // Update the current message
     updateCurrentMessage() {
-      if (this.shouldShowNeedMessage) {
+      // Always update if we have active messages and either:
+      // 1. No current message, or
+      // 2. Enough time has passed since last message
+      const hasActiveMessages = this.activeNeedMessages.length > 0
+      const shouldShowNewMessage = this.shouldShowNeedMessage
+      
+      if (hasActiveMessages && (shouldShowNewMessage || !this.currentMessage)) {
         const message = this.highestPriorityMessage
         if (message) {
           this.currentMessage = message
           this.lastMessageTime = Date.now()
         }
+      } else if (!hasActiveMessages) {
+        // Clear message if no active messages
+        this.currentMessage = null
       }
     },
 

@@ -18,7 +18,7 @@
 
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue'
-import { useNeedsStore } from '../../stores/needs/needs'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import { useHungerStore } from '../../stores/needs/hunger'
 import SubNav from '../navigation/SubNav.vue'
 import SubNavStatus from '../navigation/SubNavStatus.vue'
@@ -32,24 +32,26 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const needsStore = useNeedsStore()
+const needsQueueStore = useNeedsQueueStore()
 const hungerStore = useHungerStore()
 
-// Get needs status from individual stores
+// Get needs status from the queue system
 const needsStatus = computed(() => {
+  const allNeedsStatus = needsQueueStore.allNeedsStatus
+  
   return {
     hunger: {
       value: Math.round(hungerStore.currentValue),
       urgency: hungerStore.urgency
     },
-    // For now, use legacy values for other needs until individual stores are created
-    thirst: { value: needsStore.needs.thirst, urgency: 0 },
-    shelter: { value: needsStore.needs.shelter, urgency: 0 },
-    chew: { value: needsStore.needs.chew, urgency: 0 },
-    enrichment: { value: needsStore.needs.enrichment, urgency: 0 },
-    love: { value: needsStore.needs.love, urgency: 0 },
-    nails: { value: needsStore.needs.nails, urgency: 0 },
-    hygiene: { value: needsStore.needs.hygiene, urgency: 0 }
+    // For now, use placeholder values for other needs until individual stores are created
+    thirst: { value: 100, urgency: 0 },
+    shelter: { value: 100, urgency: 0 },
+    chew: { value: 100, urgency: 0 },
+    enrichment: { value: 100, urgency: 0 },
+    love: { value: 100, urgency: 0 },
+    nails: { value: 100, urgency: 0 },
+    hygiene: { value: 100, urgency: 0 }
   }
 })
 
