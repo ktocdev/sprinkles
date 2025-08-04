@@ -101,6 +101,18 @@
         </div>
         
         <div class="gps-specimen__guidelines">
+          <h4>Readonly State</h4>
+          <Input 
+            v-model="readonlyInput"
+            type="readonly"
+            label="Display Value"
+            placeholder="This field is readonly"
+            icon="📊"
+            hint="This field shows information but cannot be edited"
+          />
+        </div>
+        
+        <div class="gps-specimen__guidelines">
           <h4>With Hint</h4>
           <Input 
             v-model="hintInput"
@@ -311,6 +323,7 @@ const errorInput = ref('ab')
 const successInput = ref('user@example.com')
 const disabledInput = ref('Read-only content')
 const hintInput = ref('')
+const readonlyInput = ref('Read-only value')
 
 // Validation examples
 const emailValidation = ref('')

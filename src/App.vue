@@ -3,8 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useThemeStore } from './stores/theme'
 import { useInventoryStore } from './stores/inventory'
+import { useNeedsQueueStore } from './stores/needs/needsQueue'
 import Cage from './components/cage/Cage.vue'
-import StatusMarquee from './components/cage/StatusMarquee.vue'
+import StatusMarquee from './components/statuses/StatusMarquee.vue'
 import CageItemManager from './components/cage/CageItemManager.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
@@ -13,10 +14,12 @@ import AppPanels from './components/panels/AppPanels.vue'
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const inventoryStore = useInventoryStore()
+const needsQueueStore = useNeedsQueueStore()
 
 onMounted(() => {
   themeStore.initTheme()
   inventoryStore.forceResetToDefaults()
+  needsQueueStore.startNeedsSystem()
 })
 
 const showGuineaPig = ref(false)

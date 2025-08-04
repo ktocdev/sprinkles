@@ -170,6 +170,29 @@
         </Button>
       </div>
 
+      <!-- Details Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📋</div>
+          <h3 class="gps-specimen-landing__card-title">Details Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Expandable details component based on HTML details/summary elements with custom styling and two named slots.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Native HTML</span>
+          <span class="gps-specimen-landing__feature">Accessible</span>
+          <span class="gps-specimen-landing__feature">Slot-based</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showDetailsSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View Details Specimen
+        </Button>
+      </div>
+
 
     </div>
 
@@ -196,7 +219,8 @@ const emit = defineEmits([
   'showStatusBarSpecimen',
   'showInputSpecimen',
   'showFormGroupSpecimen',
-  'showToggleSpecimen'
+  'showToggleSpecimen',
+  'showDetailsSpecimen'
 ])
 </script>
 
