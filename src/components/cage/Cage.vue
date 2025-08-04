@@ -62,15 +62,13 @@ function moveGuineaPig() {
       cageStore.interactWithItem()
     }
     
-    // Drop a poop if it's time
-    if (poopStore.shouldDropPoop) {
+    // Drop a poop if it's time and game is not paused
+    if (poopStore.shouldDropPoop && !cageStore.paused) {
       cageStore.addPoop(next.x, next.y)
       poopStore.resetPoopTimer()
     }
   }
 }
-
-
 
 function handleCellClick(cell, x, y) {
   if (cell === 'poop') {

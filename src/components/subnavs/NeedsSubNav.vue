@@ -6,19 +6,20 @@
     @close="$emit('close')"
   >
     <SubNavStatus
-      v-for="(value, need) in guineaPigStore.needs" 
+      v-for="(needInfo, need) in needsStatus" 
       :key="need"
       :label="formatNeedLabel(need)"
-      :value="`${value}%`"
-      :percentage="value"
+      :value="`${needInfo.value}%`"
+      :percentage="needInfo.value"
       :color="getNeedColor(need)"
     />
   </SubNav>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-import { useGuineaPigStore } from '../../stores/guineaPig'
+import { defineProps, defineEmits, computed } from 'vue'
+import { useNeedsStore } from '../../stores/needs/needs'
+import { useHungerStore } from '../../stores/needs/hunger'
 import SubNav from '../navigation/SubNav.vue'
 import SubNavStatus from '../navigation/SubNavStatus.vue'
 
@@ -31,7 +32,26 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const guineaPigStore = useGuineaPigStore()
+const needsStore = useNeedsStore()
+const hungerStore = useHungerStore()
+
+// Get needs status from individual stores
+const needsStatus = computed(() => {
+  return {
+    hunger: {
+      value: Math.round(hungerStore.currentValue),
+      urgency: hungerStore.urgency
+    },
+    // For now, use legacy values for other needs until individual stores are created
+    thirst: { value: needsStore.needs.thirst, urgency: 0 },
+    shelter: { value: needsStore.needs.shelter, urgency: 0 },
+    chew: { value: needsStore.needs.chew, urgency: 0 },
+    enrichment: { value: needsStore.needs.enrichment, urgency: 0 },
+    love: { value: needsStore.needs.love, urgency: 0 },
+    nails: { value: needsStore.needs.nails, urgency: 0 },
+    hygiene: { value: needsStore.needs.hygiene, urgency: 0 }
+  }
+})
 
 // Function to get color for different needs
 const getNeedColor = (need) => {

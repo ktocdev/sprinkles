@@ -5,12 +5,17 @@ import Button from '../shared/Button.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import Toggle from '../shared/Toggle.vue'
 import Input from '../shared/Input.vue'
+import Details from '../shared/Details.vue'
 import { useUserStore } from '../../stores/user'
 import { useInventoryStore } from '../../stores/inventory'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
+import NeedsQueueDisplay from '../statuses/NeedsQueueDisplay.vue'
+import { useHungerStore } from '../../stores/needs/hunger'
+import { useNeedsStore } from '../../stores/needs/needs'
+import { useNeedMessagesStore } from '../../stores/needs/needMessages'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
@@ -18,6 +23,9 @@ const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
+const hungerStore = useHungerStore()
+const needsStore = useNeedsStore()
+const needMessagesStore = useNeedMessagesStore()
 
 const showDebugPanel = ref(false)
 
@@ -25,6 +33,10 @@ const showDebugPanel = ref(false)
 const isPoopingEnabled = ref(poopStore.poopTimer !== null)
 const minPoopInterval = ref(5) // 5 seconds default
 const maxPoopInterval = ref(12) // 12 seconds default
+
+// Hunger system controls
+const isHungerEnabled = ref(needsStore.isActive)
+const hungerDegradationPerMinute = ref((hungerStore.degradationRate * 60).toFixed(1))
 
 const emit = defineEmits(['gameReset'])
 
@@ -38,6 +50,20 @@ function togglePooping(enabled) {
   } else {
     poopStore.stopPoopTimer()
   }
+}
+
+function toggleHunger(enabled) {
+  if (enabled) {
+    needsStore.startNeedsSystem()
+  } else {
+    needsStore.stopNeedsSystem()
+  }
+}
+
+function updateHungerDegradation() {
+  // Convert per-minute rate back to per-second rate
+  const perSecondRate = hungerDegradationPerMinute.value / 60
+  hungerStore.setDegradationPerSecond(perSecondRate)
 }
 
 function updatePoopInterval() {
@@ -69,6 +95,10 @@ function resetGame() {
     isPoopingEnabled.value = false
     minPoopInterval.value = 5
     maxPoopInterval.value = 12
+    // Reset hunger controls
+    isHungerEnabled.value = false
+    hungerDegradationPerMinute.value = "2.0"
+    needsStore.stopNeedsSystem()
     // Emit event to notify parent about reset
     emit('gameReset')
   }
@@ -90,6 +120,9 @@ onMounted(() => {
   // Set initial values based on current store state
   isPoopingEnabled.value = poopStore.poopTimer !== null
   updatePoopInterval()
+  // Set initial hunger controls
+  isHungerEnabled.value = needsStore.isActive
+  hungerDegradationPerMinute.value = (hungerStore.degradationRate * 60).toFixed(1)
 })
 
 // Watch for changes in the poop timer state
@@ -100,6 +133,11 @@ watch(() => poopStore.poopTimer, (newTimer) => {
 // Watch for changes in min/max intervals and update the store
 watch([minPoopInterval, maxPoopInterval], () => {
   updatePoopInterval()
+})
+
+// Watch for changes in needs system state
+watch(() => needsStore.isActive, (newState) => {
+  isHungerEnabled.value = newState
 })
 
 // Expose toggle function for external use
@@ -115,88 +153,279 @@ defineExpose({
     @close="showDebugPanel = false"
   >
     <div class="gps-panel-content">
+      <!-- Needs Queue Section -->
+      <Details>
+        <template #summary>
+          🎯 Needs Queue System
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <h3 class="gps-panel-section-title">🎯 Needs Queue System</h3>
+            <div class="gps-needs-queue-container">
+              <NeedsQueueDisplay />
+            </div>
+          </div>
+        </template>
+      </Details>
+      
+      <!-- Hunger System Section -->
+      <Details>
+        <template #summary>
+          🍽️ Hunger System
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <h3 class="gps-panel-section-title">🍽️ Hunger System</h3>
+            
+            <div class="gps-panel-controls">
+              <FormGroup label="Enable Hunger Degradation">
+                <Toggle 
+                  v-model="isHungerEnabled"
+                  @change="toggleHunger"
+                  aria-label="Toggle hunger degradation on and off"
+                />
+              </FormGroup>
+     
+              <FormGroup label="Degradation Rate (per minute)">
+                <Input
+                  v-model="hungerDegradationPerMinute"
+                  type="number"
+                  :min="0"
+                  :max="10"
+                  :step="0.1"
+                  @update:modelValue="updateHungerDegradation"
+                  hint="Rate at which hunger decreases per minute"
+                />
+              </FormGroup>
+              
+              <FormGroup label="Current Hunger Value">
+                <Input
+                  :model-value="hungerStore.currentValue"
+                  type="readonly"
+                  hint="Current hunger value (0-100)"
+                />
+              </FormGroup>
+
+              <FormGroup label="Urgency Level">
+                <Input
+                  :model-value="`${Math.round(hungerStore.urgency)}%`"
+                  type="readonly"
+                  hint="Current urgency level (0-100%)"
+                />
+              </FormGroup>
+            </div>
+          </div>
+        </template>
+      </Details>
+      
+      <!-- Need Messages Section -->
+      <Details>
+        <template #summary>
+          📢 Need Messages
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <h3 class="gps-panel-section-title">📢 Need Messages</h3>
+            
+            <div class="gps-panel-controls">
+              <FormGroup label="Message Interval (seconds)">
+                <Input
+                  :model-value="needMessagesStore.messageInterval / 1000"
+                  type="number"
+                  :min="1"
+                  :max="30"
+                  :step="1"
+                  @update:modelValue="(value) => needMessagesStore.messageInterval = value * 1000"
+                  hint="Time between need messages in seconds"
+                />
+              </FormGroup>
+              
+              <!-- Hunger Messages Configuration -->
+              <div class="gps-need-messages-config">
+                <h4 class="gps-panel-subsection-title">🍽️ Hunger Messages</h4>
+                
+                <div 
+                  v-for="(threshold, index) in needMessagesStore.needConfigs.hunger.thresholds" 
+                  :key="index"
+                  class="gps-threshold-config"
+                >
+                  <div class="gps-threshold-header">
+                    <span class="gps-threshold-label">Threshold {{ index + 1 }}</span>
+                    <Button 
+                      type="danger" 
+                      size="small"
+                      @click="needMessagesStore.removeNeedThreshold('hunger', index)"
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                  
+                  <div class="gps-threshold-controls">
+                    <FormGroup label="Min Value">
+                      <Input
+                        v-model="threshold.minValue"
+                        type="number"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, minValue: value })"
+                      />
+                    </FormGroup>
+                    
+                    <FormGroup label="Max Value">
+                      <Input
+                        v-model="threshold.maxValue"
+                        type="number"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, maxValue: value })"
+                      />
+                    </FormGroup>
+                    
+                    <FormGroup label="Message">
+                      <Input
+                        v-model="threshold.message"
+                        type="text"
+                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, message: value })"
+                      />
+                    </FormGroup>
+                    
+                    <FormGroup label="Emoji">
+                      <Input
+                        v-model="threshold.emoji"
+                        type="text"
+                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, emoji: value })"
+                      />
+                    </FormGroup>
+                    
+                    <FormGroup label="Priority">
+                      <Input
+                        v-model="threshold.priority"
+                        type="number"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, priority: value })"
+                      />
+                    </FormGroup>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="secondary"
+                  @click="needMessagesStore.addNeedThreshold('hunger', {
+                    minValue: 0,
+                    maxValue: 10,
+                    message: 'New hunger message',
+                    emoji: '😐',
+                    priority: 50
+                  })"
+                >
+                  ➕ Add Hunger Threshold
+                </Button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Details>
+      
       <!-- Poop System Section -->
-      <div class="gps-panel-section">
-        <h3 class="gps-panel-section-title">💩 Poop System</h3>
-        
-        <div class="gps-panel-controls">
-          <FormGroup label="Enable Pooping">
-            <Toggle 
-              v-model="isPoopingEnabled"
-              @change="togglePooping"
-              aria-label="Toggle pooping on and off"
-            />
-          </FormGroup>
-          
-          <FormGroup label="Min Time (seconds)">
-            <Input
-              v-model="minPoopInterval"
-              type="number"
-              :min="1"
-              :max="30"
-              :step="1"
-              @update:modelValue="updatePoopInterval"
-              hint="Minimum time between poops in seconds"
-            />
-          </FormGroup>
-          
-          <FormGroup label="Max Time (seconds)">
-            <Input
-              v-model="maxPoopInterval"
-              type="number"
-              :min="1"
-              :max="30"
-              :step="1"
-              @update:modelValue="updatePoopInterval"
-              hint="Maximum time between poops in seconds"
-            />
-          </FormGroup>
-        </div>
-      </div>
+      <Details>
+        <template #summary>
+          💩 Poop System
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <h3 class="gps-panel-section-title">💩 Poop System</h3>
+            
+            <div class="gps-panel-controls">
+              <FormGroup label="Enable Pooping">
+                <Toggle 
+                  v-model="isPoopingEnabled"
+                  @change="togglePooping"
+                  aria-label="Toggle pooping on and off"
+                />
+              </FormGroup>
+              
+              <FormGroup label="Min Time (seconds)">
+                <Input
+                  v-model="minPoopInterval"
+                  type="number"
+                  :min="1"
+                  :max="30"
+                  :step="1"
+                  @update:modelValue="updatePoopInterval"
+                  hint="Minimum time between poops in seconds"
+                />
+              </FormGroup>
+              
+              <FormGroup label="Max Time (seconds)">
+                <Input
+                  v-model="maxPoopInterval"
+                  type="number"
+                  :min="1"
+                  :max="30"
+                  :step="1"
+                  @update:modelValue="updatePoopInterval"
+                  hint="Maximum time between poops in seconds"
+                />
+              </FormGroup>
+            </div>
+          </div>
+        </template>
+      </Details>
       
       <!-- Existing Actions Section -->
-      <div class="gps-panel-section">
-        <div class="gps-panel-actions">
-          <div class="gps-panel-action-item">
-            <Button 
-              type="danger"
-              @click="resetGame"
-              class="gps-panel-action-button"
-            >
-              🔄 Reset Game
-            </Button>
-            <p class="gps-panel-action-description">
-              Reset all game data to initial state. This will clear all progress and cannot be undone.
-            </p>
+      <Details>
+        <template #summary>
+          ⚙️ Game Actions
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <div class="gps-panel-actions">
+              <div class="gps-panel-action-item">
+                <Button 
+                  type="danger"
+                  @click="resetGame"
+                  class="gps-panel-action-button"
+                >
+                  🔄 Reset Game
+                </Button>
+                <p class="gps-panel-action-description">
+                  Reset all game data to initial state. This will clear all progress and cannot be undone.
+                </p>
+              </div>
+              
+              <div class="gps-panel-action-item">
+                <Button 
+                  type="warning"
+                  @click="clearCage"
+                  class="gps-panel-action-button"
+                >
+                  🧹 Clear Cage
+                </Button>
+                <p class="gps-panel-action-description">
+                  Clear all items and poop from the cage, returning it to an empty state.
+                </p>
+              </div>
+              
+              <div class="gps-panel-action-item">
+                <Button 
+                  type="secondary"
+                  @click="resetInventory"
+                  class="gps-panel-action-button"
+                >
+                  📦 Reset Inventory
+                </Button>
+                <p class="gps-panel-action-description">
+                  Reset inventory to default values, restoring all items including large beds and houses.
+                </p>
+              </div>
+            </div>
           </div>
-          
-          <div class="gps-panel-action-item">
-            <Button 
-              type="warning"
-              @click="clearCage"
-              class="gps-panel-action-button"
-            >
-              🧹 Clear Cage
-            </Button>
-            <p class="gps-panel-action-description">
-              Clear all items and poop from the cage, returning it to an empty state.
-            </p>
-          </div>
-          
-          <div class="gps-panel-action-item">
-            <Button 
-              type="secondary"
-              @click="resetInventory"
-              class="gps-panel-action-button"
-            >
-              📦 Reset Inventory
-            </Button>
-            <p class="gps-panel-action-description">
-              Reset inventory to default values, restoring all items including large beds and houses.
-            </p>
-          </div>
-        </div>
-      </div>
+        </template>
+      </Details>
     </div>
   </Panel>
 </template>
@@ -209,9 +438,75 @@ defineExpose({
   gap: 0.75rem;
 }
 
+/* Needs Queue Container - simple wrapper */
+.gps-needs-queue-container {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-bg);
+}
+
+/* Panel section title - reduced top margin */
+.gps-panel-section-title {
+  margin-block-start: 0.5rem;
+}
+
+/* Need Messages Configuration Styles */
+.gps-need-messages-config {
+  margin-block-start: 1rem;
+  padding: 1rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+}
+
+.gps-panel-subsection-title {
+  margin: 0 0 1rem 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.gps-threshold-config {
+  margin-block-end: 1.5rem;
+  padding: 1rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+}
+
+.gps-threshold-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block-end: 1rem;
+}
+
+.gps-threshold-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.gps-threshold-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 /* Desktop enhancements */
 @media (min-width: 768px) {
   .gps-panel-controls {
+    gap: 1rem;
+  }
+  
+  .gps-needs-queue-container {
+    max-height: 700px;
+  }
+  
+  .gps-threshold-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 }

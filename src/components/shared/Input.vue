@@ -12,6 +12,7 @@
         :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
+        :readonly="type === 'readonly'"
         :required="required"
         :min="min"
         :max="max"
@@ -25,7 +26,8 @@
         :class="{
           'gps-input--error': hasError,
           'gps-input--success': hasSuccess,
-          'gps-input--disabled': disabled
+          'gps-input--disabled': disabled,
+          'gps-input--readonly': type === 'readonly'
         }"
         @input="handleInput"
         @blur="handleBlur"
@@ -65,7 +67,7 @@ const props = defineProps({
     default: 'text',
     validator: (value) => [
       'text', 'email', 'password', 'number', 'tel', 'url', 
-      'search', 'date', 'time', 'datetime-local', 'month', 'week'
+      'search', 'date', 'time', 'datetime-local', 'month', 'week', 'readonly'
     ].includes(value)
   },
   label: {
@@ -235,6 +237,17 @@ function handleKeydown(event) {
 }
 
 .gps-input--disabled:hover {
+  border-color: var(--color-border);
+}
+
+.gps-input--readonly {
+  background-color: var(--color-panel);
+  color: var(--color-text);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.gps-input--readonly:hover {
   border-color: var(--color-border);
 }
 

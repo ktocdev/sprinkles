@@ -7,7 +7,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'primary',
-    validator: (value) => ['primary', 'secondary', 'flat', 'disabled', 'warning', 'danger'].includes(value)
+    validator: (value) => ['primary', 'secondary', 'flat', 'disabled', 'warning', 'danger', 'readonly'].includes(value)
   },
   size: {
     type: String,
@@ -49,6 +49,7 @@ const handleKeydown = (event) => {
   <button 
     :class="buttonClass" 
     :aria-disabled="type === 'disabled' ? true : undefined"
+    :readonly="type === 'readonly'"
     @click="handleClick"
     @keydown="handleKeydown"
   >
@@ -145,5 +146,19 @@ const handleKeydown = (event) => {
 }
 .gps-button--warning:hover {
   background: var(--color-warning-hover);
+}
+
+/* Readonly button */
+.gps-button--readonly {
+  background: var(--color-panel);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  cursor: default;
+  opacity: 0.8;
+}
+.gps-button--readonly:hover {
+  background: var(--color-panel);
+  color: var(--color-text);
+  border-color: var(--color-border);
 }
 </style> 

@@ -9,6 +9,7 @@ import StatusBarSpecimen from '../specimen/StatusBarSpecimen.vue'
 import InputSpecimen from '../specimen/InputSpecimen.vue'
 import FormGroupSpecimen from '../specimen/FormGroupSpecimen.vue'
 import ToggleSpecimen from '../specimen/ToggleSpecimen.vue'
+import DetailsSpecimen from '../specimen/DetailsSpecimen.vue'
 
 // Specimen panel visibility state
 const showSpecimenLanding = ref(false)
@@ -19,6 +20,7 @@ const showStatusBarSpecimen = ref(false)
 const showInputSpecimen = ref(false)
 const showFormGroupSpecimen = ref(false)
 const showToggleSpecimen = ref(false)
+const showDetailsSpecimen = ref(false)
 
 // Helper function to close all panels except the specified one
 function closeAllPanelsExcept(exceptPanel) {
@@ -30,6 +32,7 @@ function closeAllPanelsExcept(exceptPanel) {
   showInputSpecimen.value = exceptPanel === 'input' ? showInputSpecimen.value : false
   showFormGroupSpecimen.value = exceptPanel === 'formGroup' ? showFormGroupSpecimen.value : false
   showToggleSpecimen.value = exceptPanel === 'toggle' ? showToggleSpecimen.value : false
+  showDetailsSpecimen.value = exceptPanel === 'details' ? showDetailsSpecimen.value : false
 }
 
 function toggleSpecimenLanding() {
@@ -72,6 +75,11 @@ function toggleToggleSpecimen() {
   showToggleSpecimen.value = !showToggleSpecimen.value
 }
 
+function toggleDetailsSpecimen() {
+  closeAllPanelsExcept('details')
+  showDetailsSpecimen.value = !showDetailsSpecimen.value
+}
+
 // Expose functions for external use
 defineExpose({
   toggleSpecimenLanding,
@@ -81,7 +89,8 @@ defineExpose({
   toggleStatusBarSpecimen,
   toggleInputSpecimen,
   toggleFormGroupSpecimen,
-  toggleToggleSpecimen
+  toggleToggleSpecimen,
+  toggleDetailsSpecimen
 })
 </script>
 
@@ -100,6 +109,7 @@ defineExpose({
       @showInputSpecimen="toggleInputSpecimen"
       @showFormGroupSpecimen="toggleFormGroupSpecimen"
       @showToggleSpecimen="toggleToggleSpecimen"
+      @showDetailsSpecimen="toggleDetailsSpecimen"
     />
   </Panel>
 
@@ -164,5 +174,14 @@ defineExpose({
     @close="showToggleSpecimen = false"
   >
     <ToggleSpecimen @backToLanding="toggleSpecimenLanding" />
+  </Panel>
+
+  <!-- Details Specimen Panel -->
+  <Panel 
+    :isOpen="showDetailsSpecimen" 
+    title="Details Component Specimen" 
+    @close="showDetailsSpecimen = false"
+  >
+    <DetailsSpecimen @backToLanding="toggleSpecimenLanding" />
   </Panel>
 </template> 

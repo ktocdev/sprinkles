@@ -500,9 +500,6 @@ function throwOutItem(item) {
   }
 }
 
-
-
-
 </script>
 
 <style>

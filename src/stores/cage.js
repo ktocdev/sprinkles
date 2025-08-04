@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useInventoryStore } from './inventory.js'
 import { useMarketStore } from './market.js'
 import { useGuineaPigStore } from './guineaPig.js'
+import { useNeedsStore } from './needs/needs.js'
 import { usePoopStore } from './poop.js'
 
 function createEmptyGrid(width, height) {
@@ -233,7 +234,8 @@ export const useCageStore = defineStore('cage', {
       this.beddingFreshness = clampValue(currentFreshness + freshnessGained)
       
       // Reset hygiene to 100%
-      guineaPigStore.setNeed('hygiene', 100)
+      const needsStore = useNeedsStore()
+      needsStore.setNeed('hygiene', 100)
       
       return {
         success: true,
@@ -278,14 +280,14 @@ export const useCageStore = defineStore('cage', {
 
     // Handle poop interaction
     interactWithPoop() {
-      const guineaPigStore = useGuineaPigStore()
+      const needsStore = useNeedsStore()
       const poopStore = usePoopStore()
       const { x, y } = this.guineaPigPos
       
       const interaction = poopStore.interactWithPoop(x, y)
       
       if (interaction.success && interaction.hygieneImpact > 0) {
-        guineaPigStore.adjustNeed('hygiene', -interaction.hygieneImpact)
+        needsStore.adjustNeed('hygiene', -interaction.hygieneImpact)
       }
       
       return {
@@ -312,9 +314,9 @@ export const useCageStore = defineStore('cage', {
       }
       
       // Improve guinea pig needs
-      const guineaPigStore = useGuineaPigStore()
+      const needsStore = useNeedsStore()
       if (itemData.needType && itemData.needImprovement) {
-        guineaPigStore.adjustNeed(itemData.needType, itemData.needImprovement)
+        needsStore.adjustNeed(itemData.needType, itemData.needImprovement)
       }
       
       // Track consumption statistics
@@ -359,6 +361,22 @@ export const useCageStore = defineStore('cage', {
     // Toggle pause state
     togglePause() {
       this.paused = !this.paused
+    },
+
+    // Get the guinea pig's next best action using the needs queue
+    getGuineaPigAction() {
+      const needsStore = useNeedsStore()
+      
+      // Update needs before getting action
+      needsStore.updateAllNeeds()
+      
+      return needsStore.getBestAction()
+    },
+
+    // Fulfill a specific need using the needs queue
+    fulfillGuineaPigNeed(needName, methodName) {
+      const needsStore = useNeedsStore()
+      return needsStore.fulfillNeed(needName, methodName)
     },
 
   },

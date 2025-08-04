@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useCageStore } from './cage.js'
 
 export const usePoopStore = defineStore('poop', {
   state: () => ({
@@ -113,7 +114,14 @@ export const usePoopStore = defineStore('poop', {
       const randomInterval = this.poopInterval + (Math.random() * 2000 - 1000) // ±1 second variation
       
       this.poopTimer = setTimeout(() => {
-        this.shouldDropPoop = true
+        // Check if game is paused before setting shouldDropPoop
+        const cageStore = useCageStore()
+        if (!cageStore.paused) {
+          this.shouldDropPoop = true
+        } else {
+          // If paused, reset the timer to try again later
+          this.resetPoopTimer()
+        }
       }, randomInterval)
     },
     

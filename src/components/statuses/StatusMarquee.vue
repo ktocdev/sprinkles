@@ -1,14 +1,16 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
+import { useNeedMessagesStore } from '../../stores/needs/needMessages'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
+const needMessagesStore = useNeedMessagesStore()
 
 const shouldBounce = ref(false)
 
@@ -43,8 +45,9 @@ const isOnFreshPoop = computed(() => {
   return poopAge < 2000 // 2 seconds
 })
 
+// Priority-based status text computation
 const statusText = computed(() => {
-  // Check if guinea pig is on fresh poop
+  // Check if guinea pig is on fresh poop (highest priority)
   if (isOnFreshPoop.value) {
     return 'The guinea pig just made a poop!'
   }
@@ -52,6 +55,11 @@ const statusText = computed(() => {
   // Check if guinea pig is on old poop
   if (isOnPoop.value) {
     return 'The guinea pig stepped on poop!'
+  }
+  
+  // Check for need-based messages (medium priority)
+  if (needMessagesStore.currentMessage) {
+    return needMessagesStore.currentMessage.message
   }
   
   // Check if guinea pig is on an item
@@ -63,7 +71,7 @@ const statusText = computed(() => {
     }
   }
   
-  // Default status based on sitting/moving
+  // Default status based on sitting/moving (lowest priority)
   if (guineaPigStore.sitting) {
     return 'The guinea pig is sitting.'
   } else {
@@ -71,8 +79,9 @@ const statusText = computed(() => {
   }
 })
 
+// Priority-based emoji computation
 const statusEmoji = computed(() => {
-  // Check if guinea pig is on fresh poop
+  // Check if guinea pig is on fresh poop (highest priority)
   if (isOnFreshPoop.value) {
     return '💩'
   }
@@ -80,6 +89,11 @@ const statusEmoji = computed(() => {
   // Check if guinea pig is on old poop
   if (isOnPoop.value) {
     return '💩'
+  }
+  
+  // Check for need-based messages (medium priority)
+  if (needMessagesStore.currentMessage) {
+    return needMessagesStore.currentMessage.emoji
   }
   
   // Check if guinea pig is on an item
@@ -95,7 +109,7 @@ const statusEmoji = computed(() => {
     }
   }
   
-  // Default emoji based on sitting/moving
+  // Default emoji based on sitting/moving (lowest priority)
   if (guineaPigStore.sitting) {
     return '🛋️'
   } else {
@@ -104,7 +118,13 @@ const statusEmoji = computed(() => {
 })
 
 // Watch for status changes and trigger bounce animation
-watch(() => [guineaPigStore.sitting, currentItem.value, isOnPoop.value, isOnFreshPoop.value], (newValue, oldValue) => {
+watch(() => [
+  guineaPigStore.sitting, 
+  currentItem.value, 
+  isOnPoop.value, 
+  isOnFreshPoop.value,
+  needMessagesStore.currentMessage
+], (newValue, oldValue) => {
   if (oldValue !== undefined) { // Don't trigger on initial mount
     shouldBounce.value = true
     setTimeout(() => {
@@ -112,6 +132,15 @@ watch(() => [guineaPigStore.sitting, currentItem.value, isOnPoop.value, isOnFres
     }, 2000) // Reset after animation duration
   }
 }, { deep: true })
+
+// Start and stop the need messages system
+onMounted(() => {
+  needMessagesStore.startMessageSystem()
+})
+
+onUnmounted(() => {
+  needMessagesStore.stopMessageSystem()
+})
 </script>
 
 <template>
