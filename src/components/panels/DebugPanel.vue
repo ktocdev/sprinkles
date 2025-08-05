@@ -15,7 +15,6 @@ import { usePoopStore } from '../../stores/poop'
 import NeedsQueueDisplay from '../statuses/NeedsQueueDisplay.vue'
 import { useHungerStore } from '../../stores/needs/hunger'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
-import { useNeedMessagesStore } from '../../stores/needs/needMessages'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
@@ -25,12 +24,11 @@ const marketStore = useMarketStore()
 const poopStore = usePoopStore()
 const hungerStore = useHungerStore()
 const needsQueueStore = useNeedsQueueStore()
-const needMessagesStore = useNeedMessagesStore()
 
 const showDebugPanel = ref(false)
 
 // Poop system controls
-const isPoopingEnabled = ref(poopStore.poopTimer !== null)
+const isPoopingEnabled = ref(poopStore.isEnabled)
 const minPoopInterval = ref(5) // 5 seconds default
 const maxPoopInterval = ref(12) // 12 seconds default
 
@@ -47,9 +45,9 @@ function toggleDebugPanel() {
 
 function togglePooping(enabled) {
   if (enabled) {
-    poopStore.startPoopTimer()
+    poopStore.enablePoopSystem()
   } else {
-    poopStore.stopPoopTimer()
+    poopStore.disablePoopSystem()
   }
 }
 
@@ -67,24 +65,12 @@ function updateHungerDegradation() {
   hungerStore.setDegradationPerSecond(perSecondRate)
 }
 
-
-
 function resetHunger() {
   hungerStore.reset()
-  // Force clear any current hunger messages
-  needMessagesStore.currentMessage = null
-  // Reset the message timer to force immediate update
-  needMessagesStore.lastMessageTime = 0
   // Also update the needs queue to reflect the reset
   needsQueueStore.updateQueue()
   // Small delay to ensure the reset takes effect
   setTimeout(() => {
-    // Force update the need messages to clear any active hunger messages
-    try {
-      needMessagesStore.updateCurrentMessage()
-    } catch (error) {
-      console.warn('Error updating need messages:', error)
-    }
     needsQueueStore.updateQueue()
   }, 100)
 }
@@ -141,7 +127,7 @@ function resetInventory() {
 // Initialize poop controls on mount
 onMounted(() => {
   // Set initial values based on current store state
-  isPoopingEnabled.value = poopStore.poopTimer !== null
+  isPoopingEnabled.value = poopStore.isEnabled
   updatePoopInterval()
   // Set initial hunger controls
   isHungerEnabled.value = needsQueueStore.isActive
@@ -149,9 +135,9 @@ onMounted(() => {
   hungerUrgency.value = Math.round(hungerStore.urgency)
 })
 
-// Watch for changes in the poop timer state
-watch(() => poopStore.poopTimer, (newTimer) => {
-  isPoopingEnabled.value = newTimer !== null
+// Watch for changes in the poop system enabled state
+watch(() => poopStore.isEnabled, (newState) => {
+  isPoopingEnabled.value = newState
 })
 
 // Watch for changes in min/max intervals and update the store
@@ -182,21 +168,6 @@ defineExpose({
     @close="showDebugPanel = false"
   >
     <div class="gps-panel-content">
-      <!-- Needs Queue Section -->
-      <Details>
-        <template #summary>
-          🎯 Needs Queue System
-        </template>
-        <template #content>
-          <div class="gps-panel-section">
-            <h3 class="gps-panel-section-title">🎯 Needs Queue System</h3>
-            <div class="gps-needs-queue-container">
-              <NeedsQueueDisplay />
-            </div>
-          </div>
-        </template>
-      </Details>
-      
       <!-- Hunger System Section -->
       <Details>
         <template #summary>
@@ -257,118 +228,6 @@ defineExpose({
         </template>
       </Details>
       
-      <!-- Need Messages Section -->
-      <Details>
-        <template #summary>
-          📢 Need Messages
-        </template>
-        <template #content>
-          <div class="gps-panel-section">
-            <h3 class="gps-panel-section-title">📢 Need Messages</h3>
-            
-            <div class="gps-panel-controls">
-              <FormGroup label="Message Interval (seconds)">
-                <Input
-                  :model-value="needMessagesStore.messageInterval / 1000"
-                  type="number"
-                  :min="1"
-                  :max="30"
-                  :step="1"
-                  @update:modelValue="(value) => needMessagesStore.messageInterval = value * 1000"
-                  hint="Time between need messages in seconds"
-                />
-              </FormGroup>
-              
-              <!-- Hunger Messages Configuration -->
-              <div class="gps-need-messages-config">
-                <h4 class="gps-panel-subsection-title">🍽️ Hunger Messages</h4>
-                
-                <div 
-                  v-for="(threshold, index) in needMessagesStore.needConfigs.hunger.thresholds" 
-                  :key="index"
-                  class="gps-threshold-config"
-                >
-                  <div class="gps-threshold-header">
-                    <span class="gps-threshold-label">Threshold {{ index + 1 }}</span>
-                    <Button 
-                      type="danger" 
-                      size="small"
-                      @click="needMessagesStore.removeNeedThreshold('hunger', index)"
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                  
-                  <div class="gps-threshold-controls">
-                    <FormGroup label="Min Value">
-                      <Input
-                        v-model="threshold.minValue"
-                        type="number"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, minValue: value })"
-                      />
-                    </FormGroup>
-                    
-                    <FormGroup label="Max Value">
-                      <Input
-                        v-model="threshold.maxValue"
-                        type="number"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, maxValue: value })"
-                      />
-                    </FormGroup>
-                    
-                    <FormGroup label="Message">
-                      <Input
-                        v-model="threshold.message"
-                        type="text"
-                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, message: value })"
-                      />
-                    </FormGroup>
-                    
-                    <FormGroup label="Emoji">
-                      <Input
-                        v-model="threshold.emoji"
-                        type="text"
-                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, emoji: value })"
-                      />
-                    </FormGroup>
-                    
-                    <FormGroup label="Priority">
-                      <Input
-                        v-model="threshold.priority"
-                        type="number"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        @update:modelValue="(value) => needMessagesStore.updateNeedThreshold('hunger', index, { ...threshold, priority: value })"
-                      />
-                    </FormGroup>
-                  </div>
-                </div>
-                
-                <Button 
-                  type="secondary"
-                  @click="needMessagesStore.addNeedThreshold('hunger', {
-                    minValue: 0,
-                    maxValue: 10,
-                    message: 'New hunger message',
-                    emoji: '😐',
-                    priority: 50
-                  })"
-                >
-                  ➕ Add Hunger Threshold
-                </Button>
-              </div>
-            </div>
-          </div>
-        </template>
-      </Details>
-      
       <!-- Poop System Section -->
       <Details>
         <template #summary>
@@ -414,8 +273,23 @@ defineExpose({
           </div>
         </template>
       </Details>
+
+      <!-- Needs Queue Section -->
+      <Details>
+        <template #summary>
+          🎯 Needs Queue System
+        </template>
+        <template #content>
+          <div class="gps-panel-section">
+            <h3 class="gps-panel-section-title">🎯 Needs Queue System</h3>
+            <div class="gps-needs-queue-container">
+              <NeedsQueueDisplay />
+            </div>
+          </div>
+        </template>
+      </Details>
       
-      <!-- Existing Actions Section -->
+      <!-- Game Actions Section -->
       <Details>
         <template #summary>
           ⚙️ Game Actions
@@ -491,47 +365,6 @@ defineExpose({
   margin-block-start: 0.5rem;
 }
 
-/* Need Messages Configuration Styles */
-.gps-need-messages-config {
-  margin-block-start: 1rem;
-  padding: 1rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-}
-
-.gps-panel-subsection-title {
-  margin: 0 0 1rem 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-.gps-threshold-config {
-  margin-block-end: 1.5rem;
-  padding: 1rem;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-}
-
-.gps-threshold-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-block-end: 1rem;
-}
-
-.gps-threshold-label {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-}
-
-.gps-threshold-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
 
 /* Desktop enhancements */
 @media (min-width: 768px) {
@@ -541,12 +374,6 @@ defineExpose({
   
   .gps-needs-queue-container {
     max-height: 700px;
-  }
-  
-  .gps-threshold-controls {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
   }
 }
 </style> 

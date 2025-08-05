@@ -66,8 +66,10 @@ function formatNeedName(name) {
 }
 
 onMounted(() => {
-  // Start the needs system automatically
-  needsQueueStore.startNeedsSystem()
+  // Only start the needs system if it's currently active (respects user debug panel settings)
+  if (needsQueueStore.isActive) {
+    needsQueueStore.startNeedsSystem()
+  }
 })
 </script>
 

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
+import { useStatisticsStore } from '../statistics.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -45,6 +46,7 @@ export const useHungerStore = defineStore('hunger', {
     fulfill(methodName) {
       const foodStore = useFoodStore()
       const inventoryStore = useInventoryStore()
+      const statisticsStore = useStatisticsStore()
       const improvement = foodStore.getFoodImprovement(methodName, this.needType)
       
       if (improvement === 0) {
@@ -69,6 +71,9 @@ export const useHungerStore = defineStore('hunger', {
       const oldValue = this.currentValue
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
+
+      // Track food consumption in statistics
+      statisticsStore.trackFoodConsumption(methodName, actualImprovement)
 
       return {
         success: true,

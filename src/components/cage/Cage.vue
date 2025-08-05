@@ -98,7 +98,10 @@ onMounted(() => {
     const y = Math.floor(Math.random() * height.value)
     cageStore.setGuineaPigPos(x, y)
   }
-  poopStore.startPoopTimer()
+  // Only start poop timer if the poop system is enabled (respects user debug panel settings)
+  if (poopStore.isEnabled) {
+    poopStore.startPoopTimer()
+  }
   moveInterval = setInterval(moveGuineaPig, 2000)
 })
 

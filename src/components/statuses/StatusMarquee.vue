@@ -4,13 +4,11 @@ import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
-import { useNeedMessagesStore } from '../../stores/needs/needMessages'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
-const needMessagesStore = useNeedMessagesStore()
 
 const shouldBounce = ref(false)
 
@@ -57,10 +55,6 @@ const statusText = computed(() => {
     return 'The guinea pig stepped on poop!'
   }
   
-  // Check for need-based messages (medium priority)
-  if (needMessagesStore.currentMessage) {
-    return needMessagesStore.currentMessage.message
-  }
   
   // Check if guinea pig is on an item
   if (currentItem.value) {
@@ -91,10 +85,6 @@ const statusEmoji = computed(() => {
     return '💩'
   }
   
-  // Check for need-based messages (medium priority)
-  if (needMessagesStore.currentMessage) {
-    return needMessagesStore.currentMessage.emoji
-  }
   
   // Check if guinea pig is on an item
   if (currentItem.value) {
@@ -123,7 +113,6 @@ watch(() => [
   currentItem.value, 
   isOnPoop.value, 
   isOnFreshPoop.value,
-  needMessagesStore.currentMessage
 ], (newValue, oldValue) => {
   if (oldValue !== undefined) { // Don't trigger on initial mount
     shouldBounce.value = true
@@ -133,14 +122,6 @@ watch(() => [
   }
 }, { deep: true })
 
-// Start and stop the need messages system
-onMounted(() => {
-  needMessagesStore.startMessageSystem()
-})
-
-onUnmounted(() => {
-  needMessagesStore.stopMessageSystem()
-})
 </script>
 
 <template>

@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, watch, onUnmounted } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -39,28 +39,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-// Scroll prevention functions
-function preventScroll() {
-  document.body.classList.add('gps-no-scroll')
-}
-
-function allowScroll() {
-  document.body.classList.remove('gps-no-scroll')
-}
-
-// Watch for subnav open/close state
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    preventScroll()
-  } else {
-    allowScroll()
-  }
-})
-
-// Clean up on component unmount
-onUnmounted(() => {
-  allowScroll()
-})
+// Note: Scroll prevention removed to allow body scrolling when subnav is open
 </script>
 
 <style>
