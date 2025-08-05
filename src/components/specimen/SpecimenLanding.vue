@@ -193,6 +193,29 @@
         </Button>
       </div>
 
+      <!-- BoardList Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📝</div>
+          <h3 class="gps-specimen-landing__card-title">BoardList Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Dynamic list component for displaying Guinea Pig needs and other information with optional urgency indicators.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Dynamic content</span>
+          <span class="gps-specimen-landing__feature">Urgency levels</span>
+          <span class="gps-specimen-landing__feature">Real-time updates</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showBoardListSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View BoardList Specimen
+        </Button>
+      </div>
+
 
     </div>
 
@@ -220,7 +243,8 @@ const emit = defineEmits([
   'showInputSpecimen',
   'showFormGroupSpecimen',
   'showToggleSpecimen',
-  'showDetailsSpecimen'
+  'showDetailsSpecimen',
+  'showBoardListSpecimen'
 ])
 </script>
 

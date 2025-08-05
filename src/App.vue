@@ -4,6 +4,7 @@ import { useUserStore } from './stores/user'
 import { useThemeStore } from './stores/theme'
 import { useInventoryStore } from './stores/inventory'
 import { useNeedsQueueStore } from './stores/needs/needsQueue'
+import { useStatisticsStore } from './stores/statistics'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
 import CageItemManager from './components/cage/CageItemManager.vue'
@@ -15,11 +16,32 @@ const userStore = useUserStore()
 const themeStore = useThemeStore()
 const inventoryStore = useInventoryStore()
 const needsQueueStore = useNeedsQueueStore()
+const statisticsStore = useStatisticsStore()
 
 onMounted(() => {
   themeStore.initTheme()
   inventoryStore.forceResetToDefaults()
-  needsQueueStore.startNeedsSystem()
+  // Only start needs system if it was previously enabled (respects user debug panel settings)
+  if (needsQueueStore.isActive) {
+    needsQueueStore.startNeedsSystem()
+  }
+  
+  // Start session tracking
+  statisticsStore.startSession()
+})
+
+// Handle session pausing/resuming based on page visibility
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    statisticsStore.pauseSession()
+  } else {
+    statisticsStore.startSession()
+  }
+})
+
+// End session on page unload
+window.addEventListener('beforeunload', () => {
+  statisticsStore.endSession()
 })
 
 const showGuineaPig = ref(false)

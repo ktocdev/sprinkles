@@ -5,6 +5,7 @@ import { useGuineaPigStore } from './guineaPig.js'
 import { useNeedsQueueStore } from './needs/needsQueue.js'
 import { useHungerStore } from './needs/hunger.js'
 import { usePoopStore } from './poop.js'
+import { useStatisticsStore } from './statistics.js'
 
 function createEmptyGrid(width, height) {
   return Array.from({ length: height }, () => Array.from({ length: width }, () => null))
@@ -316,13 +317,19 @@ export const useCageStore = defineStore('cage', {
         return { success: false, message: 'Item data not found' }
       }
       
-      // Improve guinea pig needs
+      // Improve guinea pig needs and track statistics
       const needsQueueStore = useNeedsQueueStore()
       if (itemData.needType && itemData.needImprovement) {
         // Note: Only hunger store is implemented, so we'll only handle hunger for now
         if (itemData.needType === 'hunger') {
           const hungerStore = useHungerStore()
+          const oldValue = hungerStore.currentValue
           hungerStore.currentValue = Math.min(100, hungerStore.currentValue + itemData.needImprovement)
+          const actualImprovement = hungerStore.currentValue - oldValue
+          
+          // Track food consumption in statistics
+          const statisticsStore = useStatisticsStore()
+          statisticsStore.trackFoodConsumption(item.name, actualImprovement)
         }
       }
       

@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { useCageStore } from './cage.js'
+import { useStatisticsStore } from './statistics.js'
 
 export const usePoopStore = defineStore('poop', {
   state: () => ({
     poop: [], // array of { x, y, timestamp }
     poopTimer: null,
+    isEnabled: true, // Whether the poop system is enabled
     shouldDropPoop: false,
     poopInterval: 5000 + Math.random() * 7000, // 5-12 seconds base interval
     maxPoopPercentage: 0.3, // Maximum 30% of available cells can have poop
@@ -73,6 +75,11 @@ export const usePoopStore = defineStore('poop', {
       }
       
       this.poop.push(poop)
+      
+      // Track poop creation in statistics
+      const statisticsStore = useStatisticsStore()
+      statisticsStore.trackPoopCreation()
+      
       return true
     },
     
@@ -80,13 +87,28 @@ export const usePoopStore = defineStore('poop', {
     removePoop(x, y) {
       const initialCount = this.poop.length
       this.poop = this.poop.filter(p => !(p.x === x && p.y === y))
-      return this.poop.length < initialCount
+      const wasRemoved = this.poop.length < initialCount
+      
+      // Track individual poop cleaning in statistics
+      if (wasRemoved) {
+        const statisticsStore = useStatisticsStore()
+        statisticsStore.trackPoopCleaning(false, 1) // individual cleaning
+      }
+      
+      return wasRemoved
     },
     
     // Remove all poop (clean cage)
     cleanAllPoop() {
       const removedCount = this.poop.length
       this.poop = []
+      
+      // Track bulk poop cleaning in statistics
+      if (removedCount > 0) {
+        const statisticsStore = useStatisticsStore()
+        statisticsStore.trackPoopCleaning(true, removedCount) // bulk cleaning
+      }
+      
       return removedCount
     },
     
@@ -100,7 +122,9 @@ export const usePoopStore = defineStore('poop', {
     
     // Start the poop timer
     startPoopTimer() {
-      this.resetPoopTimer()
+      if (this.isEnabled) {
+        this.resetPoopTimer()
+      }
     },
     
     // Reset the poop timer
@@ -132,6 +156,18 @@ export const usePoopStore = defineStore('poop', {
         clearTimeout(this.poopTimer)
         this.poopTimer = null
       }
+    },
+
+    // Enable the poop system
+    enablePoopSystem() {
+      this.isEnabled = true
+      this.startPoopTimer()
+    },
+
+    // Disable the poop system
+    disablePoopSystem() {
+      this.isEnabled = false
+      this.stopPoopTimer()
     },
     
     // Handle guinea pig interaction with poop
