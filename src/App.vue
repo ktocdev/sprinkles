@@ -11,6 +11,7 @@ import CageItemManager from './components/cage/CageItemManager.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
 import AppPanels from './components/panels/AppPanels.vue'
+import NeedsNav from './components/navigation/NeedsNav.vue'
 
 const userStore = useUserStore()
 const themeStore = useThemeStore()
@@ -113,6 +114,9 @@ function handleGameReset() {
 <template>
   <div class="gps-app">
     <TopBar v-if="userStore.name" />
+    
+    <!-- Needs Navigation (desktop: horizontal, mobile: fixed right) -->
+    <NeedsNav v-if="userStore.name" />
 
     <div class="gps-app__main-layout">
       <IconSidebar 
@@ -167,7 +171,7 @@ function handleGameReset() {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 5rem 0 1rem;
+  padding: 5rem 0 1rem 0; /* Add right padding for mobile needs nav */
 }
 
 /* Mobile-first responsive styles */
@@ -175,6 +179,10 @@ function handleGameReset() {
   .gps-app__main-layout {
     margin-inline-start: 50px;
     width: calc(100% - 50px);
+  }
+  
+  .gps-app__content-area {
+    padding: 5rem 0 1rem; /* Keep standard padding on desktop */
   }
 }
 
