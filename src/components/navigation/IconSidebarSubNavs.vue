@@ -1,10 +1,5 @@
 <template>
   <div class="gps-icon-sidebar-subnavs">
-    <NeedsSubNav 
-      :isOpen="showNeeds"
-      @close="$emit('closeNeeds')"
-    />
-
     <CageStatusSubNav 
       :isOpen="showCageStatus"
       @close="$emit('closeCageStatus')"
@@ -14,15 +9,13 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import NeedsSubNav from '../subnavs/NeedsSubNav.vue'
 import CageStatusSubNav from '../subnavs/CageStatusSubNav.vue'
 
 const props = defineProps({
-  showNeeds: Boolean,
   showCageStatus: Boolean
 })
 
-const emit = defineEmits(['closeNeeds', 'closeCageStatus'])
+const emit = defineEmits(['closeCageStatus'])
 </script>
 
 <style>

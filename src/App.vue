@@ -46,46 +46,43 @@ window.addEventListener('beforeunload', () => {
 })
 
 const showGuineaPig = ref(false)
-const showNeeds = ref(false)
+const showStatistics = ref(false)
 const showCageStatus = ref(false)
 const showCageInteractions = ref(false)
 const showMarket = ref(false)
 
 const appPanelsRef = ref(null)
 
-function toggleNeeds() {
-  // Close other subnav if open
-  if (showCageStatus.value) {
-    showCageStatus.value = false
-  }
-  showNeeds.value = !showNeeds.value
-}
-
 function toggleCageStatus() {
-  // Close other subnav if open
-  if (showNeeds.value) {
-    showNeeds.value = false
-  }
   showCageStatus.value = !showCageStatus.value
 }
 
 function toggleCageInteractions() {
   // Close all subnavs when opening modal
-  showNeeds.value = false
   showCageStatus.value = false
   showCageInteractions.value = !showCageInteractions.value
 }
 
 function toggleGuineaPig() {
   // Close all subnavs when opening modal
-  showNeeds.value = false
   showCageStatus.value = false
   showGuineaPig.value = !showGuineaPig.value
 }
 
+function toggleStatistics() {
+  // Close all subnavs when opening modal
+  showCageStatus.value = false
+  showStatistics.value = !showStatistics.value
+}
+
+function openGuineaPigInfo() {
+  // Close all subnavs when opening modal from TopBar logo
+  showCageStatus.value = false
+  showGuineaPig.value = true
+}
+
 function toggleMarket() {
   // Close all subnavs when opening modal
-  showNeeds.value = false
   showCageStatus.value = false
   showMarket.value = !showMarket.value
 }
@@ -103,9 +100,9 @@ function toggleDesign() {
 function handleGameReset() {
   // Reset all panel states
   showGuineaPig.value = false
+  showStatistics.value = false
   showCageInteractions.value = false
   showMarket.value = false
-  showNeeds.value = false
   showCageStatus.value = false
 }
 
@@ -113,26 +110,23 @@ function handleGameReset() {
 
 <template>
   <div class="gps-app">
-    <TopBar v-if="userStore.name" />
+    <TopBar v-if="userStore.name" @openGuineaPigInfo="openGuineaPigInfo" />
     
     <!-- Needs Navigation (desktop: horizontal, mobile: fixed right) -->
     <NeedsNav v-if="userStore.name" />
 
     <div class="gps-app__main-layout">
       <IconSidebar 
-        :showGuineaPig="showGuineaPig"
-        :showNeeds="showNeeds"
+        :showStatistics="showStatistics"
         :showCageStatus="showCageStatus"
         :showCageInteractions="showCageInteractions"
         :showMarket="showMarket"
-        @toggleGuineaPig="toggleGuineaPig"
-        @toggleNeeds="toggleNeeds"
+        @toggleStatistics="toggleStatistics"
         @toggleCageStatus="toggleCageStatus"
         @toggleCageInteractions="toggleCageInteractions"
         @toggleMarket="toggleMarket"
         @toggleDebug="toggleDebug"
         @toggleDesign="toggleDesign"
-        @closeNeeds="showNeeds = false"
         @closeCageStatus="showCageStatus = false"
       />
       
@@ -147,10 +141,12 @@ function handleGameReset() {
 
     <AppPanels 
       ref="appPanelsRef"
+      :showStatistics="showStatistics"
       :showGuineaPig="showGuineaPig"
       :showCageInteractions="showCageInteractions"
       :showMarket="showMarket"
       @gameReset="handleGameReset"
+      @closeStatistics="showStatistics = false"
       @closeGuineaPig="showGuineaPig = false"
       @closeCageInteractions="showCageInteractions = false"
       @closeMarket="showMarket = false"

@@ -216,6 +216,30 @@
         </Button>
       </div>
 
+      <!-- AnchorNav Specimen - Hidden -->
+      <!-- 
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">⚓</div>
+          <h3 class="gps-specimen-landing__card-title">AnchorNav Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Fixed-position navigation component with flyout menu using Button and SubNav for consistent interaction patterns.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Fixed position</span>
+          <span class="gps-specimen-landing__feature">Flyout menu</span>
+          <span class="gps-specimen-landing__feature">Slot-based content</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showAnchorNavSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View AnchorNav Specimen
+        </Button>
+      </div>
+      -->
 
     </div>
 
@@ -244,7 +268,8 @@ const emit = defineEmits([
   'showFormGroupSpecimen',
   'showToggleSpecimen',
   'showDetailsSpecimen',
-  'showBoardListSpecimen'
+  'showBoardListSpecimen',
+  'showAnchorNavSpecimen'
 ])
 </script>
 
