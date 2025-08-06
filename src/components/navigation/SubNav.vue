@@ -38,8 +38,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-
-// Note: Scroll prevention removed to allow body scrolling when subnav is open
 </script>
 
 <style>
@@ -56,21 +54,9 @@ const emit = defineEmits(['close'])
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow-medium);
   z-index: 300;
-  animation: gps-subnav-slide-in 0.2s ease-out;
   overflow-y: auto;
   overflow-x: hidden;
   margin-inline-start: 0.5rem;
-}
-
-@keyframes gps-subnav-slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 .gps-subnav__container {

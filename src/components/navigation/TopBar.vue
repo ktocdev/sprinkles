@@ -1,11 +1,17 @@
 <script setup>
+import { defineEmits } from 'vue'
 import Button from '../shared/Button.vue'
 import { useCageStore } from '../../stores/cage'
 
 const cageStore = useCageStore()
+const emit = defineEmits(['openGuineaPigInfo'])
 
 function togglePause() {
   cageStore.togglePause()
+}
+
+function openGuineaPigInfo() {
+  emit('openGuineaPigInfo')
 }
 </script>
 
@@ -13,9 +19,14 @@ function togglePause() {
   <header class="gps-topbar">
     <div class="gps-topbar__container gps-container">
       <div class="gps-topbar__brand">
-        <div class="gps-topbar__logo">
+        <button 
+          class="gps-topbar__logo gps-topbar__logo--clickable"
+          @click="openGuineaPigInfo"
+          title="Open Guinea Pig Information"
+          aria-label="Open Guinea Pig Information"
+        >
           🐹
-        </div>
+        </button>
         <h1 class="gps-topbar__title">Guinea Pig Simulator</h1>
       </div>
       
@@ -80,8 +91,17 @@ function togglePause() {
   flex-shrink: 0;
 }
 
-.gps-topbar__logo:hover {
+.gps-topbar__logo--clickable {
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  padding: 0;
+  margin: 0;
+}
+
+.gps-topbar__logo--clickable:hover {
   transform: scale(1.1);
+  background: var(--color-accent-hover);
 }
 
 .gps-topbar__title {

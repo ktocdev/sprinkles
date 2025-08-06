@@ -3,19 +3,11 @@
     <div class="gps-icon-sidebar__container">
       <template v-if="userStore.name">
         <IconSidebarButton 
-          :active="showGuineaPig"
-          @click="$emit('toggleGuineaPig')"
-          title="Show Guinea Pig Info"
+          :active="showStatistics"
+          @click="$emit('toggleStatistics')"
+          title="Show Statistics"
         >
-          📋
-        </IconSidebarButton>
-
-        <IconSidebarButton 
-          :active="showNeeds"
-          @click="$emit('toggleNeeds')"
-          title="Show Needs"
-        >
-          📊
+          📈
         </IconSidebarButton>
 
         <IconSidebarButton 
@@ -62,9 +54,7 @@
   </nav>
 
   <IconSidebarSubNavs 
-    :showNeeds="showNeeds"
     :showCageStatus="showCageStatus"
-    @closeNeeds="$emit('closeNeeds')"
     @closeCageStatus="$emit('closeCageStatus')"
   />
 </template>
@@ -76,22 +66,19 @@ import IconSidebarButton from './IconSidebarButton.vue'
 import IconSidebarSubNavs from './IconSidebarSubNavs.vue'
 
 const props = defineProps({
-  showGuineaPig: Boolean,
-  showNeeds: Boolean,
+  showStatistics: Boolean,
   showCageStatus: Boolean,
   showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
 const emit = defineEmits([
-  'toggleGuineaPig',
-  'toggleNeeds', 
+  'toggleStatistics',
   'toggleCageStatus',
   'toggleCageInteractions',
   'toggleMarket',
   'toggleDebug',
   'toggleDesign',
-  'closeNeeds', 
   'closeCageStatus'
 ])
 

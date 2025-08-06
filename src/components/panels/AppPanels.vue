@@ -14,9 +14,11 @@
   
   <!-- Icon Sidebar Panels (prop-based) -->
   <IconSidebarPanels 
+    :showStatistics="showStatistics"
     :showGuineaPig="showGuineaPig"
     :showCageInteractions="showCageInteractions"
     :showMarket="showMarket"
+    @closeStatistics="$emit('closeStatistics')"
     @closeGuineaPig="$emit('closeGuineaPig')"
     @closeCageInteractions="$emit('closeCageInteractions')"
     @closeMarket="$emit('closeMarket')"
@@ -33,12 +35,13 @@ import DesignToolPanel from './DesignToolPanel.vue'
 import IconSidebarPanels from './IconSidebarPanels.vue'
 
 const props = defineProps({
+  showStatistics: Boolean,
   showGuineaPig: Boolean,
   showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
-const emit = defineEmits(['gameReset', 'closeGuineaPig', 'closeCageInteractions', 'closeMarket'])
+const emit = defineEmits(['gameReset', 'closeStatistics', 'closeGuineaPig', 'closeCageInteractions', 'closeMarket'])
 
 // Expose refs for external access
 const debugPanelRef = ref(null)
