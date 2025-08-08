@@ -21,7 +21,6 @@ const statisticsStore = useStatisticsStore()
 
 onMounted(() => {
   themeStore.initTheme()
-  inventoryStore.forceResetToDefaults()
   // Only start needs system if it was previously enabled (respects user debug panel settings)
   if (needsQueueStore.isActive) {
     needsQueueStore.startNeedsSystem()

@@ -49,8 +49,8 @@ const poopStore = usePoopStore()
 
 // Poop system controls
 const isPoopingEnabled = ref(poopStore.isEnabled)
-const minPoopInterval = ref(5) // 5 seconds default
-const maxPoopInterval = ref(12) // 12 seconds default
+const minPoopInterval = ref(poopStore.minPoopInterval / 1000) // Convert from ms to seconds
+const maxPoopInterval = ref(poopStore.maxPoopInterval / 1000) // Convert from ms to seconds
 
 function togglePooping(enabled) {
   if (enabled) {
@@ -61,18 +61,18 @@ function togglePooping(enabled) {
 }
 
 function updatePoopInterval() {
-  // Convert seconds to milliseconds and update the base interval
+  // Convert seconds to milliseconds and update the store intervals
   const minMs = minPoopInterval.value * 1000
   const maxMs = maxPoopInterval.value * 1000
-  const baseInterval = (minMs + maxMs) / 2
-  poopStore.setPoopInterval(baseInterval)
+  poopStore.setPoopIntervals(minMs, maxMs)
 }
 
 // Initialize poop controls on mount
 onMounted(() => {
   // Set initial values based on current store state
   isPoopingEnabled.value = poopStore.isEnabled
-  updatePoopInterval()
+  minPoopInterval.value = poopStore.minPoopInterval / 1000
+  maxPoopInterval.value = poopStore.maxPoopInterval / 1000
 })
 
 // Watch for changes in the poop system enabled state
