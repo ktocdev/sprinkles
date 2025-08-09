@@ -17,17 +17,39 @@ function cellContent(cell, x, y) {
   if (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y) return '🐹'
   if (cell === 'poop') return '💩'
   if (cell && typeof cell === 'object' && cell.name) {
-    // Return appropriate emoji based on item type
-    const itemType = cell.type
-    const itemSize = cell.size || { width: 1, height: 1 }
-    const isLarge = itemSize.width > 1 || itemSize.height > 1
+    // Return appropriate emoji based on specific item name
+    const itemName = cell.name
     
-    if (itemType === 'food') return '🥕'
-    if (itemType === 'bedding') return '🛏️'
-    if (itemType === 'chew') return '🦷'
-    if (itemType === 'toy') return '🎾'
-    if (itemType === 'bed') return isLarge ? '🛌' : '🛏️'
-    if (itemType === 'shelter') return isLarge ? '🏘️' : '🏠'
+    // Food items
+    if (itemName === 'hay') return '🌾'
+    if (itemName === 'pellets') return '🟤'
+    if (itemName === 'lettuce') return '🥬'
+    if (itemName === 'blueberries') return '🫐'
+    if (itemName === 'carrots') return '🥕'
+    if (itemName === 'cucumbers') return '🥒'
+    
+    // Bedding
+    if (itemName === 'bedding') return '🛏️'
+    
+    // Chew items
+    if (itemName === 'small_chew_stick') return '🪵'
+    if (itemName === 'large_chew_stick') return '🌳'
+    if (itemName === 'chew_cube') return '🧊'
+    
+    // Toys
+    if (itemName === 'small_ball') return '⚽'
+    if (itemName === 'large_ball') return '🏀'
+    if (itemName === 'small_tunnel') return '🕳️'
+    if (itemName === 'large_tunnel') return '🚇'
+    
+    // Beds and shelters
+    if (itemName === 'small_hammock') return '🛌'
+    if (itemName === 'large_hammock') return '🏕️'
+    if (itemName === 'small_bed') return '🛏️'
+    if (itemName === 'large_bed') return '🛌'
+    if (itemName === 'small_house') return '🏠'
+    if (itemName === 'large_house') return '🏘️'
+    
     return '📦' // Default item emoji
   }
   return ''
@@ -125,8 +147,11 @@ onUnmounted(() => {
         :style="{
           display: 'grid',
           gridTemplateColumns: `repeat(${width}, 1.2em)`,
-          gridTemplateRows: `repeat(${height}, 1.2em)`
+          gridTemplateRows: `repeat(${height}, 1.2em)`,
+          '--grid-width': width,
+          '--grid-height': height
         }"
+        :class="['gps-cage__grid--responsive']"
       >
       <div
         v-for="item in flatGrid"
@@ -278,6 +303,30 @@ onUnmounted(() => {
     width: 1.2em;
     height: 1.2em;
     font-size: 1em;
+  }
+}
+
+/* Tablet and above enhancements */
+@media (min-width: 768px) {
+  .gps-cage__grid--responsive {
+    grid-template-columns: repeat(var(--grid-width), 2.2em) !important;
+    grid-template-rows: repeat(var(--grid-height), 2.2em) !important;
+  }
+  
+  .gps-cage__cell {
+    width: 2em;
+    height: 2em;
+    font-size: 1em;
+    border-radius: 8px;
+  }
+  
+  .gps-cage__water-emoji {
+    font-size: 1.7em;
+  }
+  
+  .gps-cage__cell--item[data-item-size="2x2"] {
+    border-width: 3px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   }
 }
 </style> 

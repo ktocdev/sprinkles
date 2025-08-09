@@ -57,6 +57,13 @@ function formatNeedName(name) {
   transform: translateY(-50%);
 }
 
+/* Hide NeedsNav when inline BoardList is shown */
+@media (min-width: 1024px) {
+  .gps-needs-nav {
+    display: none;
+  }
+}
+
 /* Urgency styling for the anchor button */
 .gps-needs-nav--urgent .gps-anchor-nav__toggle {
   background: var(--color-warning);

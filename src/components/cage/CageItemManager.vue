@@ -521,22 +521,44 @@ function throwOutItem(item) {
   }
 }
 
-// Find all available positions in the cage
-function getAvailablePositions() {
+// Check if an item can fit at a specific position
+function canItemFitAtPosition(itemSize, x, y) {
+  const itemWidth = itemSize.width
+  const itemHeight = itemSize.height
+  
+  // Check if item fits within grid bounds
+  if (x + itemWidth > cageStore.size.width || y + itemHeight > cageStore.size.height) {
+    return false
+  }
+  
+  // Check if all required positions are available
+  for (let checkY = y; checkY < y + itemHeight; checkY++) {
+    for (let checkX = x; checkX < x + itemWidth; checkX++) {
+      // Check if position is occupied by another item
+      const isOccupiedByItem = cageStore.items.some(i => i.x === checkX && i.y === checkY)
+      // Check if position is occupied by guinea pig
+      const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === checkX && cageStore.guineaPigPos.y === checkY)
+      // Check if position is occupied by poop
+      const isOccupiedByPoop = poopStore.poop.some(p => p.x === checkX && p.y === checkY)
+      // Check if position is water bottle position
+      const isWaterBottlePosition = (checkX === cageStore.size.width - 1 && checkY === 0)
+      
+      if (isOccupiedByItem || isOccupiedByGuineaPig || isOccupiedByPoop || isWaterBottlePosition) {
+        return false
+      }
+    }
+  }
+  
+  return true
+}
+
+// Find all available positions for a specific item size
+function getAvailablePositionsForItem(itemSize) {
   const availablePositions = []
   
   for (let y = 0; y < cageStore.size.height; y++) {
     for (let x = 0; x < cageStore.size.width; x++) {
-      // Check if position is occupied by another item
-      const isOccupiedByItem = cageStore.items.some(i => i.x === x && i.y === y)
-      // Check if position is occupied by guinea pig
-      const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
-      // Check if position is occupied by poop
-      const isOccupiedByPoop = poopStore.poop.some(p => p.x === x && p.y === y)
-      // Check if position is water bottle position
-      const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
-      
-      if (!isOccupiedByItem && !isOccupiedByGuineaPig && !isOccupiedByPoop && !isWaterBottlePosition) {
+      if (canItemFitAtPosition(itemSize, x, y)) {
         availablePositions.push({ x, y })
       }
     }
@@ -552,13 +574,6 @@ function placeItemsRandomly() {
     return
   }
   
-  const availablePositions = getAvailablePositions()
-  
-  if (availablePositions.length === 0) {
-    alert('No available positions in the cage! Clean up some space first.')
-    return
-  }
-  
   // Get a random selection of items to place (3-6 items)
   const allAvailableItems = [
     ...Object.keys(availableConsumables.value),
@@ -570,13 +585,13 @@ function placeItemsRandomly() {
     return
   }
   
-  // Decide how many items to place (between 3 and min(6, available positions, available items))
-  const maxItems = Math.min(6, availablePositions.length, allAvailableItems.length)
+  // Decide how many items to place (between 1 and min(6, available items))
+  const maxItems = Math.min(6, allAvailableItems.length)
   const numItemsToPlace = Math.max(1, Math.min(maxItems, 3 + Math.floor(Math.random() * 4)))
   
   let placedItems = 0
   let attempts = 0
-  const maxAttempts = 50 // Prevent infinite loops
+  const maxAttempts = 100 // Prevent infinite loops
   
   while (placedItems < numItemsToPlace && attempts < maxAttempts) {
     attempts++
@@ -587,11 +602,16 @@ function placeItemsRandomly() {
     
     if (!itemDef) continue
     
-    // Pick a random available position
-    const currentAvailable = getAvailablePositions()
-    if (currentAvailable.length === 0) break
+    // Get available positions for this specific item size
+    const availablePositions = getAvailablePositionsForItem(itemDef.size)
     
-    const randomPos = currentAvailable[Math.floor(Math.random() * currentAvailable.length)]
+    if (availablePositions.length === 0) {
+      // This item can't fit anywhere, try another item
+      continue
+    }
+    
+    // Pick a random available position that can fit this item
+    const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
     
     // Try to place the item
     const success = cageStore.addItem({
@@ -619,6 +639,8 @@ function placeItemsRandomly() {
 <style>
 .gps-cage-item-manager {
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .gps-cage-item-manager__actions {
@@ -638,6 +660,9 @@ function placeItemsRandomly() {
   background: var(--color-panel);
   border-radius: var(--border-radius);
   padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .gps-cage-item-manager__section-title {
@@ -670,6 +695,9 @@ function placeItemsRandomly() {
   background: var(--color-bg);
   border-radius: var(--border-radius);
   border: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .gps-cage-item-manager__item-info {
@@ -766,8 +794,23 @@ function placeItemsRandomly() {
   font-size: var(--font-size-sm);
 }
 
+/* Tablet and above constraints */
+@media (min-width: 768px) {
+  .gps-cage-item-manager {
+    max-width: 500px;
+  }
+  
+  .gps-cage-item-manager__sections {
+    max-width: 100%;
+  }
+  
+  .gps-cage-item-manager__section {
+    max-width: 100%;
+  }
+}
+
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .gps-cage-item-manager__actions {
     justify-content: center;
   }
