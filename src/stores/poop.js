@@ -8,7 +8,8 @@ export const usePoopStore = defineStore('poop', {
     poopTimer: null,
     isEnabled: true, // Whether the poop system is enabled
     shouldDropPoop: false,
-    poopInterval: 5000 + Math.random() * 7000, // 5-12 seconds base interval
+    minPoopInterval: 10000, // Minimum interval in milliseconds
+    maxPoopInterval: 20000, // Maximum interval in milliseconds
     maxPoopPercentage: 0.3, // Maximum 30% of available cells can have poop
     hygieneImpact: 5, // Default hygiene impact when stepping on poop
     totalCells: 0, // Total cells in the grid
@@ -134,8 +135,8 @@ export const usePoopStore = defineStore('poop', {
         clearTimeout(this.poopTimer)
       }
       
-      // Randomize the interval slightly
-      const randomInterval = this.poopInterval + (Math.random() * 2000 - 1000) // ±1 second variation
+      // Randomize the interval within min/max range
+      const randomInterval = this.minPoopInterval + (Math.random() * (this.maxPoopInterval - this.minPoopInterval))
       
       this.poopTimer = setTimeout(() => {
         // Check if game is paused before setting shouldDropPoop
@@ -203,9 +204,15 @@ export const usePoopStore = defineStore('poop', {
       }
     },
     
-    // Set poop interval (for adjusting frequency)
-    setPoopInterval(intervalMs) {
-      this.poopInterval = Math.max(1000, intervalMs) // Minimum 1 second
+    // Set poop intervals (for adjusting frequency)
+    setPoopIntervals(minMs, maxMs) {
+      this.minPoopInterval = Math.max(1000, minMs) // Minimum 1 second
+      this.maxPoopInterval = Math.max(this.minPoopInterval, maxMs) // Max must be >= min
+      
+      // Restart timer with new intervals if currently enabled
+      if (this.isEnabled && this.poopTimer) {
+        this.resetPoopTimer()
+      }
     },
     
     // Set maximum poop percentage

@@ -4,13 +4,17 @@ import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
+import { useStatusStore } from '../../stores/status'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
+const statusStore = useStatusStore()
 
 const shouldBounce = ref(false)
+const poopMessage = ref(null)
+const poopMessageTimer = ref(null)
 
 // Helper function to format item names
 const formatItemName = (itemName) => {
@@ -45,24 +49,29 @@ const isOnFreshPoop = computed(() => {
 
 // Priority-based status text computation
 const statusText = computed(() => {
+  // Check for temporary poop message first (highest priority)
+  if (poopMessage.value) {
+    return poopMessage.value
+  }
+  
   // Check if guinea pig is on fresh poop (highest priority)
   if (isOnFreshPoop.value) {
     return 'The guinea pig just made a poop!'
   }
   
-  // Check if guinea pig is on old poop
-  if (isOnPoop.value) {
-    return 'The guinea pig stepped on poop!'
-  }
-  
-  
-  // Check if guinea pig is on an item
+  // Check if guinea pig is on an item (medium priority)
   if (currentItem.value) {
     const itemData = marketStore.getItemData(currentItem.value.name)
     if (itemData && itemData.actionWord) {
       const itemName = formatItemName(currentItem.value.name)
       return `The guinea pig is ${itemData.actionWord} the ${itemName}.`
     }
+  }
+  
+  // Check for urgency messages (managed by Status store)
+  const urgencyMessage = statusStore.getCurrentPriorityMessage
+  if (urgencyMessage) {
+    return urgencyMessage.message
   }
   
   // Default status based on sitting/moving (lowest priority)
@@ -80,13 +89,12 @@ const statusEmoji = computed(() => {
     return '💩'
   }
   
-  // Check if guinea pig is on old poop
+  // Check if guinea pig is on old poop (high priority)
   if (isOnPoop.value) {
     return '💩'
   }
   
-  
-  // Check if guinea pig is on an item
+  // Check if guinea pig is on an item (medium priority)
   if (currentItem.value) {
     const itemData = marketStore.getItemData(currentItem.value.name)
     if (itemData) {
@@ -99,6 +107,12 @@ const statusEmoji = computed(() => {
     }
   }
   
+  // Check for urgency messages (managed by Status store)
+  const urgencyMessage = statusStore.getCurrentPriorityMessage
+  if (urgencyMessage) {
+    return urgencyMessage.emoji
+  }
+  
   // Default emoji based on sitting/moving (lowest priority)
   if (guineaPigStore.sitting) {
     return '🛋️'
@@ -107,12 +121,39 @@ const statusEmoji = computed(() => {
   }
 })
 
+// Watch for poop interaction to show timed message
+watch(isOnPoop, (newValue, oldValue) => {
+  if (newValue && !oldValue && !isOnFreshPoop.value) {
+    // Guinea pig just stepped on poop (not fresh poop)
+    showTemporaryPoopMessage('The guinea pig stepped on poop!')
+  }
+})
+
+// Function to show temporary poop message
+function showTemporaryPoopMessage(message) {
+  // Clear any existing timer
+  if (poopMessageTimer.value) {
+    clearTimeout(poopMessageTimer.value)
+  }
+  
+  // Set the temporary message
+  poopMessage.value = message
+  
+  // Clear the message after 2 seconds
+  poopMessageTimer.value = setTimeout(() => {
+    poopMessage.value = null
+    poopMessageTimer.value = null
+  }, 2000)
+}
+
 // Watch for status changes and trigger bounce animation
 watch(() => [
   guineaPigStore.sitting, 
   currentItem.value, 
   isOnPoop.value, 
   isOnFreshPoop.value,
+  statusStore.getCurrentPriorityMessage,
+  poopMessage.value
 ], (newValue, oldValue) => {
   if (oldValue !== undefined) { // Don't trigger on initial mount
     shouldBounce.value = true
@@ -121,6 +162,19 @@ watch(() => [
     }, 2000) // Reset after animation duration
   }
 }, { deep: true })
+
+// Initialize status system on mount - always start fresh
+onMounted(() => {
+  console.log('StatusMarquee mounted, starting status store...')
+  statusStore.startUpdates()
+})
+
+// Cleanup timers on unmount
+onUnmounted(() => {
+  if (poopMessageTimer.value) {
+    clearTimeout(poopMessageTimer.value)
+  }
+})
 
 </script>
 

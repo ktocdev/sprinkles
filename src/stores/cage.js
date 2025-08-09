@@ -327,6 +327,9 @@ export const useCageStore = defineStore('cage', {
           hungerStore.currentValue = Math.min(100, hungerStore.currentValue + itemData.needImprovement)
           const actualImprovement = hungerStore.currentValue - oldValue
           
+          // Update needs queue to reflect the change in NeedsNav immediately
+          needsQueueStore.updateQueue()
+          
           // Track food consumption in statistics
           const statisticsStore = useStatisticsStore()
           statisticsStore.trackFoodConsumption(item.name, actualImprovement)

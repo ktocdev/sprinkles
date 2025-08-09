@@ -196,16 +196,21 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     startNeedsSystem() {
       this.isActive = true
       this.lastUpdate = Date.now()
+      
+      // Clear any stale timer ID from persisted state
+      if (this.updateTimer) {
+        clearInterval(this.updateTimer)
+        this.updateTimer = null
+      }
+      
       this.updateQueue()
       
       // Start the timer for continuous updates
-      if (!this.updateTimer) {
-        this.updateTimer = setInterval(() => {
-          if (this.isActive) {
-            this.updateAllNeeds()
-          }
-        }, 1000) // Update every second
-      }
+      this.updateTimer = setInterval(() => {
+        if (this.isActive) {
+          this.updateAllNeeds()
+        }
+      }, 1000) // Update every second
     },
 
     stopNeedsSystem() {

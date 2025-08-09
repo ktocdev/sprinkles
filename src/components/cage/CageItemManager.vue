@@ -241,7 +241,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
@@ -254,6 +254,7 @@ import FormGroup from '../shared/FormGroup.vue'
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
+
 
 // Modal states
 const showAddItemModal = ref(false)
