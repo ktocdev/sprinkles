@@ -6,6 +6,7 @@ import { useNeedsQueueStore } from './needs/needsQueue.js'
 import { useHungerStore } from './needs/hunger.js'
 import { usePoopStore } from './poop.js'
 import { useStatisticsStore } from './statistics.js'
+import { useStatusStore } from './status.js'
 
 function createEmptyGrid(width, height) {
   return Array.from({ length: height }, () => Array.from({ length: width }, () => null))
@@ -288,6 +289,12 @@ export const useCageStore = defineStore('cage', {
       const { x, y } = this.guineaPigPos
       
       const interaction = poopStore.interactWithPoop(x, y)
+      
+      // Show temporary message for poop interaction
+      if (interaction.success) {
+        const statusStore = useStatusStore()
+        statusStore.showTemporaryMessage(interaction.message, '💩', 2000)
+      }
       
       if (interaction.success && interaction.hygieneImpact > 0) {
         // Note: Hygiene store not implemented yet, so we'll skip this for now

@@ -206,6 +206,19 @@ export const useMarketStore = defineStore('market', {
       return state.items[itemName] || null
     },
     
+    // Get emoji for item type
+    getItemEmoji: (state) => (itemName) => {
+      const item = state.items[itemName]
+      if (!item) return '❓'
+      
+      const needType = item.needType
+      if (needType === 'hunger') return '🥕'
+      if (needType === 'chew') return '🦷'
+      if (needType === 'enrichment') return '🎾'
+      if (needType === 'shelter') return '🏠'
+      return '📦'
+    },
+    
     // Get all items
     getAllItems: (state) => {
       return state.items

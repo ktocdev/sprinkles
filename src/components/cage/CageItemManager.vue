@@ -9,6 +9,15 @@
       >
         ➕ Add Item
       </Button>
+      <Button 
+        type="secondary"
+        size="compact"
+        @click="placeItemsRandomly"
+        title="Place items randomly in cage"
+        :class="{ 'gps-button--disabled': !hasAnyItems }"
+      >
+        🎲 Random Place
+      </Button>
     </div>
 
     <!-- Item Lists -->
@@ -16,13 +25,24 @@
       <div class="gps-cage-item-manager__no-cage-items-content">
         <h4>No items in cage yet</h4>
         <p>Add some items to your cage to get started!</p>
-        <Button 
-          type="primary"
-          size="compact"
-          @click="showAddItemModal = true"
-        >
-          ➕ Add Your First Item
-        </Button>
+        <div class="gps-cage-item-manager__first-item-actions">
+          <Button 
+            type="primary"
+            size="compact"
+            @click="showAddItemModal = true"
+          >
+            ➕ Add Your First Item
+          </Button>
+          <Button 
+            type="secondary"
+            size="compact"
+            @click="placeItemsRandomly"
+            title="Place items randomly in cage"
+            :class="{ 'gps-button--disabled': !hasAnyItems }"
+          >
+            🎲 Random Place
+          </Button>
+        </div>
       </div>
     </div>
     
@@ -501,6 +521,99 @@ function throwOutItem(item) {
   }
 }
 
+// Find all available positions in the cage
+function getAvailablePositions() {
+  const availablePositions = []
+  
+  for (let y = 0; y < cageStore.size.height; y++) {
+    for (let x = 0; x < cageStore.size.width; x++) {
+      // Check if position is occupied by another item
+      const isOccupiedByItem = cageStore.items.some(i => i.x === x && i.y === y)
+      // Check if position is occupied by guinea pig
+      const isOccupiedByGuineaPig = (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y)
+      // Check if position is occupied by poop
+      const isOccupiedByPoop = poopStore.poop.some(p => p.x === x && p.y === y)
+      // Check if position is water bottle position
+      const isWaterBottlePosition = (x === cageStore.size.width - 1 && y === 0)
+      
+      if (!isOccupiedByItem && !isOccupiedByGuineaPig && !isOccupiedByPoop && !isWaterBottlePosition) {
+        availablePositions.push({ x, y })
+      }
+    }
+  }
+  
+  return availablePositions
+}
+
+// Place items randomly in the cage
+function placeItemsRandomly() {
+  if (!hasAnyItems.value) {
+    alert('No items available in inventory! Visit the Market to buy items first.')
+    return
+  }
+  
+  const availablePositions = getAvailablePositions()
+  
+  if (availablePositions.length === 0) {
+    alert('No available positions in the cage! Clean up some space first.')
+    return
+  }
+  
+  // Get a random selection of items to place (3-6 items)
+  const allAvailableItems = [
+    ...Object.keys(availableConsumables.value),
+    ...Object.keys(availablePermanents.value)
+  ]
+  
+  if (allAvailableItems.length === 0) {
+    alert('No items available in inventory!')
+    return
+  }
+  
+  // Decide how many items to place (between 3 and min(6, available positions, available items))
+  const maxItems = Math.min(6, availablePositions.length, allAvailableItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 3 + Math.floor(Math.random() * 4)))
+  
+  let placedItems = 0
+  let attempts = 0
+  const maxAttempts = 50 // Prevent infinite loops
+  
+  while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+    attempts++
+    
+    // Pick a random item
+    const randomItemName = allAvailableItems[Math.floor(Math.random() * allAvailableItems.length)]
+    const itemDef = itemDefinitions[randomItemName]
+    
+    if (!itemDef) continue
+    
+    // Pick a random available position
+    const currentAvailable = getAvailablePositions()
+    if (currentAvailable.length === 0) break
+    
+    const randomPos = currentAvailable[Math.floor(Math.random() * currentAvailable.length)]
+    
+    // Try to place the item
+    const success = cageStore.addItem({
+      name: randomItemName,
+      type: itemDef.type,
+      isConsumable: itemDef.isConsumable,
+      size: itemDef.size
+    }, randomPos.x, randomPos.y)
+    
+    if (success) {
+      inventoryStore.removeItem(randomItemName, 1)
+      placedItems++
+    }
+  }
+  
+  if (placedItems > 0) {
+    alert(`Successfully placed ${placedItems} item${placedItems === 1 ? '' : 's'} randomly in the cage!`)
+  } else {
+    alert('Could not place any items. Try cleaning up the cage or check your inventory.')
+  }
+}
+
 </script>
 
 <style>
@@ -624,6 +737,13 @@ function throwOutItem(item) {
 .gps-cage-item-manager__no-items-message p:first-child {
   font-weight: var(--font-weight-medium);
   color: var(--color-accent);
+}
+
+.gps-cage-item-manager__first-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .gps-cage-item-manager__no-cage-items {
