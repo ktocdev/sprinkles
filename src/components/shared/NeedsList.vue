@@ -1,27 +1,27 @@
 <template>
-  <div class="gps-board-list">
-    <ul class="gps-board-list__list" v-if="items.length > 0">
+  <div class="gps-needs-list">
+    <ul class="gps-needs-list__list" v-if="items.length > 0">
       <li 
         v-for="(item, index) in formattedItems" 
         :key="index"
-        class="gps-board-list__item"
+        class="gps-needs-list__item"
         :class="{
-          'gps-board-list__item--urgent': showUrgency && item.urgency > 50 && item.urgency <= 80,
-          'gps-board-list__item--critical': showUrgency && item.urgency > 80
+          'gps-needs-list__item--urgent': showUrgency && item.urgency > 50 && item.urgency <= 80,
+          'gps-needs-list__item--critical': showUrgency && item.urgency > 80
         }"
       >
-        <div class="gps-board-list__item-content">
-          <span class="gps-board-list__item-text">{{ item.message }}</span>
+        <div class="gps-needs-list__item-content">
+          <span class="gps-needs-list__item-text">{{ item.message }}</span>
           <span 
             v-if="showUrgency && item.urgency !== undefined" 
-            class="gps-board-list__item-urgency"
+            class="gps-needs-list__item-urgency"
           >
             {{ Math.round(item.urgency) }}%
           </span>
         </div>
       </li>
     </ul>
-    <div v-else class="gps-board-list__empty">
+    <div v-else class="gps-needs-list__empty">
       {{ emptyMessage }}
     </div>
   </div>
@@ -60,11 +60,11 @@ const formattedItems = computed(() => {
 </script>
 
 <style>
-.gps-board-list {
+.gps-needs-list {
   width: 100%;
 }
 
-.gps-board-list__list {
+.gps-needs-list__list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -73,7 +73,7 @@ const formattedItems = computed(() => {
   gap: 0.5rem;
 }
 
-.gps-board-list__item {
+.gps-needs-list__item {
   padding: 0.5rem 0.75rem;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
@@ -82,29 +82,29 @@ const formattedItems = computed(() => {
   font-family: var(--font-family-body);
 }
 
-.gps-board-list__item:hover {
+.gps-needs-list__item:hover {
   background: var(--color-bg);
   border-color: var(--color-accent);
 }
 
-.gps-board-list__item--urgent {
+.gps-needs-list__item--urgent {
   border-color: var(--color-warning);
   background: rgba(230, 126, 34, 0.1);
 }
 
-.gps-board-list__item--critical {
+.gps-needs-list__item--critical {
   border-color: var(--color-danger);
   background: rgba(231, 76, 60, 0.1);
 }
 
-.gps-board-list__item-content {
+.gps-needs-list__item-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;
 }
 
-.gps-board-list__item-text {
+.gps-needs-list__item-text {
   width: 100%;
   color: var(--color-text);
   font-size: var(--font-size-sm);
@@ -112,7 +112,7 @@ const formattedItems = computed(() => {
   line-height: var(--line-height-normal);
 }
 
-.gps-board-list__item-urgency {
+.gps-needs-list__item-urgency {
   align-self: flex-end;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -123,17 +123,17 @@ const formattedItems = computed(() => {
   border: 1px solid var(--color-border);
 }
 
-.gps-board-list__item--urgent .gps-board-list__item-urgency {
+.gps-needs-list__item--urgent .gps-needs-list__item-urgency {
   color: var(--color-warning);
   border-color: var(--color-warning);
 }
 
-.gps-board-list__item--critical .gps-board-list__item-urgency {
+.gps-needs-list__item--critical .gps-needs-list__item-urgency {
   color: var(--color-danger);
   border-color: var(--color-danger);
 }
 
-.gps-board-list__empty {
+.gps-needs-list__empty {
   padding: 1.5rem 1rem;
   text-align: center;
   color: var(--color-text);
@@ -148,44 +148,44 @@ const formattedItems = computed(() => {
 
 /* Mobile-first responsive design */
 @media (min-width: 480px) {
-  .gps-board-list__item {
+  .gps-needs-list__item {
     padding: 0.75rem 1rem;
   }
   
-  .gps-board-list__item-content {
+  .gps-needs-list__item-content {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
   }
   
-  .gps-board-list__item-text {
+  .gps-needs-list__item-text {
     flex: 1;
     font-size: var(--font-size-base);
   }
   
-  .gps-board-list__item-urgency {
+  .gps-needs-list__item-urgency {
     align-self: auto;
     flex-shrink: 0;
     font-size: var(--font-size-sm);
   }
   
-  .gps-board-list__empty {
+  .gps-needs-list__empty {
     padding: 2rem;
     font-size: var(--font-size-base);
   }
 }
 
 @media (min-width: 768px) {
-  .gps-board-list__item {
+  .gps-needs-list__item {
     padding: 1rem 1.25rem;
   }
   
-  .gps-board-list__item-text {
+  .gps-needs-list__item-text {
     font-size: var(--font-size-lg);
   }
   
-  .gps-board-list__item-urgency {
+  .gps-needs-list__item-urgency {
     font-size: var(--font-size-base);
   }
 }

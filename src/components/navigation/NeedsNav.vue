@@ -9,7 +9,7 @@
     title="Current Needs"
     toggle-aria-label="Toggle needs display"
   >
-    <BoardList 
+    <NeedsList 
       :items="needsItems"
       :showUrgency="true"
       emptyMessage="All needs satisfied"
@@ -21,11 +21,11 @@
 import { computed } from 'vue'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import AnchorNav from './AnchorNav.vue'
-import BoardList from '../shared/BoardList.vue'
+import NeedsList from '../shared/NeedsList.vue'
 
 const needsQueueStore = useNeedsQueueStore()
 
-// Format needs data for BoardList
+// Format needs data for NeedsList
 const needsItems = computed(() => {
   return needsQueueStore.queue
     .filter(need => need.urgency > 10) // Only show needs that require attention

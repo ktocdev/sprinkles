@@ -8,7 +8,7 @@
       <div class="gps-cage-controls-section__needs-header">
         <h3 class="gps-cage-controls-section__needs-title">📊 Current Needs</h3>
       </div>
-      <BoardList 
+      <NeedsList 
         :items="needsItems"
         :showUrgency="true"
         emptyMessage="All needs satisfied"
@@ -22,11 +22,11 @@
 import { computed } from 'vue'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import CageItemManager from './CageItemManager.vue'
-import BoardList from '../shared/BoardList.vue'
+import NeedsList from '../shared/NeedsList.vue'
 
 const needsQueueStore = useNeedsQueueStore()
 
-// Format needs data for BoardList (copied from NeedsNav)
+// Format needs data for NeedsList (copied from NeedsNav)
 const needsItems = computed(() => {
   return needsQueueStore.queue
     .filter(need => need.urgency > 10) // Only show needs that require attention

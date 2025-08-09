@@ -10,7 +10,6 @@ import InputSpecimen from '../specimen/InputSpecimen.vue'
 import FormGroupSpecimen from '../specimen/FormGroupSpecimen.vue'
 import ToggleSpecimen from '../specimen/ToggleSpecimen.vue'
 import DetailsSpecimen from '../specimen/DetailsSpecimen.vue'
-import BoardListSpecimen from '../specimen/BoardListSpecimen.vue'
 import AnchorNavSpecimen from '../specimen/AnchorNavSpecimen.vue'
 
 // Specimen panel visibility state
@@ -23,7 +22,6 @@ const showInputSpecimen = ref(false)
 const showFormGroupSpecimen = ref(false)
 const showToggleSpecimen = ref(false)
 const showDetailsSpecimen = ref(false)
-const showBoardListSpecimen = ref(false)
 const showAnchorNavSpecimen = ref(false)
 
 // Helper function to close all panels except the specified one
@@ -37,7 +35,6 @@ function closeAllPanelsExcept(exceptPanel) {
   showFormGroupSpecimen.value = exceptPanel === 'formGroup' ? showFormGroupSpecimen.value : false
   showToggleSpecimen.value = exceptPanel === 'toggle' ? showToggleSpecimen.value : false
   showDetailsSpecimen.value = exceptPanel === 'details' ? showDetailsSpecimen.value : false
-  showBoardListSpecimen.value = exceptPanel === 'boardList' ? showBoardListSpecimen.value : false
   showAnchorNavSpecimen.value = exceptPanel === 'anchorNav' ? showAnchorNavSpecimen.value : false
 }
 
@@ -86,10 +83,6 @@ function toggleDetailsSpecimen() {
   showDetailsSpecimen.value = !showDetailsSpecimen.value
 }
 
-function toggleBoardListSpecimen() {
-  closeAllPanelsExcept('boardList')
-  showBoardListSpecimen.value = !showBoardListSpecimen.value
-}
 
 function toggleAnchorNavSpecimen() {
   closeAllPanelsExcept('anchorNav')
@@ -107,7 +100,6 @@ defineExpose({
   toggleFormGroupSpecimen,
   toggleToggleSpecimen,
   toggleDetailsSpecimen,
-  toggleBoardListSpecimen,
   toggleAnchorNavSpecimen
 })
 </script>
@@ -128,7 +120,6 @@ defineExpose({
       @showFormGroupSpecimen="toggleFormGroupSpecimen"
       @showToggleSpecimen="toggleToggleSpecimen"
       @showDetailsSpecimen="toggleDetailsSpecimen"
-      @showBoardListSpecimen="toggleBoardListSpecimen"
       @showAnchorNavSpecimen="toggleAnchorNavSpecimen"
     />
   </Panel>
@@ -205,14 +196,6 @@ defineExpose({
     <DetailsSpecimen @backToLanding="toggleSpecimenLanding" />
   </Panel>
 
-  <!-- BoardList Specimen Panel -->
-  <Panel 
-    :isOpen="showBoardListSpecimen" 
-    title="BoardList Component Specimen" 
-    @close="showBoardListSpecimen = false"
-  >
-    <BoardListSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
 
   <!-- AnchorNav Specimen Panel -->
   <Panel 

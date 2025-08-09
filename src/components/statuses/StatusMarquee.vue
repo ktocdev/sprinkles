@@ -47,20 +47,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="gps-cage__status-marquee">
-    <div class="gps-cage__status-marquee-content">
-      <div class="gps-cage__status-emoji-container">
-        <span class="gps-cage__status-emoji" :class="{ 'gps-cage__status-emoji--bounce': shouldBounce }">{{ statusEmoji }}</span>
+  <div class="gps-status-marquee">
+    <div class="gps-status-marquee__content">
+      <div class="gps-status-marquee__emoji-container">
+        <span class="gps-status-marquee__emoji" :class="{ 'gps-status-marquee__emoji--bounce': shouldBounce }">{{ statusEmoji }}</span>
       </div>
-      <div class="gps-cage__status-text-container">
-        <span class="gps-cage__status-text">{{ statusText }}</span>
+      <div class="gps-status-marquee__text-container">
+        <span class="gps-status-marquee__text">{{ statusText }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <style>
-.gps-cage__status-marquee {
+.gps-status-marquee {
   background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
   border: 2px solid var(--color-accent-light);
   border-radius: var(--border-radius);
@@ -70,7 +70,7 @@ onMounted(() => {
   width: 320px;
 }
 
-.gps-cage__status-marquee-content {
+.gps-status-marquee__content {
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -79,14 +79,14 @@ onMounted(() => {
   z-index: 1;
 }
 
-.gps-cage__status-emoji-container {
+.gps-status-marquee__emoji-container {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.gps-cage__status-text-container {
+.gps-status-marquee__text-container {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -94,11 +94,11 @@ onMounted(() => {
   justify-content: center;
 }
 
-.gps-cage__status-emoji {
+.gps-status-marquee__emoji {
   font-size: 1.2em;
 }
 
-.gps-cage__status-emoji--bounce {
+.gps-status-marquee__emoji--bounce {
   animation: bounce 2s ease-in-out;
 }
 
@@ -114,7 +114,7 @@ onMounted(() => {
   }
 }
 
-.gps-cage__status-text {
+.gps-status-marquee__text {
   font-weight: 600;
   color: var(--color-text);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -128,33 +128,33 @@ onMounted(() => {
 
 /* Mobile-first responsive design */
 @media (max-width: 480px) {
-  .gps-cage__status-marquee {
+  .gps-status-marquee {
     padding: 0.5rem 1rem;
   }
   
-  .gps-cage__status-marquee-content {
+  .gps-status-marquee__content {
     gap: 0.5rem;
   }
   
-  .gps-cage__status-emoji {
+  .gps-status-marquee__emoji {
     font-size: 1em;
   }
   
-  .gps-cage__status-text {
+  .gps-status-marquee__text {
     font-size: 1em;
   }
 }
 
 @media (min-width: 768px) {
-  .gps-cage__status-marquee {
+  .gps-status-marquee {
     padding: 1rem 2rem;
   }
   
-  .gps-cage__status-emoji {
+  .gps-status-marquee__emoji {
     font-size: 1.4em;
   }
   
-  .gps-cage__status-text {
+  .gps-status-marquee__text {
     font-size: 1.2em;
   }
 }
