@@ -10,16 +10,16 @@ export const useHungerStore = defineStore('hunger', {
     maxValue: 100,
     minValue: 0,
     urgency: 0, // Will be calculated by needs queue
-    needType: 'hunger' // The type of need this store manages
+    needType: 'hunger' 
   }),
 
   getters: {
     isUrgent() {
-      return this.currentValue <= 20
+      return this.currentValue <= 30 
     },
     
     isCritical() {
-      return this.currentValue <= 10
+      return this.currentValue <= 15 
     },
     
     percentage() {

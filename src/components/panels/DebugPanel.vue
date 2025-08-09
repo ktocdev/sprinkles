@@ -4,6 +4,7 @@ import Panel from '../shared/Panel.vue'
 import Details from '../shared/Details.vue'
 import HungerSystemDebug from '../debug/HungerSystemDebug.vue'
 import PoopSystemDebug from '../debug/PoopSystemDebug.vue'
+import StatusSystemDebug from '../debug/StatusSystemDebug.vue'
 import GameActionsDebug from '../debug/GameActionsDebug.vue'
 
 const showDebugPanel = ref(false)
@@ -51,6 +52,16 @@ defineExpose({
         </template>
         <template #content>
           <PoopSystemDebug />
+        </template>
+      </Details>
+
+      <!-- Status System Section -->
+      <Details>
+        <template #summary>
+          📢 Status Messages
+        </template>
+        <template #content>
+          <StatusSystemDebug />
         </template>
       </Details>
 

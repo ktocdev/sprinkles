@@ -21,10 +21,10 @@ const statisticsStore = useStatisticsStore()
 
 onMounted(() => {
   themeStore.initTheme()
-  // Only start needs system if it was previously enabled (respects user debug panel settings)
-  if (needsQueueStore.isActive) {
-    needsQueueStore.startNeedsSystem()
-  }
+  
+  // Always start needs system on page load
+  // The debug panel can be used to toggle it off if needed
+  needsQueueStore.startNeedsSystem()
   
   // Start session tracking
   statisticsStore.startSession()
