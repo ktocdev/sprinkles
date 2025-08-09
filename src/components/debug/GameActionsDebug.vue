@@ -52,6 +52,7 @@ import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
+import { useHungerStore } from '../../stores/needs/hunger'
 
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
@@ -60,6 +61,7 @@ const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
 const needsQueueStore = useNeedsQueueStore()
+const hungerStore = useHungerStore()
 
 const emit = defineEmits(['gameReset'])
 
@@ -71,6 +73,7 @@ function resetGame() {
     cageStore.$reset()
     marketStore.$reset()
     poopStore.$reset()
+    hungerStore.$reset()
     // Remove persisted state from localStorage
     localStorage.removeItem('user')
     localStorage.removeItem('inventory')
@@ -78,7 +81,11 @@ function resetGame() {
     localStorage.removeItem('cage')
     localStorage.removeItem('market')
     localStorage.removeItem('poop')
+    localStorage.removeItem('hunger')
     needsQueueStore.stopNeedsSystem()
+    needsQueueStore.$reset()
+    localStorage.removeItem('needsQueue')
+    needsQueueStore.startNeedsSystem()
     // Emit event to notify parent about reset
     emit('gameReset')
   }

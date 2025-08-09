@@ -92,4 +92,52 @@ const buttonClasses = computed(() => ({
     opacity: 1;
   }
 }
+
+/* Tablet and above styles - larger, playful buttons */
+@media (min-width: 768px) {
+  .gps-button--compact.gps-icon-sidebar-button {
+    padding: 0.75rem;
+    font-size: 1.25rem;
+    border-radius: 12px !important;
+    transform: scale(1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+
+    &:hover {
+      transform: scale(1.05) translateY(-2px) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+      background: var(--color-border) !important;
+    }
+
+    &:active {
+      transform: scale(0.98) !important;
+      transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    &.gps-icon-sidebar-button--active {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover)) !important;
+      box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.3) !important;
+      transform: scale(1.02) !important;
+
+      &:hover {
+        transform: scale(1.08) translateY(-3px) !important;
+        box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.4) !important;
+        background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent)) !important;
+      }
+
+      &:active {
+        transform: scale(1) !important;
+      }
+    }
+
+    /* Enhanced tooltip for larger screens */
+    &::before {
+      inset-inline-start: 50px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
 </style> 

@@ -123,11 +123,16 @@ const userStore = useUserStore()
 
 @media (min-width: 768px) {
   .gps-icon-sidebar {
-    width: 50px;
+    width: 70px;
+    padding: 5rem 0 1rem 0;
+  }
+  
+  .gps-icon-sidebar__container {
+    gap: 0.75rem;
   }
   
   .gps-icon-sidebar__divider {
-    width: 30px;
+    width: 40px;
   }
 }
 </style> 

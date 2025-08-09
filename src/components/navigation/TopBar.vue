@@ -147,6 +147,44 @@ function openGuineaPigInfo() {
   }
 }
 
+/* Tablet and above enhancements */
+@media (min-width: 768px) {
+  .gps-topbar {
+    height: 4rem;
+  }
+  
+  .gps-topbar__container {
+    padding: 0 1.5rem;
+  }
+  
+  .gps-topbar__brand {
+    gap: 1rem;
+  }
+  
+  .gps-topbar__logo {
+    font-size: 2.25rem;
+    min-width: 3rem;
+    height: 3rem;
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.3);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, box-shadow 0.3s ease;
+  }
+  
+  .gps-topbar__logo--clickable:hover {
+    transform: scale(1.15) rotate(5deg);
+    background: var(--color-accent-hover);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.4);
+  }
+  
+  .gps-topbar__title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .gps-topbar__pause-button {
+    padding: 0.5rem 1rem;
+    font-size: var(--font-size-base);
+  }
+}
+
 @media (min-width: 800px) {
   .gps-topbar__container {
     gap: 0.75em;

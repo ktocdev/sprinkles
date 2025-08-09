@@ -65,7 +65,6 @@ onMounted(() => {
   border: 2px solid var(--color-accent-light);
   border-radius: var(--border-radius);
   padding: 0.75rem 1.5rem;
-  margin-block-start: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
   width: 320px;
@@ -131,7 +130,6 @@ onMounted(() => {
 @media (max-width: 480px) {
   .gps-cage__status-marquee {
     padding: 0.5rem 1rem;
-    margin-block-start: 1rem;
   }
   
   .gps-cage__status-marquee-content {

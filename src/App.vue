@@ -7,7 +7,7 @@ import { useNeedsQueueStore } from './stores/needs/needsQueue'
 import { useStatisticsStore } from './stores/statistics'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
-import CageItemManager from './components/cage/CageItemManager.vue'
+import CageControlsSection from './components/cage/CageControlsSection.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
 import AppPanels from './components/panels/AppPanels.vue'
@@ -133,7 +133,7 @@ function handleGameReset() {
         <div class="gps-main" v-if="userStore.name">
           <Cage />
           <StatusMarquee />
-          <CageItemManager />
+          <CageControlsSection />
         </div>
       </div>
     </div>
