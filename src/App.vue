@@ -167,6 +167,8 @@ function handleGameReset() {
   display: flex;
   justify-content: center;
   padding: 5rem 0 1rem 0; /* Add right padding for mobile needs nav */
+  overflow-x: hidden; /* Prevent horizontal scrollbar on page */
+  min-width: 0; /* Allow flex child to shrink */
 }
 
 /* Mobile-first responsive styles */
@@ -178,7 +180,18 @@ function handleGameReset() {
   
   .gps-app__content-area {
     padding: 5rem 0 1rem; /* Keep standard padding on desktop */
+    overflow-x: hidden; /* Prevent horizontal scrollbar on page */
   }
+}
+
+.gps-main {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 </style>

@@ -15,11 +15,11 @@ export const useHungerStore = defineStore('hunger', {
 
   getters: {
     isUrgent() {
-      return this.currentValue <= 30 
+      return this.currentValue <= 60 
     },
     
     isCritical() {
-      return this.currentValue <= 15 
+      return this.currentValue <= 40 
     },
     
     percentage() {

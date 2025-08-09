@@ -62,6 +62,12 @@ function moveGuineaPig() {
       cageStore.interactWithItem()
     }
     
+    // Check if guinea pig moved onto poop and interact with it
+    const poopAtNewPos = poopStore.isPoopAtPosition(next.x, next.y)
+    if (poopAtNewPos) {
+      cageStore.interactWithPoop()
+    }
+    
     // Drop a poop if it's time and game is not paused
     if (poopStore.shouldDropPoop && !cageStore.paused) {
       cageStore.addPoop(next.x, next.y)
@@ -113,14 +119,15 @@ onUnmounted(() => {
 
 <template>
   <div class="gps-cage">
-    <div
-      class="gps-cage__grid"
-      :style="{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${width}, 1.2em)`,
-        gridTemplateRows: `repeat(${height}, 1.2em)`
-      }"
-    >
+    <div class="gps-cage__container">
+      <div
+        class="gps-cage__grid"
+        :style="{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${width}, 1.2em)`,
+          gridTemplateRows: `repeat(${height}, 1.2em)`
+        }"
+      >
       <div
         v-for="item in flatGrid"
         :key="item.x + '-' + item.y"
@@ -141,6 +148,7 @@ onUnmounted(() => {
           {{ cellContent(item.cell, item.x, item.y) }}
         </span>
       </div>
+      </div>
     </div>
   </div>
 </template>
@@ -148,12 +156,47 @@ onUnmounted(() => {
 <style>
 .gps-cage {
   width: 100%;
+  max-width: 75%;
+  overflow: hidden;
+}
+
+.gps-cage__container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px; /* Space for scrollbar */
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-bg);
+}
+
+/* Webkit scrollbar styling for Chrome, Safari, Edge */
+.gps-cage__container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.gps-cage__container::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.gps-cage__container::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+  border: 1px solid var(--color-accent-light);
+}
+
+.gps-cage__container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-dark);
 }
 
 .gps-cage__grid {
   display: grid;
   grid-gap: 1px;
   margin-inline: auto;
+  min-width: fit-content;
+  width: fit-content;
 }
 
 .gps-cage__cell {
@@ -209,7 +252,7 @@ onUnmounted(() => {
 
 .gps-cage__grid-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* Changed from center to allow natural scrolling */
 }
 
 .gps-cage__water-emoji {
