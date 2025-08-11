@@ -16,8 +16,8 @@
           v-model="hungerDegradationPerMinute"
           type="number"
           :min="0"
-          :max="20"
-          :step="1"
+          :max="10"
+          :step="0.1"
           @update:modelValue="updateHungerDegradation"
           hint="Rate at which hunger decreases per minute"
         />
@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import Button from '../shared/Button.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import Toggle from '../shared/Toggle.vue'
@@ -66,7 +66,7 @@ const needsQueueStore = useNeedsQueueStore()
 
 // Hunger system controls
 const isHungerEnabled = ref(needsQueueStore.isActive)
-const hungerDegradationPerMinute = ref(hungerDegradationPerMinuteValue)
+const hungerDegradationPerMinute = ref((hungerStore.degradationRate * 60).toFixed(1))
 const hungerUrgency = ref(Math.round(hungerStore.urgency))
 
 function toggleHunger(enabled) {
@@ -93,15 +93,11 @@ function resetHunger() {
   }, 100)
 }
 
-const hungerDegradationPerMinuteValue = computed(() => {
-  return (hungerStore.degradationRate * 60).toFixed(0)
-})
-
 // Initialize hunger controls on mount
 onMounted(() => {
   // Set initial hunger controls
   isHungerEnabled.value = needsQueueStore.isActive
-  hungerDegradationPerMinute.value = hungerDegradationPerMinuteValue
+  hungerDegradationPerMinute.value = (hungerStore.degradationRate * 60).toFixed(1)
   hungerUrgency.value = Math.round(hungerStore.urgency)
 })
 
