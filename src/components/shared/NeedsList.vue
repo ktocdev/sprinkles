@@ -6,14 +6,24 @@
         :key="index"
         class="gps-needs-list__item"
         :class="{
-          'gps-needs-list__item--urgent': showUrgency && item.urgency > 50 && item.urgency <= 80,
-          'gps-needs-list__item--critical': showUrgency && item.urgency > 80
+          'gps-needs-list__item--fulfilled': item.status === 'fulfilled',
+          'gps-needs-list__item--normal': item.status === 'normal',
+          'gps-needs-list__item--urgent': item.status === 'urgent',
+          'gps-needs-list__item--critical': item.status === 'critical'
         }"
       >
         <div class="gps-needs-list__item-content">
           <span class="gps-needs-list__item-text">{{ item.message }}</span>
+          <StatusBar 
+            v-if="item.value !== null && item.value !== undefined"
+            :value="item.value"
+            :color="getStatusColor(item.status)"
+            :displayValue="`${item.value}/100`"
+            :showLabel="false"
+            class="gps-needs-list__item-status-bar"
+          />
           <span 
-            v-if="showUrgency && item.urgency !== undefined" 
+            v-else-if="showUrgency && item.urgency !== undefined" 
             class="gps-needs-list__item-urgency"
           >
             {{ Math.round(item.urgency) }}%
@@ -29,6 +39,7 @@
 
 <script setup>
 import { computed, defineProps } from 'vue'
+import StatusBar from './StatusBar.vue'
 
 const props = defineProps({
   items: {
@@ -51,12 +62,46 @@ const formattedItems = computed(() => {
     if (typeof item === 'string') {
       return { message: item }
     }
+    
+    // Extract value from message format like "Hunger: 85/100"
+    const value = item.value || extractValueFromMessage(item.message)
+    const status = getStatusFromValue(value)
+    
     return {
       message: item.message || item.text || String(item),
-      urgency: item.urgency
+      urgency: item.urgency,
+      value: value,
+      status: status
     }
   })
 })
+
+// Helper function to extract value from message like "Hunger: 85/100"
+function extractValueFromMessage(message) {
+  if (!message) return null
+  const match = message.match(/(\d+)\/100$/)
+  return match ? parseInt(match[1]) : null
+}
+
+// Helper function to determine status based on value
+function getStatusFromValue(value) {
+  if (value === null || value === undefined) return 'normal'
+  if (value >= 90) return 'fulfilled'
+  if (value >= 70) return 'normal'
+  if (value >= 50) return 'urgent'
+  return 'critical'
+}
+
+// Helper function to get status color
+function getStatusColor(status) {
+  switch (status) {
+    case 'fulfilled': return 'var(--color-success)'
+    case 'normal': return 'var(--color-accent)'
+    case 'urgent': return 'var(--color-warning)'
+    case 'critical': return 'var(--color-danger)'
+    default: return 'var(--color-accent)'
+  }
+}
 </script>
 
 <style>
@@ -85,6 +130,16 @@ const formattedItems = computed(() => {
 .gps-needs-list__item:hover {
   background: var(--color-bg);
   border-color: var(--color-accent);
+}
+
+.gps-needs-list__item--fulfilled {
+  border-color: var(--color-success);
+  background: rgba(39, 174, 96, 0.1);
+}
+
+.gps-needs-list__item--normal {
+  border-color: var(--color-accent);
+  background: rgba(66, 184, 131, 0.05);
 }
 
 .gps-needs-list__item--urgent {
@@ -121,6 +176,21 @@ const formattedItems = computed(() => {
   padding: 0.25rem 0.5rem;
   border-radius: calc(var(--border-radius) / 2);
   border: 1px solid var(--color-border);
+}
+
+.gps-needs-list__item-status-bar {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.gps-needs-list__item--fulfilled .gps-needs-list__item-urgency {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.gps-needs-list__item--normal .gps-needs-list__item-urgency {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .gps-needs-list__item--urgent .gps-needs-list__item-urgency {
@@ -162,6 +232,12 @@ const formattedItems = computed(() => {
   .gps-needs-list__item-text {
     flex: 1;
     font-size: var(--font-size-base);
+  }
+  
+  .gps-needs-list__item-status-bar {
+    flex: 1;
+    max-width: 200px;
+    margin-top: 0;
   }
   
   .gps-needs-list__item-urgency {

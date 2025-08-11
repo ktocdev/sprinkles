@@ -22,6 +22,21 @@ export const useHungerStore = defineStore('hunger', {
       return this.currentValue <= 40 
     },
     
+    isFulfilled() {
+      return this.currentValue >= 90
+    },
+    
+    isNormal() {
+      return this.currentValue >= 70 && this.currentValue < 90
+    },
+    
+    needStatus() {
+      if (this.currentValue >= 90) return 'fulfilled'
+      if (this.currentValue >= 70) return 'normal'
+      if (this.currentValue >= 50) return 'urgent'
+      return 'critical'
+    },
+    
     percentage() {
       return (this.currentValue / this.maxValue) * 100
     },

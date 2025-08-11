@@ -29,12 +29,16 @@ const needsQueueStore = useNeedsQueueStore()
 // Format needs data for NeedsList (copied from NeedsNav)
 const needsItems = computed(() => {
   return needsQueueStore.queue
-    .filter(need => need.urgency > 10) // Only show needs that require attention
+    .map(need => {
+      const value = Math.round(100 - need.urgency)
+      return {
+        message: `${formatNeedName(need.name)}: ${value}/100`,
+        urgency: need.urgency,
+        value: value
+      }
+    })
+    .filter(need => need.value >= 50) // Show needs with values 50/100 to 100/100 (urgent, normal, fulfilled)
     .slice(0, 5) // Limit to top 5 needs
-    .map(need => ({
-      message: `${formatNeedName(need.name)}: ${Math.round(100 - need.urgency)}/100`,
-      urgency: need.urgency
-    }))
 })
 
 function formatNeedName(name) {

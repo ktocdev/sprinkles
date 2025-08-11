@@ -67,7 +67,6 @@ onMounted(() => {
   padding: 0.75rem 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
-  width: 320px;
 }
 
 .gps-status-marquee__content {

@@ -28,21 +28,31 @@ const needsQueueStore = useNeedsQueueStore()
 // Format needs data for NeedsList
 const needsItems = computed(() => {
   return needsQueueStore.queue
-    .filter(need => need.urgency > 10) // Only show needs that require attention
+    .map(need => {
+      const value = Math.round(100 - need.urgency)
+      return {
+        message: `${formatNeedName(need.name)}: ${value}/100`,
+        urgency: need.urgency,
+        value: value
+      }
+    })
+    .filter(need => need.value >= 50) // Show needs with values 50/100 to 100/100 (urgent, normal, fulfilled)
     .slice(0, 5) // Limit to top 5 needs
-    .map(need => ({
-      message: `${formatNeedName(need.name)}: ${Math.round(100 - need.urgency)}/100`,
-      urgency: need.urgency
-    }))
 })
 
 // Check for urgent/critical items to style the AnchorNav button
 const hasUrgentItems = computed(() => {
-  return needsItems.value.some(item => item.urgency > 50 && item.urgency <= 80)
+  return needsItems.value.some(item => {
+    const value = item.value || Math.round(100 - item.urgency)
+    return value >= 50 && value < 70 // Urgent range
+  })
 })
 
 const hasCriticalItems = computed(() => {
-  return needsItems.value.some(item => item.urgency > 80)
+  return needsItems.value.some(item => {
+    const value = item.value || Math.round(100 - item.urgency)
+    return value < 50 // Critical range
+  })
 })
 
 function formatNeedName(name) {
