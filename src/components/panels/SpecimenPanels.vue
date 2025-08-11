@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import Panel from '../shared/Panel.vue'
 import SpecimenLanding from '../specimen/SpecimenLanding.vue'
 import ButtonSpecimen from '../specimen/ButtonSpecimen.vue'
@@ -11,198 +11,139 @@ import FormGroupSpecimen from '../specimen/FormGroupSpecimen.vue'
 import ToggleSpecimen from '../specimen/ToggleSpecimen.vue'
 import DetailsSpecimen from '../specimen/DetailsSpecimen.vue'
 import AnchorNavSpecimen from '../specimen/AnchorNavSpecimen.vue'
+import TabsSpecimen from '../specimen/TabsSpecimen.vue'
 
-// Specimen panel visibility state
-const showSpecimenLanding = ref(false)
-const showButtonSpecimen = ref(false)
-const showDropdownSpecimen = ref(false)
-const showModalSpecimen = ref(false)
-const showStatusBarSpecimen = ref(false)
-const showInputSpecimen = ref(false)
-const showFormGroupSpecimen = ref(false)
-const showToggleSpecimen = ref(false)
-const showDetailsSpecimen = ref(false)
-const showAnchorNavSpecimen = ref(false)
+// Configuration for all specimens
+const specimens = [
+  {
+    key: 'landing',
+    title: 'Component Specimens',
+    component: SpecimenLanding,
+    props: {}
+  },
+  {
+    key: 'button',
+    title: 'Button Component Specimen',
+    component: ButtonSpecimen,
+    props: {}
+  },
+  {
+    key: 'dropdown',
+    title: 'Dropdown Component Specimen',
+    component: DropdownSpecimen,
+    props: {}
+  },
+  {
+    key: 'modal',
+    title: 'Modal Component Specimen',
+    component: ModalSpecimen,
+    props: {}
+  },
+  {
+    key: 'statusBar',
+    title: 'StatusBar Component Specimen',
+    component: StatusBarSpecimen,
+    props: {}
+  },
+  {
+    key: 'input',
+    title: 'Input Component Specimen',
+    component: InputSpecimen,
+    props: {}
+  },
+  {
+    key: 'formGroup',
+    title: 'FormGroup Component Specimen',
+    component: FormGroupSpecimen,
+    props: {}
+  },
+  {
+    key: 'toggle',
+    title: 'Toggle Component Specimen',
+    component: ToggleSpecimen,
+    props: {}
+  },
+  {
+    key: 'details',
+    title: 'Details Component Specimen',
+    component: DetailsSpecimen,
+    props: {}
+  },
+  {
+    key: 'anchorNav',
+    title: 'AnchorNav Component Specimen',
+    component: AnchorNavSpecimen,
+    props: {}
+  },
+  {
+    key: 'tabs',
+    title: 'Tabs Component Specimen',
+    component: TabsSpecimen,
+    props: {}
+  }
+]
+
+// Reactive visibility state for all specimens
+const visibility = specimens.reduce((acc, specimen) => {
+  acc[specimen.key] = ref(false)
+  return acc
+}, {})
 
 // Helper function to close all panels except the specified one
-function closeAllPanelsExcept(exceptPanel) {
-  showSpecimenLanding.value = exceptPanel === 'landing' ? showSpecimenLanding.value : false
-  showButtonSpecimen.value = exceptPanel === 'button' ? showButtonSpecimen.value : false
-  showDropdownSpecimen.value = exceptPanel === 'dropdown' ? showDropdownSpecimen.value : false
-  showModalSpecimen.value = exceptPanel === 'modal' ? showModalSpecimen.value : false
-  showStatusBarSpecimen.value = exceptPanel === 'statusBar' ? showStatusBarSpecimen.value : false
-  showInputSpecimen.value = exceptPanel === 'input' ? showInputSpecimen.value : false
-  showFormGroupSpecimen.value = exceptPanel === 'formGroup' ? showFormGroupSpecimen.value : false
-  showToggleSpecimen.value = exceptPanel === 'toggle' ? showToggleSpecimen.value : false
-  showDetailsSpecimen.value = exceptPanel === 'details' ? showDetailsSpecimen.value : false
-  showAnchorNavSpecimen.value = exceptPanel === 'anchorNav' ? showAnchorNavSpecimen.value : false
+const closeAllPanelsExcept = (exceptPanel) => {
+  Object.keys(visibility).forEach(key => {
+    visibility[key].value = key === exceptPanel ? visibility[key].value : false
+  })
 }
 
-function toggleSpecimenLanding() {
-  closeAllPanelsExcept('landing')
-  showSpecimenLanding.value = !showSpecimenLanding.value
-}
+// Generate toggle functions dynamically
+const toggleFunctions = specimens.reduce((acc, specimen) => {
+  const functionName = `toggle${specimen.key.charAt(0).toUpperCase() + specimen.key.slice(1)}Specimen`
+  acc[functionName] = () => {
+    closeAllPanelsExcept(specimen.key)
+    visibility[specimen.key].value = !visibility[specimen.key].value
+  }
+  return acc
+}, {})
 
-function toggleButtonSpecimen() {
-  closeAllPanelsExcept('button')
-  showButtonSpecimen.value = !showButtonSpecimen.value
-}
-
-function toggleDropdownSpecimen() {
-  closeAllPanelsExcept('dropdown')
-  showDropdownSpecimen.value = !showDropdownSpecimen.value
-}
-
-function toggleModalSpecimen() {
-  closeAllPanelsExcept('modal')
-  showModalSpecimen.value = !showModalSpecimen.value
-}
-
-function toggleStatusBarSpecimen() {
-  closeAllPanelsExcept('statusBar')
-  showStatusBarSpecimen.value = !showStatusBarSpecimen.value
-}
-
-function toggleInputSpecimen() {
-  closeAllPanelsExcept('input')
-  showInputSpecimen.value = !showInputSpecimen.value
-}
-
-function toggleFormGroupSpecimen() {
-  closeAllPanelsExcept('formGroup')
-  showFormGroupSpecimen.value = !showFormGroupSpecimen.value
-}
-
-function toggleToggleSpecimen() {
-  closeAllPanelsExcept('toggle')
-  showToggleSpecimen.value = !showToggleSpecimen.value
-}
-
-function toggleDetailsSpecimen() {
-  closeAllPanelsExcept('details')
-  showDetailsSpecimen.value = !showDetailsSpecimen.value
-}
-
-
-function toggleAnchorNavSpecimen() {
-  closeAllPanelsExcept('anchorNav')
-  showAnchorNavSpecimen.value = !showAnchorNavSpecimen.value
-}
-
-// Expose functions for external use
-defineExpose({
-  toggleSpecimenLanding,
-  toggleButtonSpecimen,
-  toggleDropdownSpecimen,
-  toggleModalSpecimen,
-  toggleStatusBarSpecimen,
-  toggleInputSpecimen,
-  toggleFormGroupSpecimen,
-  toggleToggleSpecimen,
-  toggleDetailsSpecimen,
-  toggleAnchorNavSpecimen
+// Create computed properties for landing event handlers
+const landingEventHandlers = computed(() => {
+  return specimens
+    .filter(specimen => specimen.key !== 'landing')
+    .reduce((acc, specimen) => {
+      const eventName = `show${specimen.key.charAt(0).toUpperCase() + specimen.key.slice(1)}Specimen`
+      const functionName = `toggle${specimen.key.charAt(0).toUpperCase() + specimen.key.slice(1)}Specimen`
+      acc[eventName] = toggleFunctions[functionName]
+      return acc
+    }, {})
 })
+
+// Expose all toggle functions for external use
+defineExpose(toggleFunctions)
 </script>
 
 <template>
-  <!-- Specimen Landing Panel -->
+  <!-- Generate all specimen panels dynamically -->
   <Panel 
-    :isOpen="showSpecimenLanding" 
-    title="Component Specimens" 
-    @close="showSpecimenLanding = false"
+    v-for="specimen in specimens" 
+    :key="specimen.key"
+    :isOpen="visibility[specimen.key].value" 
+    :title="specimen.title" 
+    @close="visibility[specimen.key].value = false"
   >
-    <SpecimenLanding 
-      @showButtonSpecimen="toggleButtonSpecimen"
-      @showDropdownSpecimen="toggleDropdownSpecimen"
-      @showModalSpecimen="toggleModalSpecimen"
-      @showStatusBarSpecimen="toggleStatusBarSpecimen"
-      @showInputSpecimen="toggleInputSpecimen"
-      @showFormGroupSpecimen="toggleFormGroupSpecimen"
-      @showToggleSpecimen="toggleToggleSpecimen"
-      @showDetailsSpecimen="toggleDetailsSpecimen"
-      @showAnchorNavSpecimen="toggleAnchorNavSpecimen"
+    <!-- Special handling for landing panel -->
+    <component 
+      :is="specimen.component"
+      v-if="specimen.key === 'landing'"
+      v-on="landingEventHandlers"
     />
-  </Panel>
-
-  <!-- Button Specimen Panel -->
-  <Panel 
-    :isOpen="showButtonSpecimen" 
-    title="Button Component Specimen" 
-    @close="showButtonSpecimen = false"
-  >
-    <ButtonSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- Dropdown Specimen Panel -->
-  <Panel 
-    :isOpen="showDropdownSpecimen" 
-    title="Dropdown Component Specimen" 
-    @close="showDropdownSpecimen = false"
-  >
-    <DropdownSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- Modal Specimen Panel -->
-  <Panel 
-    :isOpen="showModalSpecimen" 
-    title="Modal Component Specimen" 
-    @close="showModalSpecimen = false"
-  >
-    <ModalSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- StatusBar Specimen Panel -->
-  <Panel 
-    :isOpen="showStatusBarSpecimen" 
-    title="StatusBar Component Specimen" 
-    @close="showStatusBarSpecimen = false"
-  >
-    <StatusBarSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- Input Specimen Panel -->
-  <Panel 
-    :isOpen="showInputSpecimen" 
-    title="Input Component Specimen" 
-    @close="showInputSpecimen = false"
-  >
-    <InputSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- FormGroup Specimen Panel -->
-  <Panel 
-    :isOpen="showFormGroupSpecimen" 
-    title="FormGroup Component Specimen" 
-    @close="showFormGroupSpecimen = false"
-  >
-    <FormGroupSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- Toggle Specimen Panel -->
-  <Panel 
-    :isOpen="showToggleSpecimen" 
-    title="Toggle Component Specimen" 
-    @close="showToggleSpecimen = false"
-  >
-    <ToggleSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-  <!-- Details Specimen Panel -->
-  <Panel 
-    :isOpen="showDetailsSpecimen" 
-    title="Details Component Specimen" 
-    @close="showDetailsSpecimen = false"
-  >
-    <DetailsSpecimen @backToLanding="toggleSpecimenLanding" />
-  </Panel>
-
-
-  <!-- AnchorNav Specimen Panel -->
-  <Panel 
-    :isOpen="showAnchorNavSpecimen" 
-    title="AnchorNav Component Specimen" 
-    @close="showAnchorNavSpecimen = false"
-  >
-    <AnchorNavSpecimen @backToLanding="toggleSpecimenLanding" />
+    
+    <!-- All other specimen panels -->
+    <component 
+      :is="specimen.component"
+      v-else
+      v-bind="specimen.props"
+      @backToLanding="toggleFunctions.toggleLandingSpecimen"
+    />
   </Panel>
 </template> 

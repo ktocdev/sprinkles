@@ -219,6 +219,29 @@
       </div>
       -->
 
+      <!-- Tabs Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📋</div>
+          <h3 class="gps-specimen-landing__card-title">Tabs Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Flexible tab navigation component with support for icons, badges, keyboard navigation, and multiple variants.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Icons & badges</span>
+          <span class="gps-specimen-landing__feature">Keyboard nav</span>
+          <span class="gps-specimen-landing__feature">Multiple variants</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showTabsSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View Tabs Specimen
+        </Button>
+      </div>
+
     </div>
 
     <div class="gps-specimen-landing__footer gps-panel-section">
@@ -246,7 +269,8 @@ const emit = defineEmits([
   'showFormGroupSpecimen',
   'showToggleSpecimen',
   'showDetailsSpecimen',
-  'showAnchorNavSpecimen'
+  'showAnchorNavSpecimen',
+  'showTabsSpecimen'
 ])
 </script>
 
