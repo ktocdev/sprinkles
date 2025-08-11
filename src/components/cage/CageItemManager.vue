@@ -293,7 +293,6 @@ const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
 
-
 // Modal states
 const showAddItemModal = ref(false)
 const showMoveModal = ref(false)

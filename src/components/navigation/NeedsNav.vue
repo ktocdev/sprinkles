@@ -1,5 +1,5 @@
 <template>
-  <AnchorNav 
+  <AnchorPopover 
     class="gps-needs-nav"
     :class="{
       'gps-needs-nav--urgent': hasUrgentItems && !hasCriticalItems,
@@ -14,11 +14,11 @@
       :showUrgency="true"
       emptyMessage="All needs satisfied"
     />
-  </AnchorNav>
+  </AnchorPopover>
 </template>
 
 <script setup>
-import AnchorNav from './AnchorNav.vue'
+import AnchorPopover from './AnchorPopover.vue'
 import NeedsList from '../shared/NeedsList.vue'
 import { useNeedsList } from '../../composables/useNeedsList'
 
@@ -40,24 +40,24 @@ const { needsItems, hasUrgentItems, hasCriticalItems } = useNeedsList()
 }
 
 /* Urgency styling for the anchor button */
-.gps-needs-nav--urgent .gps-anchor-nav__toggle {
+.gps-needs-nav--urgent .gps-anchor-popover__toggle {
   background: var(--color-warning);
   color: var(--color-white);
   border-color: var(--color-warning);
 }
 
-.gps-needs-nav--urgent .gps-anchor-nav__toggle:hover {
+.gps-needs-nav--urgent .gps-anchor-popover__toggle:hover {
   background: var(--color-warning-hover);
   border-color: var(--color-warning-hover);
 }
 
-.gps-needs-nav--critical .gps-anchor-nav__toggle {
+.gps-needs-nav--critical .gps-anchor-popover__toggle {
   background: var(--color-danger);
   color: var(--color-white);
   border-color: var(--color-danger);
 }
 
-.gps-needs-nav--critical .gps-anchor-nav__toggle:hover {
+.gps-needs-nav--critical .gps-anchor-popover__toggle:hover {
   background: var(--color-danger-hover);
   border-color: var(--color-danger-hover);
 }

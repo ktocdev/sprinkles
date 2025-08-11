@@ -97,7 +97,7 @@ const buttonClasses = computed(() => ({
 @media (min-width: 768px) {
   .gps-button--compact.gps-icon-sidebar-button {
     padding: 0.75rem;
-    font-size: 1.25rem;
+    font-size: var(--font-size-2xl);
     border-radius: 12px !important;
     transform: scale(1) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
