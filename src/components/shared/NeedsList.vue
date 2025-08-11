@@ -65,7 +65,8 @@ const formattedItems = computed(() => {
     
     // Extract value from message format like "Hunger: 85/100"
     const value = item.value || extractValueFromMessage(item.message)
-    const status = getStatusFromValue(value)
+    // Use provided status if available, otherwise calculate from value
+    const status = item.status || getStatusFromValue(value)
     
     return {
       message: item.message || item.text || String(item),

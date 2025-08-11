@@ -9,7 +9,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import CageStatusSubNav from '../subnavs/CageStatusSubNav.vue'
+import CageStatusSubNav from '../navigation/CageStatusSubNav.vue'
 
 const props = defineProps({
   showCageStatus: Boolean

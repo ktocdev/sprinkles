@@ -18,46 +18,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 import AnchorNav from './AnchorNav.vue'
 import NeedsList from '../shared/NeedsList.vue'
+import { useNeedsList } from '../../composables/useNeedsList'
 
-const needsQueueStore = useNeedsQueueStore()
-
-// Format needs data for NeedsList
-const needsItems = computed(() => {
-  return needsQueueStore.queue
-    .map(need => {
-      const value = Math.round(100 - need.urgency)
-      return {
-        message: `${formatNeedName(need.name)}: ${value}/100`,
-        urgency: need.urgency,
-        value: value
-      }
-    })
-    .filter(need => need.value >= 50) // Show needs with values 50/100 to 100/100 (urgent, normal, fulfilled)
-    .slice(0, 5) // Limit to top 5 needs
-})
-
-// Check for urgent/critical items to style the AnchorNav button
-const hasUrgentItems = computed(() => {
-  return needsItems.value.some(item => {
-    const value = item.value || Math.round(100 - item.urgency)
-    return value >= 50 && value < 70 // Urgent range
-  })
-})
-
-const hasCriticalItems = computed(() => {
-  return needsItems.value.some(item => {
-    const value = item.value || Math.round(100 - item.urgency)
-    return value < 50 // Critical range
-  })
-})
-
-function formatNeedName(name) {
-  return name.charAt(0).toUpperCase() + name.slice(1)
-}
+const { needsItems, hasUrgentItems, hasCriticalItems } = useNeedsList()
 </script>
 
 <style>
