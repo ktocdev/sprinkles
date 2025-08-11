@@ -1,11 +1,11 @@
 <template>
-  <div class="gps-anchor-nav" ref="anchorNavRef">
-    <div class="gps-anchor-nav__container">
+  <div class="gps-anchor-popover" ref="AnchorPopoverRef">
+    <div class="gps-anchor-popover__container">
       <Button 
         type="secondary"
         @click="toggleExpanded"
-        :class="{ 'gps-anchor-nav__toggle--expanded': isExpanded }"
-        class="gps-anchor-nav__toggle"
+        :class="{ 'gps-anchor-popover__toggle--expanded': isExpanded }"
+        class="gps-anchor-popover__toggle"
         :aria-label="toggleAriaLabel"
       >
         {{ icon }}
@@ -44,14 +44,14 @@ const props = defineProps({
 })
 
 const isExpanded = ref(false)
-const anchorNavRef = ref(null)
+const AnchorPopoverRef = ref(null)
 
 function toggleExpanded() {
   isExpanded.value = !isExpanded.value
 }
 
 function handleClickOutside(event) {
-  if (isExpanded.value && anchorNavRef.value && !anchorNavRef.value.contains(event.target)) {
+  if (isExpanded.value && AnchorPopoverRef.value && !AnchorPopoverRef.value.contains(event.target)) {
     isExpanded.value = false
   }
 }
@@ -66,7 +66,7 @@ onUnmounted(() => {
 </script>
 
 <style>
-.gps-anchor-nav {
+.gps-anchor-popover {
   position: fixed;
   top: 50%;
   right: 0;
@@ -77,7 +77,7 @@ onUnmounted(() => {
   user-select: none;
 }
 
-.gps-anchor-nav__container {
+.gps-anchor-popover__container {
   position: relative;
   display: flex;
   flex-direction: row-reverse;
@@ -85,7 +85,7 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.gps-anchor-nav__toggle {
+.gps-anchor-popover__toggle {
   position: absolute;
   top: 50%;
   right: 0;
@@ -93,28 +93,28 @@ onUnmounted(() => {
   height: 40px;
   width: 40px;
   padding: .2rem 2rem .2rem .5rem;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-2xl);
   box-shadow: var(--box-shadow-medium);
   border-radius: var(--border-radius) 0 0 var(--border-radius);
   transition: var(--transition);
 }
 
-.gps-anchor-nav__toggle:hover {
+.gps-anchor-popover__toggle:hover {
   transform: translateY(-50%) translateX(-2px);
 }
 
-.gps-anchor-nav__toggle--expanded {
+.gps-anchor-popover__toggle--expanded {
   background: var(--color-accent);
   color: var(--color-white);
   border-color: var(--color-accent);
 }
 
-.gps-anchor-nav__toggle--expanded:hover {
+.gps-anchor-popover__toggle--expanded:hover {
   background: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
 }
 
-.gps-anchor-nav__container .gps-subnav {
+.gps-anchor-popover__container .gps-subnav {
   position: absolute;
   top: 50%;
   inset-inline-end: 32px;
@@ -125,13 +125,13 @@ onUnmounted(() => {
 }
 
 @media (min-width: 480px) {
-  .gps-anchor-nav {
+  .gps-anchor-popover {
     max-width: 320px;
   }
 }
 
 @media (min-width: 768px) {
-  .gps-anchor-nav {
+  .gps-anchor-popover {
     max-width: 350px;
   }
 }

@@ -15,7 +15,10 @@ let moveInterval = null
 
 function cellContent(cell, x, y) {
   if (cageStore.guineaPigPos.x === x && cageStore.guineaPigPos.y === y) return '🐹'
-  if (cell === 'poop') return '💩'
+  
+  // Check for poop at this position (poop goes on top of items)
+  if (poopStore.isPoopAtPosition(x, y)) return '💩'
+  
   if (cell && typeof cell === 'object' && cell.name) {
     // Return appropriate emoji based on specific item name
     const itemName = cell.name
@@ -99,7 +102,8 @@ function moveGuineaPig() {
 }
 
 function handleCellClick(cell, x, y) {
-  if (cell === 'poop') {
+  // Check for poop first (poop is on top, so it gets clicked first)
+  if (poopStore.isPoopAtPosition(x, y)) {
     cageStore.removePoop(x, y)
   } else if (cell && typeof cell === 'object' && cell.name) {
     // Handle item click
@@ -159,8 +163,8 @@ onUnmounted(() => {
         class="gps-cage__cell"
         :class="{
           'gps-cage__cell--guinea-pig': cageStore.guineaPigPos.x === item.x && cageStore.guineaPigPos.y === item.y,
-          'gps-cage__cell--poop': item.cell === 'poop',
-          'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name,
+          'gps-cage__cell--poop': poopStore.isPoopAtPosition(item.x, item.y),
+          'gps-cage__cell--item': item.cell && typeof item.cell === 'object' && item.cell.name && !poopStore.isPoopAtPosition(item.x, item.y),
           'gps-cage__cell--water': item.x === width - 1 && item.y === 0
         }"
         :data-item-size="item.cell && typeof item.cell === 'object' && item.cell.size ? `${item.cell.size.width}x${item.cell.size.height}` : null"

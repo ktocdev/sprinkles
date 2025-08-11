@@ -8,7 +8,7 @@
   <DebugPanel ref="debugPanelRef" @gameReset="$emit('gameReset')" />
   <DesignToolPanel 
     ref="designToolPanelRef"
-    @showSpecimenLanding="specimenPanelsRef?.toggleSpecimenLanding()"
+    @showSpecimenLanding="specimenPanelsRef?.toggleLandingSpecimen()"
     @showThemeExplorer="themeExplorerPanelRef?.toggleThemeExplorer()"
   />
   

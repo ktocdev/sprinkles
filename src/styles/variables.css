@@ -10,6 +10,8 @@
   --color-danger-hover: #c0392b;
   --color-warning: #e67e22;
   --color-warning-hover: #d35400;
+  --color-success: #27ae60;
+  --color-success-hover: #229954;
   --color-white: #fff;
   --box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   --box-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -55,6 +57,8 @@ body.theme-light {
   --color-danger-hover: #c0392b;
   --color-warning: #e67e22;
   --color-warning-hover: #d35400;
+  --color-success: #27ae60;
+  --color-success-hover: #229954;
   --color-cage-guinea-pig: #ffe4b5;
   --color-cage-poop: #e2c48d;
   

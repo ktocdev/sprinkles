@@ -193,35 +193,13 @@
         </Button>
       </div>
 
-      <!-- BoardList Specimen -->
-      <div class="gps-specimen-landing__card gps-panel-section">
-        <div class="gps-specimen-landing__card-header">
-          <div class="gps-specimen-landing__card-icon">📝</div>
-          <h3 class="gps-specimen-landing__card-title">BoardList Component</h3>
-        </div>
-        <p class="gps-specimen-landing__card-description">
-          Dynamic list component for displaying Guinea Pig needs and other information with optional urgency indicators.
-        </p>
-        <div class="gps-specimen-landing__card-features">
-          <span class="gps-specimen-landing__feature">Dynamic content</span>
-          <span class="gps-specimen-landing__feature">Urgency levels</span>
-          <span class="gps-specimen-landing__feature">Real-time updates</span>
-        </div>
-        <Button 
-          type="primary" 
-          @click="$emit('showBoardListSpecimen')"
-          class="gps-specimen-landing__card-button"
-        >
-          View BoardList Specimen
-        </Button>
-      </div>
 
-      <!-- AnchorNav Specimen - Hidden -->
+      <!-- AnchorPopover Specimen - Hidden -->
       <!-- 
       <div class="gps-specimen-landing__card gps-panel-section">
         <div class="gps-specimen-landing__card-header">
           <div class="gps-specimen-landing__card-icon">⚓</div>
-          <h3 class="gps-specimen-landing__card-title">AnchorNav Component</h3>
+          <h3 class="gps-specimen-landing__card-title">AnchorPopover Component</h3>
         </div>
         <p class="gps-specimen-landing__card-description">
           Fixed-position navigation component with flyout menu using Button and SubNav for consistent interaction patterns.
@@ -233,13 +211,36 @@
         </div>
         <Button 
           type="primary" 
-          @click="$emit('showAnchorNavSpecimen')"
+          @click="$emit('showAnchorPopoverSpecimen')"
           class="gps-specimen-landing__card-button"
         >
-          View AnchorNav Specimen
+          View AnchorPopover Specimen
         </Button>
       </div>
       -->
+
+      <!-- Tabs Specimen -->
+      <div class="gps-specimen-landing__card gps-panel-section">
+        <div class="gps-specimen-landing__card-header">
+          <div class="gps-specimen-landing__card-icon">📋</div>
+          <h3 class="gps-specimen-landing__card-title">Tabs Component</h3>
+        </div>
+        <p class="gps-specimen-landing__card-description">
+          Flexible tab navigation component with support for icons, badges, keyboard navigation, and multiple variants.
+        </p>
+        <div class="gps-specimen-landing__card-features">
+          <span class="gps-specimen-landing__feature">Icons & badges</span>
+          <span class="gps-specimen-landing__feature">Keyboard nav</span>
+          <span class="gps-specimen-landing__feature">Multiple variants</span>
+        </div>
+        <Button 
+          type="primary" 
+          @click="$emit('showTabsSpecimen')"
+          class="gps-specimen-landing__card-button"
+        >
+          View Tabs Specimen
+        </Button>
+      </div>
 
     </div>
 
@@ -268,8 +269,8 @@ const emit = defineEmits([
   'showFormGroupSpecimen',
   'showToggleSpecimen',
   'showDetailsSpecimen',
-  'showBoardListSpecimen',
-  'showAnchorNavSpecimen'
+  'showAnchorPopoverSpecimen',
+  'showTabsSpecimen'
 ])
 </script>
 

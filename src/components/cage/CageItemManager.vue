@@ -18,6 +18,15 @@
       >
         🎲 Random Place
       </Button>
+      <Button 
+        type="warning"
+        size="compact"
+        @click="placeFoodRandomly"
+        title="Place random food items in cage"
+        :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
+      >
+        🥕 Feed Time
+      </Button>
     </div>
 
     <!-- Item Lists -->
@@ -41,6 +50,15 @@
             :class="{ 'gps-button--disabled': !hasAnyItems }"
           >
             🎲 Random Place
+          </Button>
+          <Button 
+            type="warning"
+            size="compact"
+            @click="placeFoodRandomly"
+            title="Place random food items in cage"
+            :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
+          >
+            🥕 Feed Time
           </Button>
         </div>
       </div>
@@ -263,7 +281,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useCageStore } from '../../stores/cage'
-import { useInventoryStore } from '../../stores/inventory'
+import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
@@ -275,7 +293,6 @@ const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
 
-
 // Modal states
 const showAddItemModal = ref(false)
 const showMoveModal = ref(false)
@@ -285,34 +302,6 @@ const itemY = ref(null)
 const itemToMove = ref(null)
 const moveX = ref(null)
 const moveY = ref(null)
-
-// Item definitions
-const itemDefinitions = {
-  // Consumables
-  hay: { name: 'Hay', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  pellets: { name: 'Pellets', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  lettuce: { name: 'Lettuce', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  blueberries: { name: 'Blueberries', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  carrots: { name: 'Carrots', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  cucumbers: { name: 'Cucumbers', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
-  small_chew_stick: { name: 'Small Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
-  large_chew_stick: { name: 'Large Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
-  chew_cube: { name: 'Chew Cube', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
-  
-  // Permanents
-  small_ball: { name: 'Small Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
-  large_ball: { name: 'Large Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
-  small_tunnel: { name: 'Small Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
-  large_tunnel: { name: 'Large Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
-  small_hammock: { name: 'Small Hammock', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
-  large_hammock: { name: 'Large Hammock', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
-  small_bed: { name: 'Small Bed', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
-  large_bed: { name: 'Large Bed', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
-  small_house: { name: 'Small House', type: 'shelter', isConsumable: false, size: { width: 1, height: 1 } },
-  large_house: { name: 'Large House', type: 'shelter', isConsumable: false, size: { width: 2, height: 2 } }
-}
-
-
 
 // Computed properties
 const availableConsumables = computed(() => {
@@ -338,6 +327,20 @@ const availablePermanents = computed(() => {
 const hasAnyItems = computed(() => {
   return Object.keys(availableConsumables.value).length > 0 || 
          Object.keys(availablePermanents.value).length > 0
+})
+
+const availableFoodItems = computed(() => {
+  const foodItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if (itemDefinitions[item].type === 'food' && inventoryStore.items[item] > 0) {
+      foodItems[item] = inventoryStore.items[item]
+    }
+  })
+  return foodItems
+})
+
+const hasAnyFoodItems = computed(() => {
+  return Object.keys(availableFoodItems.value).length > 0
 })
 
 // Dropdown options for item selection
@@ -631,6 +634,70 @@ function placeItemsRandomly() {
     alert(`Successfully placed ${placedItems} item${placedItems === 1 ? '' : 's'} randomly in the cage!`)
   } else {
     alert('Could not place any items. Try cleaning up the cage or check your inventory.')
+  }
+}
+
+// Place food items randomly in the cage
+function placeFoodRandomly() {
+  if (!hasAnyFoodItems.value) {
+    alert('No food items available in inventory! Visit the Market to buy food first.')
+    return
+  }
+  
+  // Get all available food items
+  const allAvailableFoodItems = Object.keys(availableFoodItems.value)
+  
+  if (allAvailableFoodItems.length === 0) {
+    alert('No food items available in inventory!')
+    return
+  }
+  
+  // Decide how many food items to place (between 2 and min(5, available food items))
+  const maxItems = Math.min(5, allAvailableFoodItems.length)
+  const numItemsToPlace = Math.max(2, Math.min(maxItems, 2 + Math.floor(Math.random() * 4)))
+  
+  let placedItems = 0
+  let attempts = 0
+  const maxAttempts = 100 // Prevent infinite loops
+  
+  while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+    attempts++
+    
+    // Pick a random food item
+    const randomItemName = allAvailableFoodItems[Math.floor(Math.random() * allAvailableFoodItems.length)]
+    const itemDef = itemDefinitions[randomItemName]
+    
+    if (!itemDef) continue
+    
+    // Get available positions for this specific item size
+    const availablePositions = getAvailablePositionsForItem(itemDef.size)
+    
+    if (availablePositions.length === 0) {
+      // This item can't fit anywhere, try another item
+      continue
+    }
+    
+    // Pick a random available position that can fit this item
+    const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
+    
+    // Try to place the item
+    const success = cageStore.addItem({
+      name: randomItemName,
+      type: itemDef.type,
+      isConsumable: itemDef.isConsumable,
+      size: itemDef.size
+    }, randomPos.x, randomPos.y)
+    
+    if (success) {
+      inventoryStore.removeItem(randomItemName, 1)
+      placedItems++
+    }
+  }
+  
+  if (placedItems > 0) {
+    alert(`Successfully placed ${placedItems} food item${placedItems === 1 ? '' : 's'} randomly in the cage! 🥕`)
+  } else {
+    alert('Could not place any food items. Try cleaning up the cage or check your food inventory.')
   }
 }
 

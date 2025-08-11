@@ -1,5 +1,31 @@
 import { defineStore } from 'pinia'
 
+// Item definitions
+export const itemDefinitions = {
+  // Consumables
+  hay: { name: 'Hay', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  pellets: { name: 'Pellets', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  lettuce: { name: 'Lettuce', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  blueberries: { name: 'Blueberries', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  carrots: { name: 'Carrots', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  cucumbers: { name: 'Cucumbers', type: 'food', isConsumable: true, size: { width: 1, height: 1 } },
+  small_chew_stick: { name: 'Small Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
+  large_chew_stick: { name: 'Large Chew Stick', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
+  chew_cube: { name: 'Chew Cube', type: 'chew', isConsumable: true, size: { width: 1, height: 1 } },
+  
+  // Permanents
+  small_ball: { name: 'Small Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  large_ball: { name: 'Large Ball', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  small_tunnel: { name: 'Small Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  large_tunnel: { name: 'Large Tunnel', type: 'toy', isConsumable: false, size: { width: 1, height: 1 } },
+  small_hammock: { name: 'Small Hammock', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
+  large_hammock: { name: 'Large Hammock', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
+  small_bed: { name: 'Small Bed', type: 'bed', isConsumable: false, size: { width: 1, height: 1 } },
+  large_bed: { name: 'Large Bed', type: 'bed', isConsumable: false, size: { width: 2, height: 2 } },
+  small_house: { name: 'Small House', type: 'shelter', isConsumable: false, size: { width: 1, height: 1 } },
+  large_house: { name: 'Large House', type: 'shelter', isConsumable: false, size: { width: 2, height: 2 } }
+}
+
 // Default inventory items
 const DEFAULT_ITEMS = {
   // Food items
