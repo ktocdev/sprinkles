@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
+import { useCageStore } from '../cage.js'
+import { needStoreMixin } from './needStoreMixin.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -10,7 +12,84 @@ export const useHungerStore = defineStore('hunger', {
     maxValue: 100,
     minValue: 0,
     urgency: 0, // Will be calculated by needs queue
-    needType: 'hunger' 
+    needType: 'hunger',
+    previousStatus: null, // Track previous status for reactions
+    recentlyFulfilled: false, // Flag to prevent duplicate reactions
+    
+    // Guinea pig reactions for different improvements
+    reactions: {
+      criticalToUrgent: [
+        'Wheek wheek wheek!',
+        'Finally some food!',
+        'Nom nom nom...',
+        'Thank you human!'
+      ],
+      urgentToNormal: [
+        'Yummy!',
+        'Crunch crunch crunch',
+        'Much better now!',
+        'Happy guinea pig sounds!'
+      ],
+      normalToFulfilled: [
+        'So satisfied!',
+        'Best human ever!',
+        'Purr purr purr...',
+        'Life is good!',
+        'Perfect!'
+      ],
+      // Reactions when status gets worse (degradations)
+      fulfilledToNormal: [
+        'Getting a bit hungry...',
+        'Could use a snack',
+        'Tummy starting to rumble',
+        'Food thoughts creeping in'
+      ],
+      normalToUrgent: [
+        'Really need food now!',
+        'Wheek! Where is dinner?',
+        'Getting quite hungry!',
+        'Food! Food! Food!',
+        'Human, I need sustenance!'
+      ],
+      urgentToCritical: [
+        'WHEEK WHEEK WHEEK!',
+        'STARVING GUINEA PIG!',
+        'EMERGENCY FOOD NEEDED!',
+        'CRITICAL HUNGER ALERT!',
+        'MUST EAT NOW!'
+      ]
+    },
+    
+    // Urgency status messages (different from reactions)
+    urgencyMessages: {
+      normal: [
+        'Getting a bit peckish...',
+        'Sniffing around for food...',
+        'Time for a snack?'
+      ],
+      urgent: [
+        'I\'m getting really hungry!',
+        'Where\'s the food?',
+        'Need food soon!',
+        'My tummy is rumbling...'
+      ],
+      critical: [
+        'I\'m STARVING!',
+        'FEED ME NOW!',
+        'I need food immediately!',
+        'This guinea pig is famished!'
+      ]
+    },
+    
+    // Message configuration
+    messageConfig: {
+      emoji: '🍽️',
+      intervals: {
+        normal: 12000,    // 12 seconds
+        urgent: 8000,     // 8 seconds  
+        critical: 5000    // 5 seconds
+      }
+    }
   }),
 
   getters: {
@@ -87,6 +166,61 @@ export const useHungerStore = defineStore('hunger', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
+      // Show "ate food" message for automatic eating
+      if (actualImprovement > 0) {
+        const statusStore = useStatusStore()
+        const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
+      }
+
+      // Always show a feeding reaction when food is consumed, but not when paused
+      if (actualImprovement > 0) {
+        console.log(`🍽️ FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        console.log(`🍽️ FEED: recentlyFulfilled flag is currently: ${this.recentlyFulfilled}`)
+        
+        // Set flag to prevent duplicate reactions from needsQueue AFTER we've logged the current state
+        this.recentlyFulfilled = true
+        console.log(`🍽️ FEED: Set recentlyFulfilled flag to true`)
+        
+        // Check if game is paused - don't show reactions when paused
+        const cageStore = useCageStore()
+        if (cageStore.paused) {
+          console.log(`⏰ DELAY: Feeding reaction skipped - game is paused`)
+          // Still need to clear the flag later, so don't return early
+        } else {
+        
+        // Get appropriate reaction based on current status
+        let reactionType
+        const currentStatus = this.needStatus
+        
+        if (currentStatus === 'critical') {
+          reactionType = 'criticalToUrgent'
+        } else if (currentStatus === 'urgent') {
+          reactionType = 'urgentToNormal'  
+        } else if (currentStatus === 'normal') {
+          reactionType = 'normalToFulfilled'
+        } else { // fulfilled
+          reactionType = 'normalToFulfilled' // Use same reactions for fulfilled
+        }
+        
+        console.log(`🍽️ FEED: Current hunger status: ${currentStatus}, using reaction type: ${reactionType}`)
+        
+        const reaction = this.getRandomReaction(reactionType)
+        if (reaction) {
+          console.log(`🍽️ FEED: Selected feeding reaction: "${reaction.message}" ${reaction.emoji}`)
+          this.triggerDelayedReaction(reaction)
+        } else {
+          console.log(`🍽️ FEED: No reaction found for type: ${reactionType}`)
+        }
+        }
+      }
+      
+      // Clear the flag after a short delay so needsQueue can handle future automatic changes
+      setTimeout(() => {
+        console.log(`🍽️ FEED: Clearing recentlyFulfilled flag after 500ms delay`)
+        this.recentlyFulfilled = false
+      }, 500) // 0.5 seconds should be enough to avoid conflicts
+
       // Track food consumption in statistics
       statisticsStore.trackFoodConsumption(methodName, actualImprovement)
 
@@ -137,7 +271,10 @@ export const useHungerStore = defineStore('hunger', {
 
     getDegradationPerHour() {
       return this.degradationRate * 3600
-    }
+    },
+
+    // Shared mixin methods for status improvements and reactions
+    ...needStoreMixin
   },
 
   persist: true

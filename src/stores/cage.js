@@ -293,7 +293,7 @@ export const useCageStore = defineStore('cage', {
       // Show temporary message for poop interaction
       if (interaction.success) {
         const statusStore = useStatusStore()
-        statusStore.showTemporaryMessage(interaction.message, '💩', 2000)
+        statusStore.showTemporaryMessage(interaction.message, '💩', 1000)
       }
       
       if (interaction.success && interaction.hygieneImpact > 0) {
@@ -351,6 +351,11 @@ export const useCageStore = defineStore('cage', {
       
       // Remove item from grid
       this.removeItem(itemId)
+      
+      // Show brief eating message in StatusMarquee
+      const statusStore = useStatusStore()
+      const itemDisplayName = item.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
       
       return {
         success: true,
