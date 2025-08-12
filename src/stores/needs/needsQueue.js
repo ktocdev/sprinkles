@@ -55,6 +55,80 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       return status
+    },
+
+    // Calculate overall wellness based on average of all implemented needs
+    overallWellness() {
+      const validNeeds = []
+      
+      for (const [needName, storeName] of Object.entries(this.needs)) {
+        const store = this.getNeedStore(storeName)
+        if (store && store.currentValue !== undefined) {
+          validNeeds.push(store.currentValue)
+        }
+      }
+      
+      if (validNeeds.length === 0) return 50 // Default fallback
+      
+      const average = validNeeds.reduce((sum, value) => sum + value, 0) / validNeeds.length
+      return Math.round(average)
+    },
+
+    // Get wellness message based on overall wellness score
+    wellnessMessage() {
+      const wellness = this.overallWellness
+      const messages = {
+        excellent: [
+          'Guinea pig is excellent!',
+          'Thriving guinea pig!',
+          'Perfect health!',
+          'Living the best life!',
+          'Absolutely fantastic!'
+        ],
+        content: [
+          'Guinea pig is content',
+          'Happy and healthy',
+          'Doing quite well',
+          'Comfortable guinea pig',
+          'All good here!'
+        ],
+        okay: [
+          'Guinea pig is okay',
+          'Doing alright',
+          'Could be better',
+          'Managing well enough',
+          'Getting by fine'
+        ],
+        needsHelp: [
+          'Guinea pig could be better',
+          'Needs some attention',
+          'Could use some care',
+          'Not feeling great',
+          'Needs improvement'
+        ],
+        needsHelp2: [
+          'Guinea pig needs help',
+          'Requires immediate attention',
+          'Not doing well',
+          'Needs serious care',
+          'Poor condition'
+        ]
+      }
+
+      let messageArray
+      if (wellness >= 90) {
+        messageArray = messages.excellent
+      } else if (wellness >= 80) {
+        messageArray = messages.content
+      } else if (wellness >= 60) {
+        messageArray = messages.okay
+      } else if (wellness >= 50) {
+        messageArray = messages.needsHelp
+      } else {
+        messageArray = messages.needsHelp2
+      }
+
+      return messageArray[Math.floor(Math.random() * messageArray.length)]
     }
   },
 
@@ -120,28 +194,34 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           const cageStore = useCageStore()
           if (!cageStore.paused) {
             // Check for improvements first
+            let improvementReaction = null
             if (store.checkForStatusImprovement) {
-              const improvementReaction = store.checkForStatusImprovement()
+              improvementReaction = store.checkForStatusImprovement()
               if (improvementReaction && !store.recentlyFulfilled) {
                 this.showNeedReaction(improvementReaction)
               }
             }
             
             // Check for degradations (only if no improvement reaction was shown)
-            if (store.checkForStatusDegradation && !store.recentlyFulfilled) {
+            if (store.checkForStatusDegradation && !store.recentlyFulfilled && !improvementReaction) {
               const degradationReaction = store.checkForStatusDegradation()
               if (degradationReaction) {
                 this.showNeedReaction(degradationReaction)
               }
             }
           } else {
-            // When paused, still update previousStatus but don't show reactions
+            // When paused, still check status but don't show reactions
             if (store.checkForStatusImprovement) {
               store.checkForStatusImprovement()
             }
             if (store.checkForStatusDegradation) {
               store.checkForStatusDegradation()
             }
+          }
+          
+          // Update previous status after both checks are done
+          if (store.updatePreviousStatus) {
+            store.updatePreviousStatus()
           }
           
           queue.push({

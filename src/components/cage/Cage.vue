@@ -3,10 +3,12 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { usePoopStore } from '../../stores/poop'
+import { useStatusStore } from '../../stores/status'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
 const poopStore = usePoopStore()
+const statusStore = useStatusStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
@@ -95,7 +97,11 @@ function moveGuineaPig() {
     
     // Drop a poop if it's time and game is not paused
     if (poopStore.shouldDropPoop && !cageStore.paused) {
-      cageStore.addPoop(next.x, next.y)
+      const poopAdded = cageStore.addPoop(next.x, next.y)
+      if (poopAdded) {
+        // Show "guinea pig made a poop" message
+        statusStore.showTemporaryMessage('Guinea pig made a poop!', '💩', 1000)
+      }
       poopStore.resetPoopTimer()
     }
   }

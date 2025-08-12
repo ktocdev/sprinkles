@@ -131,11 +131,29 @@ export const useStatusStore = defineStore('status', {
         }
       }
       
-      // Show content message during cooldown after reactions (medium-low priority)
+      // Show wellness message during cooldown after reactions (medium-low priority)
       if (now - state.lastMessageTime < 2000 && now - state.lastMessageTime > 500) {
+        const needsQueueStore = useNeedsQueueStore()
+        const wellnessMessage = needsQueueStore.wellnessMessage
+        const overallWellness = needsQueueStore.overallWellness
+        
+        // Choose emoji based on wellness level
+        let emoji = '😌' // default content
+        if (overallWellness >= 90) {
+          emoji = '🌟' // excellent
+        } else if (overallWellness >= 80) {
+          emoji = '😌' // content
+        } else if (overallWellness >= 60) {
+          emoji = '🙂' // okay
+        } else if (overallWellness >= 50) {
+          emoji = '😐' // could be better
+        } else {
+          emoji = '😟' // needs help
+        }
+        
         return {
-          message: 'Guinea pig is content',
-          emoji: '😌'
+          message: wellnessMessage,
+          emoji: emoji
         }
       }
       
@@ -230,6 +248,33 @@ export const useStatusStore = defineStore('status', {
       if (now - this.lastMessageTime < this.globalCooldown) {
         console.log(`⏰ DELAY: Message blocked by global cooldown (${this.globalCooldown}ms)`)
         return
+      }
+      
+      // Apply probability-based filtering for hunger messages based on status
+      if (needType === 'hunger') {
+        const needsQueueStore = useNeedsQueueStore()
+        const hungerStore = needsQueueStore.getNeedStore('hunger')
+        if (hungerStore) {
+          const hungerStatus = hungerStore.needStatus
+          let probability = 1.0 // Default: always show (for urgent/critical)
+          
+          if (hungerStatus === 'fulfilled') {
+            probability = 0.03 // 3% chance (1 in ~33 messages)
+          } else if (hungerStatus === 'normal') {
+            probability = 0.1 // 10% chance (1 in 10 messages) 
+          } else if (hungerStatus === 'urgent') {
+            probability = 0.4 // 40% chance (2 in 5 messages)
+          } else if (hungerStatus === 'critical') {
+            probability = 0.75 // 75% chance (3 in 4 messages)
+          }
+          
+          if (Math.random() > probability) {
+            console.log(`🎲 PROB: Hunger message skipped due to probability (${Math.round(probability * 100)}% chance, status: ${hungerStatus})`)
+            return
+          } else {
+            console.log(`🎲 PROB: Hunger message passed probability check (${Math.round(probability * 100)}% chance, status: ${hungerStatus})`)
+          }
+        }
       }
 
       const config = this.messageConfig[needType]

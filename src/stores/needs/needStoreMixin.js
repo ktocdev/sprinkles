@@ -6,9 +6,6 @@ export const needStoreMixin = {
     const currentStatus = this.needStatus
     const previousStatus = this.previousStatus
     
-    // Update previous status for next check
-    this.previousStatus = currentStatus
-    
     // If no previous status, no reaction yet
     if (!previousStatus) return null
     
@@ -46,6 +43,11 @@ export const needStoreMixin = {
     }
     
     return null
+  },
+
+  // Update previous status after both improvement and degradation checks are done
+  updatePreviousStatus() {
+    this.previousStatus = this.needStatus
   },
 
   // Get a random reaction message for a specific improvement type
