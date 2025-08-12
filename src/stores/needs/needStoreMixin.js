@@ -55,11 +55,13 @@ export const needStoreMixin = {
       if (reaction && reaction.message && reaction.emoji) {
         // Extend the cooldown immediately to prevent messages in the gap
         const now = Date.now()
-        const totalDuration = 0 + 800 + 50 // delay + reaction duration + small buffer
+        const totalDuration = 1000 + 800 + 50 // delay + reaction duration + small buffer
         statusStore.lastMessageTime = now + totalDuration
         
-        // Show reaction immediately
-        statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
+        // Delay the reaction to show after other messages
+        setTimeout(() => {
+          statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
+        }, 1000)
       }
     } catch (error) {
       console.warn('Could not show delayed reaction:', error)

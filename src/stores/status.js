@@ -268,6 +268,14 @@ export const useStatusStore = defineStore('status', {
         }
       }
       
+      // Show content message during cooldown after reactions (medium-low priority)
+      if (now - state.lastMessageTime < 2000 && now - state.lastMessageTime > 500) {
+        return {
+          message: 'Guinea pig is content',
+          emoji: '😌'
+        }
+      }
+      
       return {
         message: guineaPigStore.currentMessage,
         emoji: guineaPigStore.currentEmoji
