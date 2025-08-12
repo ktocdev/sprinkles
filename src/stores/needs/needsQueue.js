@@ -1,18 +1,20 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
 import { useCageStore } from '../cage.js'
+import { useStatusStore } from '../status.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
     needs: {
       hunger: 'hunger',
       thirst: 'thirst',
-      shelter: 'shelter',
+      sleep: 'sleep',
       chew: 'chew',
-      enrichment: 'enrichment',
-      love: 'love',
       nails: 'nails',
-      hygiene: 'hygiene'
+      shelter: 'shelter',
+      hygiene: 'hygiene',
+      enrichment: 'enrichment',
+      love: 'love'
     },
     queue: [], // Ordered list of needs by urgency
     lastUpdate: Date.now(),
@@ -105,13 +107,22 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     updateQueue() {
       const queue = []
 
-      // Calculate urgency for each need
+      // Calculate urgency for each need and check for reactions
       for (const [needName, storeName] of Object.entries(this.needs)) {
         const store = this.getNeedStore(storeName)
         if (store) {
           // Calculate urgency based on current value and degradation rate
           const urgency = this.calculateUrgency(store)
           store.setUrgency(urgency)
+          
+          // Check for status improvements and show reactions
+          // But only if the store hasn't recently been manually fulfilled
+          if (store.checkForStatusImprovement) {
+            const reaction = store.checkForStatusImprovement()
+            if (reaction && !store.recentlyFulfilled) {
+              this.showNeedReaction(reaction)
+            }
+          }
           
           queue.push({
             name: needName,
@@ -203,6 +214,14 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         this.updateTimer = null
       }
       
+      // Initialize previous status for all need stores
+      for (const [needName, storeName] of Object.entries(this.needs)) {
+        const store = this.getNeedStore(storeName)
+        if (store && store.initializePreviousStatus) {
+          store.initializePreviousStatus()
+        }
+      }
+      
       this.updateQueue()
       
       // Start the timer for continuous updates
@@ -220,6 +239,26 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
+      }
+    },
+
+    // Show a guinea pig reaction in the StatusMarquee with delay
+    showNeedReaction(reaction) {
+      try {
+        const statusStore = useStatusStore()
+        
+        if (reaction && reaction.message && reaction.emoji) {
+          // Extend the cooldown immediately to prevent messages in the gap
+          const now = Date.now()
+          const totalDuration = 0 + 800 + 50 // delay + reaction duration + small buffer
+          statusStore.lastMessageTime = now + totalDuration
+          
+          // Delay the reaction to show after any other messages
+          // Show reaction immediately
+          statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
+        }
+      } catch (error) {
+        console.warn('Could not show need reaction:', error)
       }
     },
 

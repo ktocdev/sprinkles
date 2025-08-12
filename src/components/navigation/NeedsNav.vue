@@ -12,7 +12,6 @@
     <NeedsList 
       :items="needsItems"
       :showUrgency="true"
-      emptyMessage="All needs satisfied"
     />
   </AnchorPopover>
 </template>

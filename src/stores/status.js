@@ -157,12 +157,12 @@ export const useStatusStore = defineStore('status', {
     
     // General settings
     enabled: true,
-    globalCooldown: 2000, // Minimum time between any messages (2 seconds)
+    globalCooldown: 100, // Minimum time between any messages (0.1 seconds)
     lastMessageTime: 0,
     
     // Update timer management
     updateTimer: null,
-    updateInterval: 5000 // Update every 5 seconds
+    updateInterval: 1000 // Update every 1 second
   }),
 
   getters: {
@@ -206,6 +206,7 @@ export const useStatusStore = defineStore('status', {
     getCurrentStatusDisplay: (state) => (context) => {
       // context should include: guineaPigStore, cageStore, poopStore, marketStore
       const { guineaPigStore, cageStore, poopStore, marketStore } = context
+      const now = Date.now()
       
       // Check for temporary messages first (highest priority)
       const urgencyMessage = state.currentMessage
@@ -216,6 +217,8 @@ export const useStatusStore = defineStore('status', {
           emoji: urgencyMessage.emoji || config?.emoji || '⚠️'
         }
       }
+      
+      // Skip the cooldown content message - let other messages show immediately
       
       const { x, y } = cageStore.guineaPigPos
       
@@ -335,9 +338,8 @@ export const useStatusStore = defineStore('status', {
         this.showNeedMessage(needType, urgencyLevel, urgency)
       }, interval)
 
-      // Show first message after a short delay if it's urgent/critical
-      const initialDelay = urgencyLevel === 'critical' ? 1000 : 
-                          urgencyLevel === 'urgent' ? 3000 : interval
+      // Show first message immediately
+      const initialDelay = 0
 
       setTimeout(() => {
         this.showNeedMessage(needType, urgencyLevel, urgency)
@@ -575,7 +577,9 @@ export const useStatusStore = defineStore('status', {
         }
       }, duration)
       
-      this.lastMessageTime = now
+      // Extend the global cooldown to prevent other messages from showing immediately after
+      // Add a buffer to the cooldown based on the message duration
+      this.lastMessageTime = now + duration + 50 // Extra 0.05 second buffer
     },
 
     // Get debug info

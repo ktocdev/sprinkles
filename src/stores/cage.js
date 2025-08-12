@@ -352,6 +352,11 @@ export const useCageStore = defineStore('cage', {
       // Remove item from grid
       this.removeItem(itemId)
       
+      // Show brief eating message in StatusMarquee
+      const statusStore = useStatusStore()
+      const itemDisplayName = item.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
+      
       return {
         success: true,
         message: `Consumed ${item.name}`,

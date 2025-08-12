@@ -16,8 +16,8 @@
           v-model="hungerDegradationPerMinute"
           type="number"
           :min="0"
-          :max="10"
-          :step="0.1"
+          :max="20"
+          :step="1"
           @update:modelValue="updateHungerDegradation"
           hint="Rate at which hunger decreases per minute"
         />
@@ -66,7 +66,7 @@ const needsQueueStore = useNeedsQueueStore()
 
 // Hunger system controls
 const isHungerEnabled = ref(needsQueueStore.isActive)
-const hungerDegradationPerMinute = ref((hungerStore.degradationRate * 60).toFixed(1))
+const hungerDegradationPerMinute = ref((hungerStore.degradationRate * 60).toFixed(0))
 const hungerUrgency = ref(Math.round(hungerStore.urgency))
 
 function toggleHunger(enabled) {
@@ -97,7 +97,7 @@ function resetHunger() {
 onMounted(() => {
   // Set initial hunger controls
   isHungerEnabled.value = needsQueueStore.isActive
-  hungerDegradationPerMinute.value = (hungerStore.degradationRate * 60).toFixed(1)
+  hungerDegradationPerMinute.value = (hungerStore.degradationRate * 60).toFixed(0)
   hungerUrgency.value = Math.round(hungerStore.urgency)
 })
 

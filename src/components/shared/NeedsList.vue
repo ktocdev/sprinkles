@@ -31,9 +31,6 @@
         </div>
       </li>
     </ul>
-    <div v-else class="gps-needs-list__empty">
-      {{ emptyMessage }}
-    </div>
   </div>
 </template>
 
@@ -50,10 +47,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  emptyMessage: {
-    type: String,
-    default: 'No items to display'
-  }
 })
 
 // Transform items to consistent format
@@ -204,19 +197,6 @@ function getStatusColor(status) {
   border-color: var(--color-danger);
 }
 
-.gps-needs-list__empty {
-  padding: 1.5rem 1rem;
-  text-align: center;
-  color: var(--color-text);
-  opacity: 0.7;
-  font-style: italic;
-  font-size: var(--font-size-sm);
-  font-family: var(--font-family-body);
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-}
-
 /* Mobile-first responsive design */
 @media (min-width: 480px) {
   .gps-needs-list__item {
@@ -245,11 +225,6 @@ function getStatusColor(status) {
     align-self: auto;
     flex-shrink: 0;
     font-size: var(--font-size-sm);
-  }
-  
-  .gps-needs-list__empty {
-    padding: 2rem;
-    font-size: var(--font-size-base);
   }
 }
 

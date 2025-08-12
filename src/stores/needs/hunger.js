@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
+import { needStoreMixin } from './needStoreMixin.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -10,7 +11,32 @@ export const useHungerStore = defineStore('hunger', {
     maxValue: 100,
     minValue: 0,
     urgency: 0, // Will be calculated by needs queue
-    needType: 'hunger' 
+    needType: 'hunger',
+    previousStatus: null, // Track previous status for reactions
+    recentlyFulfilled: false, // Flag to prevent duplicate reactions
+    
+    // Guinea pig reactions for different improvements
+    reactions: {
+      criticalToUrgent: [
+        'Wheek wheek wheek!',
+        'Finally some food!',
+        'Nom nom nom...',
+        'Thank you human!'
+      ],
+      urgentToNormal: [
+        'Yummy!',
+        'Crunch crunch crunch',
+        'Much better now!',
+        'Happy guinea pig sounds!'
+      ],
+      normalToFulfilled: [
+        'So satisfied!',
+        'Best human ever!',
+        'Purr purr purr...',
+        'Life is good!',
+        'Perfect!'
+      ]
+    }
   }),
 
   getters: {
@@ -87,6 +113,21 @@ export const useHungerStore = defineStore('hunger', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
+      // Set flag to prevent duplicate reactions from needsQueue
+      this.recentlyFulfilled = true
+      
+      // Check for status improvements and show reactions immediately
+      const reaction = this.checkForStatusImprovement()
+      if (reaction) {
+        // Trigger reaction with delay
+        this.triggerDelayedReaction(reaction)
+      }
+      
+      // Clear the flag after a short delay so needsQueue can handle future automatic changes
+      setTimeout(() => {
+        this.recentlyFulfilled = false
+      }, 500) // 0.5 seconds should be enough to avoid conflicts
+
       // Track food consumption in statistics
       statisticsStore.trackFoodConsumption(methodName, actualImprovement)
 
@@ -137,7 +178,10 @@ export const useHungerStore = defineStore('hunger', {
 
     getDegradationPerHour() {
       return this.degradationRate * 3600
-    }
+    },
+
+    // Shared mixin methods for status improvements and reactions
+    ...needStoreMixin
   },
 
   persist: true
