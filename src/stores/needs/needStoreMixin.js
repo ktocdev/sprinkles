@@ -26,6 +26,28 @@ export const needStoreMixin = {
     return null
   },
 
+  // Check for status degradations and return reaction if any
+  checkForStatusDegradation() {
+    const currentStatus = this.needStatus
+    const previousStatus = this.previousStatus
+    
+    // If no previous status, no reaction yet
+    if (!previousStatus) return null
+    
+    // Check for degradations (getting worse)
+    if (previousStatus === 'fulfilled' && currentStatus === 'normal') {
+      return this.getRandomReaction('fulfilledToNormal')
+    }
+    if (previousStatus === 'normal' && currentStatus === 'urgent') {
+      return this.getRandomReaction('normalToUrgent')
+    }
+    if (previousStatus === 'urgent' && currentStatus === 'critical') {
+      return this.getRandomReaction('urgentToCritical')
+    }
+    
+    return null
+  },
+
   // Get a random reaction message for a specific improvement type
   getRandomReaction(improvementType) {
     const reactions = this.reactions[improvementType]
@@ -53,18 +75,23 @@ export const needStoreMixin = {
       const statusStore = useStatusStore()
       
       if (reaction && reaction.message && reaction.emoji) {
+        console.log(`🎭 REACTION: Triggering delayed reaction: "${reaction.message}" ${reaction.emoji} (${reaction.needType})`)
+        
         // Extend the cooldown immediately to prevent messages in the gap
         const now = Date.now()
         const totalDuration = 1000 + 800 + 50 // delay + reaction duration + small buffer
         statusStore.lastMessageTime = now + totalDuration
+        console.log(`⏰ DELAY: Extended status cooldown by ${totalDuration}ms`)
         
         // Delay the reaction to show after other messages
+        console.log(`⏰ DELAY: Delaying reaction by 1000ms`)
         setTimeout(() => {
+          console.log(`🎭 REACTION: Showing delayed ${reaction.needType} reaction: "${reaction.message}" ${reaction.emoji}`)
           statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
         }, 1000)
       }
     } catch (error) {
-      console.warn('Could not show delayed reaction:', error)
+      console.warn(`⚠️ ERROR: Could not show delayed reaction for ${reaction?.needType}:`, error)
     }
   }
 }

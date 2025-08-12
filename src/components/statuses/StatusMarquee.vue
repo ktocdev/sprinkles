@@ -41,6 +41,8 @@ watch(() => currentStatus.value, (newValue, oldValue) => {
 
 // Initialize status system on mount - always start fresh
 onMounted(() => {
+  console.log('🔍 PLAN: StatusMarquee mounted, initializing status system')
+  statusStore.initialize()
   statusStore.startUpdates()
 })
 

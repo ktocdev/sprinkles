@@ -293,7 +293,7 @@ export const useCageStore = defineStore('cage', {
       // Show temporary message for poop interaction
       if (interaction.success) {
         const statusStore = useStatusStore()
-        statusStore.showTemporaryMessage(interaction.message, '💩', 2000)
+        statusStore.showTemporaryMessage(interaction.message, '💩', 1000)
       }
       
       if (interaction.success && interaction.hygieneImpact > 0) {
