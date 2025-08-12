@@ -116,11 +116,26 @@ export const useHungerStore = defineStore('hunger', {
       // Set flag to prevent duplicate reactions from needsQueue
       this.recentlyFulfilled = true
       
-      // Check for status improvements and show reactions immediately
-      const reaction = this.checkForStatusImprovement()
-      if (reaction) {
-        // Trigger reaction with delay
-        this.triggerDelayedReaction(reaction)
+      // Always show a feeding reaction when food is consumed
+      if (actualImprovement > 0) {
+        // Get appropriate reaction based on current status
+        let reactionType
+        const currentStatus = this.needStatus
+        
+        if (currentStatus === 'critical') {
+          reactionType = 'criticalToUrgent'
+        } else if (currentStatus === 'urgent') {
+          reactionType = 'urgentToNormal'  
+        } else if (currentStatus === 'normal') {
+          reactionType = 'normalToFulfilled'
+        } else { // fulfilled
+          reactionType = 'normalToFulfilled' // Use same reactions for fulfilled
+        }
+        
+        const reaction = this.getRandomReaction(reactionType)
+        if (reaction) {
+          this.triggerDelayedReaction(reaction)
+        }
       }
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
