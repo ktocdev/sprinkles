@@ -77,6 +77,9 @@ export const usePoopStore = defineStore('poop', {
       
       this.poop.push(poop)
       
+      // Show fresh poop message
+      this.showPoopMessage('fresh')
+      
       // Track poop creation in statistics
       const statisticsStore = useStatisticsStore()
       statisticsStore.trackPoopCreation()
@@ -185,9 +188,10 @@ export const usePoopStore = defineStore('poop', {
       
       const now = Date.now()
       const poopAge = now - poop.timestamp
-      const isFreshPoop = poopAge < 2000 // 2 seconds
+      const isFreshPoop = poopAge < 3000 // 3 seconds
       
       if (isFreshPoop) {
+        // Don't show message for fresh poop - already shown when created
         return {
           success: true,
           message: 'Fresh poop - no hygiene penalty',
@@ -196,11 +200,45 @@ export const usePoopStore = defineStore('poop', {
         }
       }
       
+      // Show old poop message
+      this.showPoopMessage('old')
+      
       return {
         success: true,
         message: 'Stepped on poop - hygiene decreased',
         hygieneImpact: this.hygieneImpact,
         poopAge: poopAge
+      }
+    },
+
+    // Show poop-related messages
+    showPoopMessage(type) {
+      try {
+        // Import here to avoid circular dependencies
+        const { useStatusStore } = require('./status.js')
+        const statusStore = useStatusStore()
+        
+        let message, emoji, duration
+        
+        switch (type) {
+          case 'fresh':
+            message = 'The guinea pig just made a poop!'
+            emoji = '💩'
+            duration = 2000
+            break
+          case 'old':
+            message = 'Eww, stepped on old poop!'
+            emoji = '🤢'
+            duration = 1500
+            break
+          default:
+            return
+        }
+        
+        console.log(`💩 POOP: Showing ${type} poop message: "${message}" ${emoji}`)
+        statusStore.showTemporaryMessage(message, emoji, duration)
+      } catch (error) {
+        console.warn('Could not show poop message:', error)
       }
     },
     

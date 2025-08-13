@@ -4,36 +4,6 @@ import { useCageStore } from './cage.js'
 
 export const useStatusStore = defineStore('status', {
   state: () => ({
-    // Message configurations for different urgency levels
-    messageConfig: {
-      hunger: {
-        messages: {
-          normal: [
-            'Getting a bit peckish...',
-            'Sniffing around for food...',
-            'Time for a snack?'
-          ],
-          urgent: [
-            'I\'m getting really hungry!',
-            'Where\'s the food?',
-            'Need food soon!',
-            'My tummy is rumbling...'
-          ],
-          critical: [
-            'I\'m STARVING!',
-            'FEED ME NOW!',
-            'I need food immediately!',
-            'This guinea pig is famished!'
-          ]
-        },
-        emoji: '🍽️',
-        intervals: {
-          normal: 12000,    // 12 seconds
-          urgent: 8000,     // 8 seconds  
-          critical: 5000    // 5 seconds
-        }
-      }
-    },
     
     // Current urgency messages and their timers
     activeMessages: new Map(), // Map of needType -> { message, timer, lastShown }
@@ -59,9 +29,11 @@ export const useStatusStore = defineStore('status', {
   }),
 
   getters: {
-    // Get the configuration for a specific need type
+    // Get the configuration for a specific need type from the need store itself
     getNeedConfig: (state) => (needType) => {
-      return state.messageConfig[needType] || null
+      const needsQueueStore = useNeedsQueueStore()
+      const needStore = needsQueueStore.getNeedStore(needType)
+      return needStore?.messageConfig || null
     },
 
     // Get all active urgent messages
@@ -86,7 +58,9 @@ export const useStatusStore = defineStore('status', {
       // Check for temporary messages first (highest priority)
       const urgencyMessage = state.currentMessage
       if (urgencyMessage && urgencyMessage.isTemporary) {
-        const config = state.messageConfig[urgencyMessage.needType]
+        const needsQueueStore = useNeedsQueueStore()
+        const needStore = needsQueueStore.getNeedStore(urgencyMessage.needType)
+        const config = needStore?.messageConfig
         return {
           message: urgencyMessage.message,
           emoji: urgencyMessage.emoji || config?.emoji || '⚠️'
@@ -95,19 +69,6 @@ export const useStatusStore = defineStore('status', {
       
       const { x, y } = cageStore.guineaPigPos || { x: 0, y: 0 }
       
-      // Check if guinea pig is on fresh poop (high priority)
-      const poopAtPos = poopStore.poopItems?.find(poop => poop.x === x && poop.y === y)
-      if (poopAtPos) {
-        const poopAge = now - poopAtPos.timestamp
-        const isFreshPoop = poopAge < 3000 // 3 seconds
-        if (isFreshPoop) {
-          return {
-            message: 'The guinea pig just made a poop!',
-            emoji: '💩'
-          }
-        }
-        // Old poop message is handled by temporary messages now
-      }
       
       // Check if guinea pig is on an item (medium priority)
       const currentItem = cageStore.items?.find(item => item.x === x && item.y === y)
@@ -124,7 +85,9 @@ export const useStatusStore = defineStore('status', {
       
       // Check for urgent/critical need messages (medium-low priority)
       if (urgencyMessage && (urgencyMessage.urgencyLevel === 'critical' || urgencyMessage.urgencyLevel === 'urgent')) {
-        const config = state.messageConfig[urgencyMessage.needType]
+        const needsQueueStore = useNeedsQueueStore()
+        const needStore = needsQueueStore.getNeedStore(urgencyMessage.needType)
+        const config = needStore?.messageConfig
         return {
           message: urgencyMessage.message,
           emoji: urgencyMessage.emoji || config?.emoji || '⚠️'
@@ -160,7 +123,9 @@ export const useStatusStore = defineStore('status', {
       // Default to guinea pig state (low priority)
       // Show normal need messages more frequently (40% chance when guinea pig is sitting)
       if (urgencyMessage && urgencyMessage.urgencyLevel === 'normal' && guineaPigStore.sitting && Math.random() < 0.4) {
-        const config = state.messageConfig[urgencyMessage.needType]
+        const needsQueueStore = useNeedsQueueStore()
+        const needStore = needsQueueStore.getNeedStore(urgencyMessage.needType)
+        const config = needStore?.messageConfig
         return {
           message: urgencyMessage.message,
           emoji: urgencyMessage.emoji || config?.emoji || '⚠️'
@@ -211,7 +176,7 @@ export const useStatusStore = defineStore('status', {
       
       // Process each need type
       for (const [needType, status] of Object.entries(allNeedsStatus)) {
-        const config = this.messageConfig[needType]
+        const config = this.getNeedConfig(needType)
         if (!config) {
           console.log(`🔍 PLAN: No config found for need type: ${needType}`)
           continue
@@ -250,41 +215,17 @@ export const useStatusStore = defineStore('status', {
         return
       }
       
-      // Apply probability-based filtering for hunger messages based on status
-      if (needType === 'hunger') {
-        const needsQueueStore = useNeedsQueueStore()
-        const hungerStore = needsQueueStore.getNeedStore('hunger')
-        if (hungerStore) {
-          const hungerStatus = hungerStore.needStatus
-          let probability = 1.0 // Default: always show (for urgent/critical)
-          
-          if (hungerStatus === 'fulfilled') {
-            probability = 0.03 // 3% chance (1 in ~33 messages)
-          } else if (hungerStatus === 'normal') {
-            probability = 0.1 // 10% chance (1 in 10 messages) 
-          } else if (hungerStatus === 'urgent') {
-            probability = 0.4 // 40% chance (2 in 5 messages)
-          } else if (hungerStatus === 'critical') {
-            probability = 0.75 // 75% chance (3 in 4 messages)
-          }
-          
-          if (Math.random() > probability) {
-            console.log(`🎲 PROB: Hunger message skipped due to probability (${Math.round(probability * 100)}% chance, status: ${hungerStatus})`)
-            return
-          } else {
-            console.log(`🎲 PROB: Hunger message passed probability check (${Math.round(probability * 100)}% chance, status: ${hungerStatus})`)
-          }
-        }
-      }
 
-      const config = this.messageConfig[needType]
+      const config = this.getNeedConfig(needType)
       if (!config) {
         console.log(`🔍 PLAN: No config found for need type: ${needType}`)
         return
       }
 
-      // Get available messages for this urgency level
-      const messages = config.messages[urgencyLevel] || []
+      // Get available messages from the need store
+      const needsQueueStore = useNeedsQueueStore()
+      const needStore = needsQueueStore.getNeedStore(needType)
+      const messages = needStore?.urgencyMessages?.[urgencyLevel] || config.messages?.[urgencyLevel] || []
       if (messages.length === 0) {
         console.log(`🔍 PLAN: No messages available for ${needType} at ${urgencyLevel} level`)
         return
