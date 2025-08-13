@@ -4,11 +4,12 @@ import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
 import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
+import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
     currentValue: 100,
-    degradationRate: 0.1, // Points per second (6 points per minute) - more noticeable for testing
+    degradationRate: STANDARD_DEGRADATION_RATES.hunger || 0.1, // Points per second
     maxValue: 100,
     minValue: 0,
     urgency: 0, // Will be calculated by needs queue
@@ -173,25 +174,18 @@ export const useHungerStore = defineStore('hunger', {
         statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
       }
 
-      // Always show a feeding reaction when food is consumed, but not when paused
+      // Show feeding reaction when food is consumed 
       if (actualImprovement > 0) {
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         console.log(`🍽️ [HUNGER] FEED: recentlyFulfilled flag is currently: ${this.recentlyFulfilled}`)
         
-        // Set flag to prevent duplicate reactions from needsQueue AFTER we've logged the current state
+        // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
         console.log(`🍽️ [HUNGER] FEED: Set recentlyFulfilled flag to true`)
         
-        // Check if game is paused - don't show reactions when paused
-        const cageStore = useCageStore()
-        if (cageStore.paused) {
-          console.log(`⏰ DELAY: Feeding reaction skipped - game is paused`)
-          // Still need to clear the flag later, so don't return early
-        } else {
-        
-        // Get appropriate reaction based on current status
-        let reactionType
+        // Trigger manual feeding reaction using mixin (handles pause checking)
         const currentStatus = this.needStatus
+        let reactionType
         
         if (currentStatus === 'critical') {
           reactionType = 'criticalToUrgent'
@@ -211,7 +205,6 @@ export const useHungerStore = defineStore('hunger', {
           this.triggerDelayedReaction(reaction)
         } else {
           console.log(`🍽️ [HUNGER] FEED: No reaction found for type: ${reactionType}`)
-        }
         }
       }
       

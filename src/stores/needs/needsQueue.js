@@ -189,39 +189,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           const urgency = this.calculateUrgency(store)
           store.setUrgency(urgency)
           
-          // Check for status changes and show reactions
-          // But only if the store hasn't recently been manually fulfilled and game isn't paused
-          const cageStore = useCageStore()
-          if (!cageStore.paused) {
-            // Check for improvements first
-            let improvementReaction = null
-            if (store.checkForStatusImprovement) {
-              improvementReaction = store.checkForStatusImprovement()
-              if (improvementReaction && !store.recentlyFulfilled) {
-                this.showNeedReaction(improvementReaction)
-              }
-            }
-            
-            // Check for degradations (only if no improvement reaction was shown)
-            if (store.checkForStatusDegradation && !store.recentlyFulfilled && !improvementReaction) {
-              const degradationReaction = store.checkForStatusDegradation()
-              if (degradationReaction) {
-                this.showNeedReaction(degradationReaction)
-              }
-            }
-          } else {
-            // When paused, still check status but don't show reactions
-            if (store.checkForStatusImprovement) {
-              store.checkForStatusImprovement()
-            }
-            if (store.checkForStatusDegradation) {
-              store.checkForStatusDegradation()
-            }
-          }
-          
-          // Update previous status after both checks are done
-          if (store.updatePreviousStatus) {
-            store.updatePreviousStatus()
+          // Let the store handle its own status change reactions
+          if (store.handleStatusChangeReactions) {
+            store.handleStatusChangeReactions()
           }
           
           queue.push({
@@ -345,32 +315,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
-      }
-    },
-
-    // Show a guinea pig reaction in the StatusMarquee with delay
-    showNeedReaction(reaction) {
-      try {
-        const statusStore = useStatusStore()
-        
-        if (reaction && reaction.message && reaction.emoji) {
-          console.log(`🎭 [NEEDSQUEUE] REACTION: Planning to show reaction: "${reaction.message}" ${reaction.emoji} (need: ${reaction.needType})`)
-          
-          // Extend the cooldown immediately to prevent messages in the gap
-          const now = Date.now()
-          const totalDuration = 1000 + 800 + 50 // delay + reaction duration + small buffer
-          statusStore.lastMessageTime = now + totalDuration
-          console.log(`⏰ DELAY: Extended cooldown by ${totalDuration}ms to prevent message conflicts`)
-          
-          // Delay the reaction to show after any other messages
-          console.log(`⏰ DELAY: Delaying reaction by 1000ms`)
-          setTimeout(() => {
-            console.log(`🎭 [NEEDSQUEUE] REACTION: Showing delayed reaction: "${reaction.message}" ${reaction.emoji}`)
-            statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
-          }, 1000)
-        }
-      } catch (error) {
-        console.warn('🔍 [NEEDSQUEUE] WARN: Could not show need reaction:', error)
       }
     },
 

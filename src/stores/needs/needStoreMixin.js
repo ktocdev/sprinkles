@@ -70,7 +70,7 @@ export const needStoreMixin = {
     this.previousStatus = this.needStatus
   },
 
-  // Trigger a delayed reaction message
+  // Trigger a delayed reaction message with proper timing
   triggerDelayedReaction(reaction) {
     try {
       // Import here to avoid circular dependencies
@@ -78,23 +78,71 @@ export const needStoreMixin = {
       const statusStore = useStatusStore()
       
       if (reaction && reaction.message && reaction.emoji) {
-        console.log(`🎭 REACTION: Triggering delayed reaction: "${reaction.message}" ${reaction.emoji} (${reaction.needType})`)
+        console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Triggering delayed reaction: "${reaction.message}" ${reaction.emoji}`)
         
         // Extend the cooldown immediately to prevent messages in the gap
         const now = Date.now()
         const totalDuration = 1000 + 800 + 50 // delay + reaction duration + small buffer
         statusStore.lastMessageTime = now + totalDuration
-        console.log(`⏰ DELAY: Extended status cooldown by ${totalDuration}ms`)
+        console.log(`⏰ [${this.needType.toUpperCase()}] DELAY: Extended status cooldown by ${totalDuration}ms`)
         
         // Delay the reaction to show after other messages
-        console.log(`⏰ DELAY: Delaying reaction by 1000ms`)
+        console.log(`⏰ [${this.needType.toUpperCase()}] DELAY: Delaying reaction by 1000ms`)
         setTimeout(() => {
-          console.log(`🎭 REACTION: Showing delayed ${reaction.needType} reaction: "${reaction.message}" ${reaction.emoji}`)
+          console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Showing delayed reaction: "${reaction.message}" ${reaction.emoji}`)
           statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
         }, 1000)
       }
     } catch (error) {
-      console.warn(`⚠️ ERROR: Could not show delayed reaction for ${reaction?.needType}:`, error)
+      console.warn(`⚠️ [${this.needType.toUpperCase()}] ERROR: Could not show delayed reaction:`, error)
+    }
+  },
+
+  // Handle status change reactions automatically (called by individual stores)
+  handleStatusChangeReactions() {
+    try {
+      // Import here to avoid circular dependencies
+      const { useCageStore } = require('../cage.js')
+      const cageStore = useCageStore()
+      
+      // Don't show reactions when paused or recently fulfilled
+      if (cageStore.paused || this.recentlyFulfilled) {
+        // Still update status tracking even when paused
+        if (this.checkForStatusImprovement) {
+          this.checkForStatusImprovement()
+        }
+        if (this.checkForStatusDegradation) {
+          this.checkForStatusDegradation()
+        }
+        if (this.updatePreviousStatus) {
+          this.updatePreviousStatus()
+        }
+        return
+      }
+
+      // Check for improvements first
+      let improvementReaction = null
+      if (this.checkForStatusImprovement) {
+        improvementReaction = this.checkForStatusImprovement()
+        if (improvementReaction) {
+          this.triggerDelayedReaction(improvementReaction)
+        }
+      }
+      
+      // Check for degradations (only if no improvement reaction was shown)
+      if (this.checkForStatusDegradation && !improvementReaction) {
+        const degradationReaction = this.checkForStatusDegradation()
+        if (degradationReaction) {
+          this.triggerDelayedReaction(degradationReaction)
+        }
+      }
+      
+      // Update previous status after both checks are done
+      if (this.updatePreviousStatus) {
+        this.updatePreviousStatus()
+      }
+    } catch (error) {
+      console.warn(`⚠️ [${this.needType.toUpperCase()}] ERROR: Could not handle status change reactions:`, error)
     }
   },
 

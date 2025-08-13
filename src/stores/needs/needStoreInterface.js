@@ -121,7 +121,10 @@ export const REQUIRED_ACTIONS = {
   updatePreviousStatus: 'function() - update previousStatus after checks',
   getRandomReaction: 'function(type) - get random reaction message',
   initializePreviousStatus: 'function() - initialize previousStatus',
-  triggerDelayedReaction: 'function(reaction) - show delayed reaction message'
+  triggerDelayedReaction: 'function(reaction) - show delayed reaction message',
+  handleStatusChangeReactions: 'function() - handle automatic status change reactions',
+  validateInterface: 'function() - validate store follows standard interface',
+  ensureMessageConfig: 'function() - ensure message config is properly structured'
 }
 
 // =============================================================================
@@ -193,11 +196,12 @@ export function validateNeedStore(needStore) {
 export const EXAMPLE_NEED_STORE = `
 import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
+import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
 
 export const useExampleStore = defineStore('example', {
   state: () => ({
     currentValue: 100,
-    degradationRate: 0.2,
+    degradationRate: STANDARD_DEGRADATION_RATES.example || 0.1,
     maxValue: 100,
     minValue: 0,
     urgency: 0,
@@ -223,9 +227,9 @@ export const useExampleStore = defineStore('example', {
     messageConfig: {
       emoji: '🔧',
       intervals: {
-        normal: 10000,
-        urgent: 6000,
-        critical: 4000
+        normal: 12000,
+        urgent: 8000,
+        critical: 5000
       }
     },
     
@@ -264,7 +268,7 @@ export const useExampleStore = defineStore('example', {
     },
     
     fulfill(methodName) {
-      // Implement fulfillment logic
+      // Implement fulfillment logic - see needStoreTemplate.js for examples
       // Return { success: boolean, message: string, improvement?: number }
     },
     
@@ -277,12 +281,19 @@ export const useExampleStore = defineStore('example', {
     },
     
     getBestFulfillmentMethod() {
-      // Return best available method
-      return null
+      const methods = this.fulfillmentMethods
+      return methods.length > 0 ? methods[0] : null
     },
     
     // Include mixin methods
-    ...needStoreMixin
+    ...needStoreMixin,
+    
+    // Initialize and validate the store
+    initialize() {
+      this.ensureMessageConfig()
+      this.validateInterface()
+      this.initializePreviousStatus()
+    }
   },
   
   persist: true
