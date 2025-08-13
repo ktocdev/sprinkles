@@ -103,7 +103,6 @@ export const useCageStore = defineStore('cage', {
       this.size = { width, height }
       this.resetCage() // Reset everything when size changes
     },
-
     setBeddingFreshness(value) {
       this.beddingFreshness = clampValue(value)
     },
@@ -135,7 +134,6 @@ export const useCageStore = defineStore('cage', {
     refreshWater() {
       this.waterLevel = 100
     },
-
     cleanCage() {
       const poopStore = usePoopStore()
       return poopStore.cleanAllPoop()
