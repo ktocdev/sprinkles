@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useNeedsQueueStore } from './needs/needsQueue.js'
-import { useCageStore } from './cage.js'
 
 export const useStatusStore = defineStore('status', {
   state: () => ({
@@ -161,13 +160,6 @@ export const useStatusStore = defineStore('status', {
       
       if (!this.enabled) {
         console.log('🔍 [STATUS] PLAN: Status system disabled, skipping updates')
-        return
-      }
-
-      // Check if game is paused - don't update messages when paused
-      const cageStore = useCageStore()
-      if (cageStore.paused) {
-        console.log('🔍 [STATUS] PLAN: Skipping message updates - game is paused')
         return
       }
 

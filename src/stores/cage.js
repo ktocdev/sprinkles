@@ -378,16 +378,38 @@ export const useCageStore = defineStore('cage', {
     // Pause the game
     pauseGame() {
       this.paused = true
+      
+      // Stop all timer-based systems to save CPU/battery
+      const statusStore = useStatusStore()
+      const needsQueueStore = useNeedsQueueStore()
+      
+      statusStore.stopUpdates()
+      needsQueueStore.stopNeedsSystem()
+      
+      console.log('🛑 [CAGE] PAUSE: Game paused, all timers stopped')
     },
 
     // Resume the game
     resumeGame() {
       this.paused = false
+      
+      // Restart all timer-based systems
+      const statusStore = useStatusStore()
+      const needsQueueStore = useNeedsQueueStore()
+      
+      statusStore.startUpdates()
+      needsQueueStore.startNeedsSystem()
+      
+      console.log('▶️ [CAGE] RESUME: Game resumed, all timers restarted')
     },
 
     // Toggle pause state
     togglePause() {
-      this.paused = !this.paused
+      if (this.paused) {
+        this.resumeGame()
+      } else {
+        this.pauseGame()
+      }
     },
 
     // Get the guinea pig's next best action using the needs queue
