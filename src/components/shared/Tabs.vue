@@ -280,7 +280,7 @@ const handleTabKeydown = (event, index) => {
   }
   
   .gps-tabs__tab-label {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-s);
   }
 }
 
