@@ -143,7 +143,7 @@ export const useStatusStore = defineStore('status', {
     // Initialize the status system
     initialize() {
       if (!this._initialized) {
-        console.log('🔍 PLAN: Initializing status system')
+        console.log('🔍 [STATUS] PLAN: Initializing status system')
         this._initialized = true
         if (this.enabled) {
           this.startUpdates()
@@ -157,17 +157,17 @@ export const useStatusStore = defineStore('status', {
       if (!this._initialized) {
         this.initialize()
       }
-      console.log('🔍 PLAN: updateUrgencyMessages called, enabled:', this.enabled)
+      console.log('🔍 [STATUS] PLAN: updateUrgencyMessages called, enabled:', this.enabled)
       
       if (!this.enabled) {
-        console.log('🔍 PLAN: Status system disabled, skipping updates')
+        console.log('🔍 [STATUS] PLAN: Status system disabled, skipping updates')
         return
       }
 
       // Check if game is paused - don't update messages when paused
       const cageStore = useCageStore()
       if (cageStore.paused) {
-        console.log('🔍 PLAN: Skipping message updates - game is paused')
+        console.log('🔍 [STATUS] PLAN: Skipping message updates - game is paused')
         return
       }
 
@@ -178,7 +178,7 @@ export const useStatusStore = defineStore('status', {
       for (const [needType, status] of Object.entries(allNeedsStatus)) {
         const config = this.getNeedConfig(needType)
         if (!config) {
-          console.log(`🔍 PLAN: No config found for need type: ${needType}`)
+          console.log(`🔍 [STATUS] PLAN: No config found for need type: ${needType}`)
           continue
         }
 
@@ -207,7 +207,7 @@ export const useStatusStore = defineStore('status', {
     showNeedMessage(needType, urgencyLevel, urgency) {
       const now = Date.now()
       
-      console.log(`🔍 PLAN: Attempting to show ${needType} message (${urgencyLevel}, urgency: ${Math.round(urgency)})`)
+      console.log(`🔍 [STATUS] PLAN: Attempting to show ${needType} message (${urgencyLevel}, urgency: ${Math.round(urgency)})`)
       
       // Check global cooldown
       if (now - this.lastMessageTime < this.globalCooldown) {
@@ -218,7 +218,7 @@ export const useStatusStore = defineStore('status', {
 
       const config = this.getNeedConfig(needType)
       if (!config) {
-        console.log(`🔍 PLAN: No config found for need type: ${needType}`)
+        console.log(`🔍 [STATUS] PLAN: No config found for need type: ${needType}`)
         return
       }
 
@@ -227,10 +227,10 @@ export const useStatusStore = defineStore('status', {
       const needStore = needsQueueStore.getNeedStore(needType)
       const messages = needStore?.urgencyMessages?.[urgencyLevel] || config.messages?.[urgencyLevel] || []
       if (messages.length === 0) {
-        console.log(`🔍 PLAN: No messages available for ${needType} at ${urgencyLevel} level`)
+        console.log(`🔍 [STATUS] PLAN: No messages available for ${needType} at ${urgencyLevel} level`)
         return
       }
-      console.log(`🔍 PLAN: ${messages.length} potential messages for ${needType}:`, messages)
+      console.log(`🔍 [STATUS] PLAN: ${messages.length} potential messages for ${needType}:`, messages)
 
       // Ensure messageHistory is a Map
       if (!(this.messageHistory instanceof Map)) {
@@ -242,18 +242,18 @@ export const useStatusStore = defineStore('status', {
       
       // Filter out recently shown messages
       let availableMessages = messages.filter(msg => !history.includes(msg))
-      console.log(`🔍 PLAN: ${availableMessages.length} messages available after filtering out recent ones`)
+      console.log(`🔍 [STATUS] PLAN: ${availableMessages.length} messages available after filtering out recent ones`)
       
       // If all messages were recently used, use all messages
       if (availableMessages.length === 0) {
         availableMessages = [...messages]
         this.messageHistory.set(needType, []) // Clear history
-        console.log(`🔍 PLAN: All messages were recent, cleared history and using all ${availableMessages.length} messages`)
+        console.log(`🔍 [STATUS] PLAN: All messages were recent, cleared history and using all ${availableMessages.length} messages`)
       }
 
       // Pick a random message
       const message = availableMessages[Math.floor(Math.random() * availableMessages.length)]
-      console.log(`📢 SHOW: Selected message for ${needType}: "${message}"`)
+      console.log(`📢 [STATUS] SHOW: Selected message for ${needType}: "${message}"`)
 
       // Update message history
       history.push(message)
@@ -270,7 +270,7 @@ export const useStatusStore = defineStore('status', {
         urgencyLevel,
         timestamp: now
       }
-      console.log(`📢 SHOW: Current message set to ${needType} (urgency: ${Math.round(urgency)})`)
+      console.log(`📢 [STATUS] SHOW: Current message set to ${needType} (urgency: ${Math.round(urgency)})`)
 
       // Update active message data
       // Ensure activeMessages is a Map
@@ -292,7 +292,7 @@ export const useStatusStore = defineStore('status', {
     showTemporaryMessage(message, emoji = '⚠️', duration = 2000) {
       const now = Date.now()
       
-      console.log(`📢 SHOW: Temporary message: "${message}" ${emoji} for ${duration}ms`)
+      console.log(`📢 [STATUS] SHOW: Temporary message: "${message}" ${emoji} for ${duration}ms`)
       
       // Set as current message with high priority
       this.currentMessage = {
@@ -310,7 +310,7 @@ export const useStatusStore = defineStore('status', {
         // Only clear if this is still the current temporary message
         if (this.currentMessage?.isTemporary && this.currentMessage.timestamp === now) {
           this.currentMessage = null
-          console.log(`📢 SHOW: Temporary message cleared after ${duration}ms`)
+          console.log(`📢 [STATUS] SHOW: Temporary message cleared after ${duration}ms`)
         }
       }, duration)
       
@@ -332,11 +332,11 @@ export const useStatusStore = defineStore('status', {
 
     // Start periodic updates
     startUpdates() {
-      console.log('🔍 PLAN: Starting status system updates, interval:', this.updateInterval)
+      console.log('🔍 [STATUS] PLAN: Starting status system updates, interval:', this.updateInterval)
       
       // Clear any stale timer from persisted state
       if (this.updateTimer) {
-        console.log('🔍 PLAN: Clearing existing update timer')
+        console.log('🔍 [STATUS] PLAN: Clearing existing update timer')
         clearInterval(this.updateTimer)
         this.updateTimer = null
       }
@@ -348,7 +348,7 @@ export const useStatusStore = defineStore('status', {
         }
       }, this.updateInterval)
       
-      console.log('🔍 PLAN: Update timer created with ID:', this.updateTimer)
+      console.log('🔍 [STATUS] PLAN: Update timer created with ID:', this.updateTimer)
       
       // Do initial update
       if (this.enabled) {

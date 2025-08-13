@@ -175,12 +175,12 @@ export const useHungerStore = defineStore('hunger', {
 
       // Always show a feeding reaction when food is consumed, but not when paused
       if (actualImprovement > 0) {
-        console.log(`🍽️ FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
-        console.log(`🍽️ FEED: recentlyFulfilled flag is currently: ${this.recentlyFulfilled}`)
+        console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        console.log(`🍽️ [HUNGER] FEED: recentlyFulfilled flag is currently: ${this.recentlyFulfilled}`)
         
         // Set flag to prevent duplicate reactions from needsQueue AFTER we've logged the current state
         this.recentlyFulfilled = true
-        console.log(`🍽️ FEED: Set recentlyFulfilled flag to true`)
+        console.log(`🍽️ [HUNGER] FEED: Set recentlyFulfilled flag to true`)
         
         // Check if game is paused - don't show reactions when paused
         const cageStore = useCageStore()
@@ -203,21 +203,21 @@ export const useHungerStore = defineStore('hunger', {
           reactionType = 'normalToFulfilled' // Use same reactions for fulfilled
         }
         
-        console.log(`🍽️ FEED: Current hunger status: ${currentStatus}, using reaction type: ${reactionType}`)
+        console.log(`🍽️ [HUNGER] FEED: Current hunger status: ${currentStatus}, using reaction type: ${reactionType}`)
         
         const reaction = this.getRandomReaction(reactionType)
         if (reaction) {
-          console.log(`🍽️ FEED: Selected feeding reaction: "${reaction.message}" ${reaction.emoji}`)
+          console.log(`🍽️ [HUNGER] FEED: Selected feeding reaction: "${reaction.message}" ${reaction.emoji}`)
           this.triggerDelayedReaction(reaction)
         } else {
-          console.log(`🍽️ FEED: No reaction found for type: ${reactionType}`)
+          console.log(`🍽️ [HUNGER] FEED: No reaction found for type: ${reactionType}`)
         }
         }
       }
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
       setTimeout(() => {
-        console.log(`🍽️ FEED: Clearing recentlyFulfilled flag after 500ms delay`)
+        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after 500ms delay`)
         this.recentlyFulfilled = false
       }, 500) // 0.5 seconds should be enough to avoid conflicts
 
@@ -252,29 +252,15 @@ export const useHungerStore = defineStore('hunger', {
       this.degradationRate = rate
     },
 
-    setDegradationPerMinute(rate) {
-      this.degradationRate = rate / 60
-    },
-
-    setDegradationPerHour(rate) {
-      this.degradationRate = rate / 3600
-    },
-
-    // Get degradation rate in different time units
-    getDegradationPerSecond() {
-      return this.degradationRate
-    },
-
-    getDegradationPerMinute() {
-      return this.degradationRate * 60
-    },
-
-    getDegradationPerHour() {
-      return this.degradationRate * 3600
-    },
-
     // Shared mixin methods for status improvements and reactions
-    ...needStoreMixin
+    ...needStoreMixin,
+
+    // Initialize and validate the store
+    initialize() {
+      this.ensureMessageConfig()
+      this.validateInterface()
+      this.initializePreviousStatus()
+    }
   },
 
   persist: true

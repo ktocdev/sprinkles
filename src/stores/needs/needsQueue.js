@@ -51,7 +51,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
             }
           }
         } catch (error) {
-          console.warn(`Store ${storeName} not found for need ${needName}`)
+          console.warn(`🔍 [NEEDSQUEUE] WARN: Store ${storeName} not found for need ${needName}`)
         }
       }
       return status
@@ -314,11 +314,17 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         this.updateTimer = null
       }
       
-      // Initialize previous status for all need stores
+      // Initialize all need stores
       for (const [needName, storeName] of Object.entries(this.needs)) {
         const store = this.getNeedStore(storeName)
-        if (store && store.initializePreviousStatus) {
-          store.initializePreviousStatus()
+        if (store) {
+          // Call initialize if available (includes validation and setup)
+          if (store.initialize) {
+            store.initialize()
+          } else if (store.initializePreviousStatus) {
+            // Fallback for stores without initialize method
+            store.initializePreviousStatus()
+          }
         }
       }
       
@@ -348,7 +354,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         const statusStore = useStatusStore()
         
         if (reaction && reaction.message && reaction.emoji) {
-          console.log(`🎭 REACTION: Planning to show reaction: "${reaction.message}" ${reaction.emoji} (need: ${reaction.needType})`)
+          console.log(`🎭 [NEEDSQUEUE] REACTION: Planning to show reaction: "${reaction.message}" ${reaction.emoji} (need: ${reaction.needType})`)
           
           // Extend the cooldown immediately to prevent messages in the gap
           const now = Date.now()
@@ -359,12 +365,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           // Delay the reaction to show after any other messages
           console.log(`⏰ DELAY: Delaying reaction by 1000ms`)
           setTimeout(() => {
-            console.log(`🎭 REACTION: Showing delayed reaction: "${reaction.message}" ${reaction.emoji}`)
+            console.log(`🎭 [NEEDSQUEUE] REACTION: Showing delayed reaction: "${reaction.message}" ${reaction.emoji}`)
             statusStore.showTemporaryMessage(reaction.message, reaction.emoji, 800)
           }, 1000)
         }
       } catch (error) {
-        console.warn('Could not show need reaction:', error)
+        console.warn('🔍 [NEEDSQUEUE] WARN: Could not show need reaction:', error)
       }
     },
 

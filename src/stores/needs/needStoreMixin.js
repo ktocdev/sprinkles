@@ -1,4 +1,5 @@
 // Shared methods for need stores to handle status improvements and reactions
+import { validateNeedStore } from './needStoreInterface.js'
 
 export const needStoreMixin = {
   // Check for status improvements and return reaction if any
@@ -94,6 +95,51 @@ export const needStoreMixin = {
       }
     } catch (error) {
       console.warn(`⚠️ ERROR: Could not show delayed reaction for ${reaction?.needType}:`, error)
+    }
+  },
+
+  // Validate this store follows the standard interface (development only)
+  validateInterface() {
+    if (process.env.NODE_ENV === 'development') {
+      const validation = validateNeedStore(this)
+      if (!validation.success) {
+        console.warn(`⚠️ Need store "${this.needType}" does not follow standard interface:`)
+        validation.errors.forEach(error => console.warn(`  - ${error}`))
+        return false
+      } else {
+        console.log(`✅ Need store "${this.needType}" follows standard interface`)
+        return true
+      }
+    }
+    return true
+  },
+
+  // Helper method to get standard thresholds (can be overridden by individual stores)
+  getStandardThresholds() {
+    return {
+      critical: 40,
+      urgent: 60,
+      normal: 70,
+      fulfilled: 90
+    }
+  },
+
+  // Helper method to ensure message config is properly structured
+  ensureMessageConfig() {
+    if (!this.messageConfig) {
+      console.warn(`⚠️ Need store "${this.needType}" missing messageConfig`)
+      this.messageConfig = {
+        emoji: '❓',
+        intervals: { normal: 12000, urgent: 8000, critical: 5000 }
+      }
+    }
+    if (!this.urgencyMessages) {
+      console.warn(`⚠️ Need store "${this.needType}" missing urgencyMessages`)
+      this.urgencyMessages = {
+        normal: ['Need attention...'],
+        urgent: ['Urgent need!'],
+        critical: ['Critical situation!']
+      }
     }
   }
 }

@@ -235,10 +235,10 @@ export const usePoopStore = defineStore('poop', {
             return
         }
         
-        console.log(`💩 POOP: Showing ${type} poop message: "${message}" ${emoji}`)
+        console.log(`💩 [POOP] POOP: Showing ${type} poop message: "${message}" ${emoji}`)
         statusStore.showTemporaryMessage(message, emoji, duration)
       } catch (error) {
-        console.warn('Could not show poop message:', error)
+        console.warn('💩 [POOP] WARN: Could not show poop message:', error)
       }
     },
     
