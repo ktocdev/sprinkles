@@ -45,47 +45,48 @@
 
 <script setup>
 import Button from '../shared/Button.vue'
-import { useUserStore } from '../../stores/user'
-import { useInventoryStore } from '../../stores/inventory'
-import { useGuineaPigStore } from '../../stores/guineaPig'
-import { useCageStore } from '../../stores/cage'
-import { useMarketStore } from '../../stores/market'
-import { usePoopStore } from '../../stores/poop'
+import { getActivePinia } from 'pinia'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
-import { useHungerStore } from '../../stores/needs/hunger'
+import { useCageStore } from '../../stores/cage'
+import { useInventoryStore } from '../../stores/inventory'
 
-const userStore = useUserStore()
-const inventoryStore = useInventoryStore()
-const guineaPigStore = useGuineaPigStore()
-const cageStore = useCageStore()
-const marketStore = useMarketStore()
-const poopStore = usePoopStore()
+// Only need specific stores for individual functions
 const needsQueueStore = useNeedsQueueStore()
-const hungerStore = useHungerStore()
+const cageStore = useCageStore()
+const inventoryStore = useInventoryStore()
 
 const emit = defineEmits(['gameReset'])
 
 function resetGame() {
   if (window.confirm('Are you sure you want to reset your game? This cannot be undone.')) {
-    userStore.$reset()
-    inventoryStore.$reset()
-    guineaPigStore.$reset()
-    cageStore.$reset()
-    marketStore.$reset()
-    poopStore.$reset()
-    hungerStore.$reset()
-    // Remove persisted state from localStorage
-    localStorage.removeItem('user')
-    localStorage.removeItem('inventory')
-    localStorage.removeItem('guineaPig')
-    localStorage.removeItem('cage')
-    localStorage.removeItem('market')
-    localStorage.removeItem('poop')
-    localStorage.removeItem('hunger')
+    // Stop needs system before reset
     needsQueueStore.stopNeedsSystem()
-    needsQueueStore.$reset()
-    localStorage.removeItem('needsQueue')
+    
+    // Reset all stores automatically using Pinia's active store registry
+    const pinia = getActivePinia()
+    if (pinia && pinia._s) {
+      pinia._s.forEach(store => {
+        try {
+          store.$reset()
+        } catch (error) {
+          console.warn(`Failed to reset store:`, error)
+        }
+      })
+    }
+    
+    // Clear all persisted state from localStorage
+    // Keep only essential browser data (like theme preferences if any)
+    Object.keys(localStorage).forEach(key => {
+      // Skip any keys we want to preserve (none for game reset)
+      localStorage.removeItem(key)
+    })
+    
+    // Restart needs system after everything is reset
     needsQueueStore.startNeedsSystem()
+    
+    // Pause the game so user has to click "Play" to start
+    cageStore.pauseGame()
+    
     // Emit event to notify parent about reset
     emit('gameReset')
   }

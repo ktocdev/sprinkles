@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { useNeedsQueueStore } from './needs/needsQueue.js'
-import { useCageStore } from './cage.js'
 
 export const useStatusStore = defineStore('status', {
   state: () => ({
     
     // Current urgency messages and their timers
     activeMessages: new Map(), // Map of needType -> { message, timer, lastShown }
+    
+    // Track last message time for each need type to respect intervals
+    lastMessageTimes: new Map(), // Map of needType -> timestamp
     
     // Current priority message to display
     currentMessage: null,
@@ -23,6 +25,7 @@ export const useStatusStore = defineStore('status', {
     // Update timer management
     updateTimer: null,
     updateInterval: 1000, // Update every 1 second
+    timerPaused: false, // Track if timer is paused
     
     // Initialization flag
     _initialized: false
@@ -164,13 +167,6 @@ export const useStatusStore = defineStore('status', {
         return
       }
 
-      // Check if game is paused - don't update messages when paused
-      const cageStore = useCageStore()
-      if (cageStore.paused) {
-        console.log('🔍 [STATUS] PLAN: Skipping message updates - game is paused')
-        return
-      }
-
       const needsQueueStore = useNeedsQueueStore()
       const allNeedsStatus = needsQueueStore.allNeedsStatus
       
@@ -182,7 +178,7 @@ export const useStatusStore = defineStore('status', {
           continue
         }
 
-        // Determine urgency level
+        // Determine urgency level and interval
         let urgencyLevel = 'normal'
         let interval = config.intervals.normal
 
@@ -196,15 +192,15 @@ export const useStatusStore = defineStore('status', {
 
         // Show message based on urgency and timing
         if (status.isCritical || status.isUrgent) {
-          this.showNeedMessage(needType, urgencyLevel, status.urgency)
+          this.showNeedMessage(needType, urgencyLevel, status.urgency, interval)
         } else if (status.urgency > 0) {
-          this.showNeedMessage(needType, urgencyLevel, status.urgency)
+          this.showNeedMessage(needType, urgencyLevel, status.urgency, interval)
         }
       }
     },
 
     // Show a specific need message
-    showNeedMessage(needType, urgencyLevel, urgency) {
+    showNeedMessage(needType, urgencyLevel, urgency, interval) {
       const now = Date.now()
       
       console.log(`🔍 [STATUS] PLAN: Attempting to show ${needType} message (${urgencyLevel}, urgency: ${Math.round(urgency)})`)
@@ -212,6 +208,20 @@ export const useStatusStore = defineStore('status', {
       // Check global cooldown
       if (now - this.lastMessageTime < this.globalCooldown) {
         console.log(`⏰ DELAY: Message blocked by global cooldown (${this.globalCooldown}ms)`)
+        return
+      }
+      
+      // Ensure lastMessageTimes is a Map
+      if (!(this.lastMessageTimes instanceof Map)) {
+        this.lastMessageTimes = new Map(Object.entries(this.lastMessageTimes || {}))
+      }
+      
+      // Check if enough time has passed since last message for this need type
+      const lastMessageTime = this.lastMessageTimes.get(needType) || 0
+      const timeSinceLastMessage = now - lastMessageTime
+      
+      if (timeSinceLastMessage < interval) {
+        console.log(`⏰ DELAY: ${needType} message blocked by interval timing (${timeSinceLastMessage}ms < ${interval}ms)`)
         return
       }
       
@@ -286,6 +296,9 @@ export const useStatusStore = defineStore('status', {
 
       // Update the last message time
       this.lastMessageTime = now
+      
+      // Record when this need type last showed a message
+      this.lastMessageTimes.set(needType, now)
     },
 
     // Show a temporary message that overrides other messages for a short time
@@ -343,7 +356,7 @@ export const useStatusStore = defineStore('status', {
       
       // Always create a fresh timer
       this.updateTimer = setInterval(() => {
-        if (this.enabled) {
+        if (this.enabled && !this.timerPaused) {
           this.updateUrgencyMessages()
         }
       }, this.updateInterval)
@@ -361,6 +374,24 @@ export const useStatusStore = defineStore('status', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
+      }
+      this.timerPaused = false
+    },
+
+    // Pause the timer without clearing it
+    pauseUpdates() {
+      console.log('⏸️ [STATUS] PAUSE: Pausing status system updates')
+      this.timerPaused = true
+    },
+
+    // Resume the paused timer
+    resumeUpdates() {
+      console.log('▶️ [STATUS] RESUME: Resuming status system updates')
+      this.timerPaused = false
+      
+      // Do immediate update when resuming
+      if (this.enabled && this.updateTimer) {
+        this.updateUrgencyMessages()
       }
     },
 

@@ -23,7 +23,6 @@ export const useCageStore = defineStore('cage', {
     waterLevel: 100,
     guineaPigPos: { x: 0, y: 0 },
     items: [], // array of { id, name, type, x, y, isConsumable, quantity }
-    consumptionStats: {}, // Track consumption by item type
     paused: false // Game pause state
   }),
 
@@ -322,38 +321,25 @@ export const useCageStore = defineStore('cage', {
         return { success: false, message: 'Item data not found' }
       }
       
-      // Improve guinea pig needs and track statistics
+      // Improve guinea pig needs using the proper fulfillment system
       const needsQueueStore = useNeedsQueueStore()
       if (itemData.needType && itemData.needImprovement) {
-        // Note: Only hunger store is implemented, so we'll only handle hunger for now
+        // Use the proper fulfillment system which handles reactions and messages
         if (itemData.needType === 'hunger') {
           const hungerStore = useHungerStore()
-          const oldValue = hungerStore.currentValue
-          hungerStore.currentValue = Math.min(100, hungerStore.currentValue + itemData.needImprovement)
-          const actualImprovement = hungerStore.currentValue - oldValue
+          // Call the proper fulfill function which handles everything
+          const fulfillResult = hungerStore.fulfill(item.name)
+          console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
           
           // Update needs queue to reflect the change in NeedsNav immediately
           needsQueueStore.updateQueue()
-          
-          // Track food consumption in statistics
-          const statisticsStore = useStatisticsStore()
-          statisticsStore.trackFoodConsumption(item.name, actualImprovement)
         }
       }
-      
-      // Track consumption statistics
-      if (!this.consumptionStats[item.name]) {
-        this.consumptionStats[item.name] = 0
-      }
-      this.consumptionStats[item.name]++
       
       // Remove item from grid
       this.removeItem(itemId)
       
-      // Show brief eating message in StatusMarquee
-      const statusStore = useStatusStore()
-      const itemDisplayName = item.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
+      // Note: "Ate Food" message and reactions are handled by the hunger store's fulfill function
       
       return {
         success: true,
@@ -365,29 +351,41 @@ export const useCageStore = defineStore('cage', {
       }
     },
 
-    // Get consumption statistics
-    getConsumptionStats() {
-      return this.consumptionStats
-    },
-
-    // Reset consumption statistics
-    resetConsumptionStats() {
-      this.consumptionStats = {}
-    },
-
     // Pause the game
     pauseGame() {
       this.paused = true
+      
+      // Pause all timer-based systems to save CPU/battery
+      const statusStore = useStatusStore()
+      const needsQueueStore = useNeedsQueueStore()
+      
+      statusStore.pauseUpdates()
+      needsQueueStore.pauseNeedsSystem()
+      
+      console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
     },
 
     // Resume the game
     resumeGame() {
       this.paused = false
+      
+      // Resume all timer-based systems
+      const statusStore = useStatusStore()
+      const needsQueueStore = useNeedsQueueStore()
+      
+      statusStore.resumeUpdates()
+      needsQueueStore.resumeNeedsSystem()
+      
+      console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
     },
 
     // Toggle pause state
     togglePause() {
-      this.paused = !this.paused
+      if (this.paused) {
+        this.resumeGame()
+      } else {
+        this.pauseGame()
+      }
     },
 
     // Get the guinea pig's next best action using the needs queue

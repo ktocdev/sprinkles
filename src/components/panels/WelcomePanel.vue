@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import Panel from '../shared/Panel.vue'
 import { useUserStore } from '../../stores/user'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import { useCageStore } from '../../stores/cage'
 import Button from '../shared/Button.vue'
 import Input from '../shared/Input.vue'
 import FormGroup from '../shared/FormGroup.vue'
@@ -10,6 +11,7 @@ import Dropdown from '../shared/Dropdown.vue'
 
 const userStore = useUserStore()
 const guineaPigStore = useGuineaPigStore()
+const cageStore = useCageStore()
 const nameInput = ref('')
 const guineaPigInfo = ref({
   name: '',
@@ -116,6 +118,9 @@ function handleSubmit() {
   for (const key in guineaPigInfo.value) {
     guineaPigStore.setInfoField(key, guineaPigInfo.value[key])
   }
+  
+  // Resume the game when user clicks "Play"
+  cageStore.resumeGame()
 }
 
 // Clear form values when user store is reset

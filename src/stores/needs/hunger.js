@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
+import { useStatusStore } from '../status.js'
 import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
@@ -19,6 +20,20 @@ export const useHungerStore = defineStore('hunger', {
     
     // Guinea pig reactions for different improvements
     reactions: {
+      // General eating reactions (shown after ANY food consumption)
+      eating: [
+        'Nom nom nom!',
+        'Delicious!',
+        'Yummy food!',
+        'Crunch crunch!',
+        'So tasty!',
+        'Thank you for the food!',
+        'Munch munch munch!',
+        'Perfect snack!',
+        'Food makes me happy!',
+        'Wheek wheek! More please!'
+      ],
+      
       criticalToUrgent: [
         'Wheek wheek wheek!',
         'Finally some food!',
@@ -86,9 +101,9 @@ export const useHungerStore = defineStore('hunger', {
     messageConfig: {
       emoji: '🍽️',
       intervals: {
-        normal: 12000,    // 12 seconds
-        urgent: 8000,     // 8 seconds  
-        critical: 5000    // 5 seconds
+        normal: 18000,    // 18 seconds
+        urgent: 12000,     // 12 seconds  
+        critical: 8000    // 8 seconds
       }
     }
   }),
@@ -174,37 +189,22 @@ export const useHungerStore = defineStore('hunger', {
         statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
       }
 
-      // Show feeding reaction when food is consumed 
+      // Show eating reaction when food is consumed 
       if (actualImprovement > 0) {
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
-        console.log(`🍽️ [HUNGER] FEED: recentlyFulfilled flag is currently: ${this.recentlyFulfilled}`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
-        console.log(`🍽️ [HUNGER] FEED: Set recentlyFulfilled flag to true`)
         
-        // Trigger manual feeding reaction using mixin (handles pause checking)
-        const currentStatus = this.needStatus
-        let reactionType
-        
-        if (currentStatus === 'critical') {
-          reactionType = 'criticalToUrgent'
-        } else if (currentStatus === 'urgent') {
-          reactionType = 'urgentToNormal'  
-        } else if (currentStatus === 'normal') {
-          reactionType = 'normalToFulfilled'
-        } else { // fulfilled
-          reactionType = 'normalToFulfilled' // Use same reactions for fulfilled
-        }
-        
-        console.log(`🍽️ [HUNGER] FEED: Current hunger status: ${currentStatus}, using reaction type: ${reactionType}`)
-        
-        const reaction = this.getRandomReaction(reactionType)
-        if (reaction) {
-          console.log(`🍽️ [HUNGER] FEED: Selected feeding reaction: "${reaction.message}" ${reaction.emoji}`)
-          this.triggerDelayedReaction(reaction)
-        } else {
-          console.log(`🍽️ [HUNGER] FEED: No reaction found for type: ${reactionType}`)
+        // Always show a general eating reaction after any food consumption
+        const eatingReaction = this.getRandomReaction('eating')
+        if (eatingReaction) {
+          console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+          // Show reaction with shorter delay for better timing
+          const statusStore = useStatusStore()
+          setTimeout(() => {
+            statusStore.showTemporaryMessage(eatingReaction.message, '🐹', 1200)
+          }, 800) // Show sooner after "Ate X" message
         }
       }
       

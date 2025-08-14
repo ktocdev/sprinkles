@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
-import { useCageStore } from '../cage.js'
 import { useStatusStore } from '../status.js'
+import { useUserStore } from '../user.js'
+import { useCageStore } from '../cage.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -20,7 +21,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     lastUpdate: Date.now(),
     updateInterval: 1000, // 1 second in milliseconds
     isActive: true,
-    updateTimer: null // Timer for continuous updates
+    updateTimer: null, // Timer for continuous updates
+    timerPaused: false // Track if timer is paused
   }),
 
   getters: {
@@ -157,11 +159,16 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         return // Don't update too frequently
       }
 
-      // Check if game is paused - don't degrade needs when paused
+      // Check if game is paused at higher level (welcome panel or manual pause)
+      const userStore = useUserStore()
       const cageStore = useCageStore()
-      if (cageStore.paused) {
+      const isGamePaused = !userStore.name || cageStore.paused
+      
+      if (isGamePaused) {
+        // Don't degrade needs when game is paused, but still update queue for display
         this.lastUpdate = now
-        return // Skip degradation when game is paused
+        this.updateQueue()
+        return
       }
 
       // Degrade all needs
@@ -302,7 +309,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Start the timer for continuous updates
       this.updateTimer = setInterval(() => {
-        if (this.isActive) {
+        if (this.isActive && !this.timerPaused) {
           this.updateAllNeeds()
         }
       }, 1000) // Update every second
@@ -315,6 +322,25 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
+      }
+      this.timerPaused = false
+    },
+
+    // Pause the timer without clearing it
+    pauseNeedsSystem() {
+      this.timerPaused = true
+    },
+
+    // Resume the paused timer
+    resumeNeedsSystem() {
+      this.timerPaused = false
+      
+      // Reset lastUpdate to prevent degradation from paused time
+      this.lastUpdate = Date.now()
+      
+      // Just update the queue display without degrading
+      if (this.isActive && this.updateTimer) {
+        this.updateQueue()
       }
     },
 
