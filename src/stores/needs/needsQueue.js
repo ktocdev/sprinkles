@@ -3,9 +3,9 @@ import { useHungerStore } from './hunger.js'
 import { useWellnessStore } from './wellness.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
-import { usePoopStore } from '../poop.js'
 import { useMarketStore } from '../market.js'
-import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
+import { useGuineaPigStore } from '../guineaPig.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, MESSAGE_PRIORITIES, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -101,10 +101,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
-      // Final fallback
+      // Final fallback - use guinea pig store directly
+      const guineaPigStore = useGuineaPigStore()
       return {
-        text: 'Guinea pig is here',
-        emoji: '🐹'
+        text: guineaPigStore.currentMessage,
+        emoji: guineaPigStore.currentEmoji
       }
     }
   },
@@ -198,8 +199,10 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       queue.sort((a, b) => b.urgency - a.urgency)
       this.queue = queue
       
-      // Process pending poop messages
-      this.processPoopMessages()
+      // Poop messages are now handled by guinea pig store
+      
+      // Process pending guinea pig status messages
+      this.processGuineaPigStatusMessages()
       
       // Update fallback message based on guinea pig state
       this.updateFallbackMessage()
@@ -295,6 +298,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
+      // Initialize guinea pig store
+      const guineaPigStore = useGuineaPigStore()
+      if (guineaPigStore && guineaPigStore.initialize) {
+        guineaPigStore.initialize()
+      }
+      
       this.updateQueue()
       
       // Start the timer for continuous updates
@@ -317,6 +326,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Clear all messages when stopping
       this.clearAllMessages()
+      
+      // Stop guinea pig store
+      const guineaPigStore = useGuineaPigStore()
+      if (guineaPigStore && guineaPigStore.stop) {
+        guineaPigStore.stop()
+      }
     },
 
     // Pause the timer without clearing it
@@ -394,15 +409,29 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Special handling for ambient messages (movement, sitting, etc.)
       if (type === 'ambient' && priority >= 8) {
-        // Don't add ambient messages if there are higher priority messages in queue
-        const hasHigherPriorityMessages = this.messageQueue.some(msg => msg.priority < 7)
-        if (hasHigherPriorityMessages || this.currentMessage) {
-          console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping ambient message "${text}" - higher priority messages present`)
+        // Check for exact duplicate messages in queue or currently showing
+        const isDuplicate = this.messageQueue.some(msg => msg.text === text && msg.type === type) ||
+                           (this.currentMessage && this.currentMessage.text === text)
+        
+        if (isDuplicate) {
+          console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping duplicate ambient message "${text}"`)
           return null
         }
         
-        // Remove other ambient messages to prevent spam
-        this.messageQueue = this.messageQueue.filter(msg => msg.type !== 'ambient')
+        // For guinea pig movement status, only keep the most recent one
+        if (needType === 'movement') {
+          this.messageQueue = this.messageQueue.filter(msg => !(msg.type === 'ambient' && msg.needType === 'movement'))
+        } else {
+          // For other ambient messages, don't add if there are higher priority messages
+          const hasHigherPriorityMessages = this.messageQueue.some(msg => msg.priority < 7)
+          if (hasHigherPriorityMessages) {
+            console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping ambient message "${text}" - higher priority messages present`)
+            return null
+          }
+          
+          // Remove other non-movement ambient messages to prevent spam
+          this.messageQueue = this.messageQueue.filter(msg => !(msg.type === 'ambient' && msg.needType !== 'movement'))
+        }
       }
       
       const messageId = `msg_${++this.messageIdCounter}_${Date.now()}`
@@ -608,8 +637,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
-      // No special state, clear fallback (will use wellness message)
-      this.fallbackMessage = null
+      // Set guinea pig status as fallback
+      const guineaPigStore = useGuineaPigStore()
+      this.fallbackMessage = {
+        text: guineaPigStore.currentMessage,
+        emoji: guineaPigStore.currentEmoji
+      }
     },
 
     // Process pending reactions from a need store
@@ -650,47 +683,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       })
     },
 
-    // Process pending poop messages
-    processPoopMessages() {
-      try {
-        // Get poop store
-        const poopStore = usePoopStore()
-        if (!poopStore || !poopStore.getPendingPoopMessages) {
-          return
-        }
-        
-        const pendingMessages = poopStore.getPendingPoopMessages()
-        if (!pendingMessages || pendingMessages.length === 0) {
-          return
-        }
-        
-        // Check if game is paused - don't process messages when paused
-        const userStore = useUserStore()
-        const cageStore = useCageStore()
-        const isGamePaused = !userStore.name || cageStore.paused
-        
-        if (isGamePaused) {
-          console.log(`💩 [NEEDSQUEUE] POOP: Clearing ${pendingMessages.length} pending poop messages (game paused)`)
-          return
-        }
-        
-        // Process each pending poop message
-        pendingMessages.forEach(msg => {
-          console.log(`💩 [NEEDSQUEUE] POOP: Processing pending poop message: "${msg.message}" ${msg.emoji}`)
-          
-          this.addMessage(
-            msg.message,
-            msg.emoji,
-            msg.duration,
-            msg.priority,
-            msg.type
-          )
-        })
-      } catch (error) {
-        console.warn(`💩 [NEEDSQUEUE] POOP: Could not process poop messages:`, error)
-      }
-    },
-
     // Log current queue status to console
     logQueueStatus() {
       if (this.messageQueue.length === 0) {
@@ -706,6 +698,53 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       if (this.messageQueue.length > 5) {
         console.log(`  ... and ${this.messageQueue.length - 5} more messages`)
+      }
+    },
+
+    // Process pending guinea pig status messages
+    processGuineaPigStatusMessages() {
+      try {
+        const guineaPigStore = useGuineaPigStore()
+        if (!guineaPigStore || !guineaPigStore.getPendingStatusMessages) {
+          return
+        }
+        
+        const pendingMessages = guineaPigStore.getPendingStatusMessages()
+        if (!pendingMessages || pendingMessages.length === 0) {
+          return
+        }
+        
+        // Check if game is paused - don't process messages when paused
+        const userStore = useUserStore()
+        const cageStore = useCageStore()
+        const isGamePaused = !userStore.name || cageStore.paused
+        
+        if (isGamePaused) {
+          console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Clearing ${pendingMessages.length} pending status messages (game paused)`)
+          return
+        }
+        
+        // Process each pending status message
+        pendingMessages.forEach(msg => {
+          console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Processing status message: "${msg.text}" ${msg.emoji}`)
+          
+          this.addMessage(
+            msg.text,
+            msg.emoji,
+            msg.duration || MESSAGE_DURATIONS.AMBIENT,
+            msg.priority || MESSAGE_PRIORITIES.AMBIENT,
+            msg.type || 'status_change',
+            msg.needType || 'movement'
+          )
+        })
+        
+        // Clear processed messages from guinea pig store
+        if (guineaPigStore.clearProcessedStatusMessages) {
+          guineaPigStore.clearProcessedStatusMessages(pendingMessages.length)
+        }
+        
+      } catch (error) {
+        console.warn(`🐹 [NEEDSQUEUE] GUINEAPIG: Could not process status messages:`, error)
       }
     },
 

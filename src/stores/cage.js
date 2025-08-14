@@ -286,11 +286,7 @@ export const useCageStore = defineStore('cage', {
       
       const interaction = poopStore.interactWithPoop(x, y)
       
-      // Show temporary message for poop interaction via message queue
-      if (interaction.success) {
-        const needsQueueStore = useNeedsQueueStore()
-        needsQueueStore.addMessage(interaction.message, '💩', 1000, 2, 'poop')
-      }
+      // Poop messages are now handled by guinea pig store
       
       if (interaction.success && interaction.hygieneImpact > 0) {
         // Note: Hygiene store not implemented yet, so we'll skip this for now
