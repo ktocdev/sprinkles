@@ -84,6 +84,9 @@ function resetGame() {
     // Restart needs system after everything is reset
     needsQueueStore.startNeedsSystem()
     
+    // Pause the game so user has to click "Play" to start
+    cageStore.pauseGame()
+    
     // Emit event to notify parent about reset
     emit('gameReset')
   }
