@@ -321,32 +321,25 @@ export const useCageStore = defineStore('cage', {
         return { success: false, message: 'Item data not found' }
       }
       
-      // Improve guinea pig needs and track statistics
+      // Improve guinea pig needs using the proper fulfillment system
       const needsQueueStore = useNeedsQueueStore()
       if (itemData.needType && itemData.needImprovement) {
-        // Note: Only hunger store is implemented, so we'll only handle hunger for now
+        // Use the proper fulfillment system which handles reactions and messages
         if (itemData.needType === 'hunger') {
           const hungerStore = useHungerStore()
-          const oldValue = hungerStore.currentValue
-          hungerStore.currentValue = Math.min(100, hungerStore.currentValue + itemData.needImprovement)
-          const actualImprovement = hungerStore.currentValue - oldValue
+          // Call the proper fulfill function which handles everything
+          const fulfillResult = hungerStore.fulfill(item.name)
+          console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
           
           // Update needs queue to reflect the change in NeedsNav immediately
           needsQueueStore.updateQueue()
-          
-          // Track food consumption in statistics
-          const statisticsStore = useStatisticsStore()
-          statisticsStore.trackFoodConsumption(item.name, actualImprovement)
         }
       }
       
       // Remove item from grid
       this.removeItem(itemId)
       
-      // Show brief eating message in StatusMarquee
-      const statusStore = useStatusStore()
-      const itemDisplayName = item.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
+      // Note: "Ate Food" message and reactions are handled by the hunger store's fulfill function
       
       return {
         success: true,

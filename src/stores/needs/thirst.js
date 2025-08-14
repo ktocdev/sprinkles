@@ -48,6 +48,20 @@ export const useThirstStore = defineStore('thirst', {
     
     // Reaction messages for status changes
     reactions: {
+      // General drinking reactions (shown after ANY water consumption)
+      drinking: [
+        'Glug glug glug!',
+        'Refreshing!',
+        'Cool water!',
+        'Slurp slurp!',
+        'So refreshing!',
+        'Water tastes great!',
+        'Gulp gulp gulp!',
+        'Perfect hydration!',
+        'Water makes me happy!',
+        'Thank you for the water!'
+      ],
+      
       // Improvement reactions
       criticalToUrgent: [
         'Getting some hydration!',
@@ -156,28 +170,18 @@ export const useThirstStore = defineStore('thirst', {
         this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
         const actualImprovement = this.currentValue - oldValue
 
-        // Show fulfillment reaction if improvement occurred
+        // Show drinking reaction if improvement occurred
         if (actualImprovement > 0) {
           console.log(`💧 [THIRST] FULFILL: ${method.name} improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true
           
-          // Get appropriate reaction based on current status
-          const currentStatus = this.needStatus
-          let reactionType = 'normalToFulfilled' // default
-          
-          if (currentStatus === 'critical') {
-            reactionType = 'criticalToUrgent'
-          } else if (currentStatus === 'urgent') {
-            reactionType = 'urgentToNormal'  
-          } else if (currentStatus === 'normal' || currentStatus === 'fulfilled') {
-            reactionType = 'normalToFulfilled'
-          }
-          
-          const reaction = this.getRandomReaction(reactionType)
-          if (reaction) {
-            this.triggerDelayedReaction(reaction)
+          // Always show a general drinking reaction after any water consumption
+          const drinkingReaction = this.getRandomReaction('drinking')
+          if (drinkingReaction) {
+            console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
+            this.triggerDelayedReaction(drinkingReaction)
           }
           
           // Clear the flag after a short delay
