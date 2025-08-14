@@ -66,6 +66,7 @@ export const useWellnessStore = defineStore('wellness', {
     overallWellness() {
       const needsQueueStore = useNeedsQueueStore()
       const validNeeds = []
+      const needDetails = []
       
       for (const [needName, storeName] of Object.entries(needsQueueStore.needs)) {
         if (storeName === 'wellness') continue // Skip self to avoid recursion
@@ -73,13 +74,19 @@ export const useWellnessStore = defineStore('wellness', {
         const store = needsQueueStore.getNeedStore(storeName)
         if (store && store.currentValue !== undefined) {
           validNeeds.push(store.currentValue)
+          needDetails.push(`${needName}:${store.currentValue}`)
         }
       }
       
-      if (validNeeds.length === 0) return 50 // Default fallback
+      if (validNeeds.length === 0) {
+        console.log('🌟 [WELLNESS] CALC: No valid needs found, using default 50%')
+        return 50 // Default fallback
+      }
       
       const average = validNeeds.reduce((sum, value) => sum + value, 0) / validNeeds.length
-      return Math.round(average)
+      const rounded = Math.round(average)
+      console.log(`🌟 [WELLNESS] CALC: Overall wellness: ${rounded}% (from ${validNeeds.length} needs: [${needDetails.join(', ')}])`)
+      return rounded
     },
 
     // Use overall wellness as current value
@@ -172,24 +179,30 @@ export const useWellnessStore = defineStore('wellness', {
         messageArray = this.urgencyMessages.critical
       }
 
-      return messageArray[Math.floor(Math.random() * messageArray.length)]
+      const selectedMessage = messageArray[Math.floor(Math.random() * messageArray.length)]
+      console.log(`🌟 [WELLNESS] MESSAGE: Selected "${selectedMessage}" (${level} level, ${wellness}%)`)
+      return selectedMessage
     },
 
     // Get appropriate emoji for current wellness level
     getWellnessEmoji() {
       const wellness = this.overallWellness
       
+      let emoji
       if (wellness >= 90) {
-        return '🌟' // excellent
+        emoji = '🌟' // excellent
       } else if (wellness >= 80) {
-        return '😌' // content
+        emoji = '😌' // content
       } else if (wellness >= 60) {
-        return '🙂' // okay
+        emoji = '🙂' // okay
       } else if (wellness >= 50) {
-        return '😐' // could be better
+        emoji = '😐' // could be better
       } else {
-        return '😟' // needs help
+        emoji = '😟' // needs help
       }
+      
+      console.log(`🌟 [WELLNESS] EMOJI: Selected ${emoji} for ${wellness}% wellness`)
+      return emoji
     },
 
     // Minimal implementation for need store compatibility
@@ -213,10 +226,20 @@ export const useWellnessStore = defineStore('wellness', {
       return []
     },
 
+    // Handle status change tracking
+    handleStatusChangeReactions() {
+      const currentStatus = this.needStatus
+      if (this.previousStatus && this.previousStatus !== currentStatus) {
+        console.log(`🌟 [WELLNESS] STATUS: Changed from ${this.previousStatus} → ${currentStatus} (${this.overallWellness}%)`)
+        this.previousStatus = currentStatus
+      }
+    },
+
     initialize() {
       this.ensureMessageConfig()
       this.validateInterface()
       this.initializePreviousStatus()
+      console.log(`🌟 [WELLNESS] INIT: Wellness store initialized with ${this.overallWellness}% wellness`)
     }
   },
   

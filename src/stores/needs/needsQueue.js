@@ -95,9 +95,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Default wellness message from wellness store
       const wellnessStore = this.getNeedStore('wellness')
       if (wellnessStore) {
+        const wellnessText = wellnessStore.getWellnessMessage()
+        const wellnessEmoji = wellnessStore.getWellnessEmoji()
+        console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
         return {
-          text: wellnessStore.getWellnessMessage(),
-          emoji: wellnessStore.getWellnessEmoji()
+          text: wellnessText,
+          emoji: wellnessEmoji
         }
       }
       
@@ -710,11 +713,17 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     checkUrgencyMessage(store, needName) {
       // Only show urgency messages for urgent/critical needs
       if (!store.isUrgent && !store.isCritical) {
+        if (needName === 'wellness') {
+          console.log(`🌟 [WELLNESS] URGENCY: Wellness not urgent/critical (${store.percentage}%), skipping urgency message`)
+        }
         return
       }
       
       const config = store.messageConfig
       if (!config || !store.urgencyMessages) {
+        if (needName === 'wellness') {
+          console.log(`🌟 [WELLNESS] URGENCY: Missing config or urgency messages for wellness`)
+        }
         return
       }
       
@@ -734,14 +743,25 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       const lastUrgencyKey = `urgency_${needName}`
       const now = Date.now()
       const lastTime = this[`_${lastUrgencyKey}`] || 0
+      const timeSinceLastMessage = now - lastTime
       
-      if (now - lastTime < interval) {
+      if (needName === 'wellness') {
+        console.log(`🌟 [WELLNESS] URGENCY: Checking timing - ${urgencyLevel} level, interval: ${interval}ms, time since last: ${timeSinceLastMessage}ms`)
+      }
+      
+      if (timeSinceLastMessage < interval) {
+        if (needName === 'wellness') {
+          console.log(`🌟 [WELLNESS] URGENCY: Too soon for next message (need ${interval - timeSinceLastMessage}ms more)`)
+        }
         return // Too soon to show another urgency message
       }
       
       // Get available messages
       const messages = store.urgencyMessages[urgencyLevel] || []
       if (messages.length === 0) {
+        if (needName === 'wellness') {
+          console.log(`🌟 [WELLNESS] URGENCY: No messages available for ${urgencyLevel} level`)
+        }
         return
       }
       
@@ -755,7 +775,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Record when we showed this urgency message
       this[`_${lastUrgencyKey}`] = now
       
-      console.log(`📢 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message: "${message}"`)
+      if (needName === 'wellness') {
+        console.log(`🌟 [WELLNESS] URGENCY: Added urgency message "${message}" ${emoji} (${urgencyLevel} level, ${MESSAGE_DURATIONS.URGENCY}ms duration)`)
+      } else {
+        console.log(`📢 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message: "${message}"`)
+      }
     },
 
 
