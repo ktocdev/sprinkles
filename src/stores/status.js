@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia'
 import { useNeedsQueueStore } from './needs/needsQueue.js'
+import { useCageStore } from './cage.js'
 
 export const useStatusStore = defineStore('status', {
   state: () => ({
     
     // Current urgency messages and their timers
     activeMessages: new Map(), // Map of needType -> { message, timer, lastShown }
+    
+    // Track last message time for each need type to respect intervals
+    lastMessageTimes: new Map(), // Map of needType -> timestamp
     
     // Current priority message to display
     currentMessage: null,
@@ -174,7 +178,9 @@ export const useStatusStore = defineStore('status', {
           continue
         }
 
-        // Determine urgency level
+        // Determine urgency level and interval
+        console.log(`🔍 [STATUS] DEBUG: ${needType} - currentValue: ${status.currentValue}, isUrgent: ${status.isUrgent}, isCritical: ${status.isCritical}`)
+        
         let urgencyLevel = 'normal'
         let interval = config.intervals.normal
 
@@ -188,15 +194,21 @@ export const useStatusStore = defineStore('status', {
 
         // Show message based on urgency and timing
         if (status.isCritical || status.isUrgent) {
-          this.showNeedMessage(needType, urgencyLevel, status.urgency)
+          this.showNeedMessage(needType, urgencyLevel, status.urgency, interval)
         } else if (status.urgency > 0) {
-          this.showNeedMessage(needType, urgencyLevel, status.urgency)
+          this.showNeedMessage(needType, urgencyLevel, status.urgency, interval)
         }
       }
     },
 
     // Show a specific need message
-    showNeedMessage(needType, urgencyLevel, urgency) {
+    showNeedMessage(needType, urgencyLevel, urgency, interval) {
+      // Check if game is paused first - exit silently if so
+      const cageStore = useCageStore()
+      if (cageStore.paused) {
+        return
+      }
+      
       const now = Date.now()
       
       console.log(`🔍 [STATUS] PLAN: Attempting to show ${needType} message (${urgencyLevel}, urgency: ${Math.round(urgency)})`)
@@ -204,6 +216,20 @@ export const useStatusStore = defineStore('status', {
       // Check global cooldown
       if (now - this.lastMessageTime < this.globalCooldown) {
         console.log(`⏰ DELAY: Message blocked by global cooldown (${this.globalCooldown}ms)`)
+        return
+      }
+      
+      // Ensure lastMessageTimes is a Map
+      if (!(this.lastMessageTimes instanceof Map)) {
+        this.lastMessageTimes = new Map(Object.entries(this.lastMessageTimes || {}))
+      }
+      
+      // Check if enough time has passed since last message for this need type
+      const lastMessageTime = this.lastMessageTimes.get(needType) || 0
+      const timeSinceLastMessage = now - lastMessageTime
+      
+      if (timeSinceLastMessage < interval) {
+        console.log(`⏰ DELAY: ${needType} message blocked by interval timing (${timeSinceLastMessage}ms < ${interval}ms)`)
         return
       }
       
@@ -278,6 +304,9 @@ export const useStatusStore = defineStore('status', {
 
       // Update the last message time
       this.lastMessageTime = now
+      
+      // Record when this need type last showed a message
+      this.lastMessageTimes.set(needType, now)
     },
 
     // Show a temporary message that overrides other messages for a short time

@@ -86,9 +86,9 @@ export const useHungerStore = defineStore('hunger', {
     messageConfig: {
       emoji: '🍽️',
       intervals: {
-        normal: 12000,    // 12 seconds
-        urgent: 8000,     // 8 seconds  
-        critical: 5000    // 5 seconds
+        normal: 18000,    // 18 seconds
+        urgent: 12000,     // 12 seconds  
+        critical: 8000    // 8 seconds
       }
     }
   }),
