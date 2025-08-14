@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
+import { useWellnessStore } from './wellness.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { usePoopStore } from '../poop.js'
@@ -16,7 +17,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       shelter: 'shelter',
       hygiene: 'hygiene',
       enrichment: 'enrichment',
-      love: 'love'
+      love: 'love',
+      wellness: 'wellness'
     },
     queue: [], // Ordered list of needs by urgency
     lastUpdate: Date.now(),
@@ -72,79 +74,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       return status
     },
 
-    // Calculate overall wellness based on average of all implemented needs
-    overallWellness() {
-      const validNeeds = []
-      
-      for (const [needName, storeName] of Object.entries(this.needs)) {
-        const store = this.getNeedStore(storeName)
-        if (store && store.currentValue !== undefined) {
-          validNeeds.push(store.currentValue)
-        }
-      }
-      
-      if (validNeeds.length === 0) return 50 // Default fallback
-      
-      const average = validNeeds.reduce((sum, value) => sum + value, 0) / validNeeds.length
-      return Math.round(average)
-    },
-
-    // Get wellness message based on overall wellness score
-    wellnessMessage() {
-      const wellness = this.overallWellness
-      const messages = {
-        excellent: [
-          'Guinea pig is excellent!',
-          'Thriving guinea pig!',
-          'Perfect health!',
-          'Living the best life!',
-          'Absolutely fantastic!'
-        ],
-        content: [
-          'Guinea pig is content',
-          'Happy and healthy',
-          'Doing quite well',
-          'Comfortable guinea pig',
-          'All good here!'
-        ],
-        okay: [
-          'Guinea pig is okay',
-          'Doing alright',
-          'Could be better',
-          'Managing well enough',
-          'Getting by fine'
-        ],
-        needsHelp: [
-          'Guinea pig could be better',
-          'Needs some attention',
-          'Could use some care',
-          'Not feeling great',
-          'Needs improvement'
-        ],
-        needsHelp2: [
-          'Guinea pig needs help',
-          'Requires immediate attention',
-          'Not doing well',
-          'Needs serious care',
-          'Poor condition'
-        ]
-      }
-
-      let messageArray
-      if (wellness >= 90) {
-        messageArray = messages.excellent
-      } else if (wellness >= 80) {
-        messageArray = messages.content
-      } else if (wellness >= 60) {
-        messageArray = messages.okay
-      } else if (wellness >= 50) {
-        messageArray = messages.needsHelp
-      } else {
-        messageArray = messages.needsHelp2
-      }
-
-      return messageArray[Math.floor(Math.random() * messageArray.length)]
-    },
 
     // Get current display message (from queue or fallback)
     currentDisplayMessage() {
@@ -162,9 +91,18 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
-      // Default wellness message
+      // Default wellness message from wellness store
+      const wellnessStore = this.getNeedStore('wellness')
+      if (wellnessStore) {
+        return {
+          text: wellnessStore.getWellnessMessage(),
+          emoji: wellnessStore.getWellnessEmoji()
+        }
+      }
+      
+      // Final fallback
       return {
-        text: this.wellnessMessage,
+        text: 'Guinea pig is here',
         emoji: '🐹'
       }
     }
@@ -176,6 +114,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       switch (storeName) {
         case 'hunger':
           return useHungerStore()
+        case 'wellness':
+          return useWellnessStore()
         // Add other need stores here as they're created
         // case 'thirst':
         //   return useThirstStore()
@@ -263,8 +203,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Update fallback message based on guinea pig state
       this.updateFallbackMessage()
       
-      // Occasionally show wellness messages when there's no urgency
-      this.checkWellnessMessage()
     },
 
     calculateUrgency(store) {
@@ -640,51 +578,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       console.log(`📢 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message: "${message}"`)
     },
 
-    // Check if we should show wellness message
-    checkWellnessMessage() {
-      // Only show wellness messages occasionally and when no urgent needs
-      const hasUrgentNeeds = this.queue.some(need => need.urgency > 50)
-      if (hasUrgentNeeds) {
-        return
-      }
-      
-      // Only show wellness message every 2 minutes (much less frequent)
-      const now = Date.now()
-      const lastWellnessTime = this._lastWellnessMessage || 0
-      if (now - lastWellnessTime < 120000) { // 2 minutes instead of 30 seconds
-        return
-      }
-      
-      // Much lower random chance to show wellness message (5% instead of 20%)
-      if (Math.random() > 0.05) {
-        return
-      }
-      
-      const wellnessMessage = this.wellnessMessage
-      const overallWellness = this.overallWellness
-      
-      // Choose emoji based on wellness level
-      let emoji = '😌' // default content
-      if (overallWellness >= 90) {
-        emoji = '🌟' // excellent
-      } else if (overallWellness >= 80) {
-        emoji = '😌' // content
-      } else if (overallWellness >= 60) {
-        emoji = '🙂' // okay
-      } else if (overallWellness >= 50) {
-        emoji = '😐' // could be better
-      } else {
-        emoji = '😟' // needs help
-      }
-      
-      // Add wellness message to queue
-      this.addMessage(wellnessMessage, emoji, 3000, 4, 'wellness')
-      
-      // Record when we showed wellness message
-      this._lastWellnessMessage = now
-      
-      console.log(`📢 [NEEDSQUEUE] WELLNESS: Added wellness message: "${wellnessMessage}" (${overallWellness}%)`)
-    },
 
     // Update fallback message based on guinea pig state
     updateFallbackMessage() {
