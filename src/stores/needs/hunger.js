@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
-import { useStatusStore } from '../status.js'
 import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
@@ -182,11 +181,12 @@ export const useHungerStore = defineStore('hunger', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
-      // Show "ate food" message for automatic eating
+      // Show "ate food" message via message queue
       if (actualImprovement > 0) {
-        const statusStore = useStatusStore()
+        const { useNeedsQueueStore } = require('./needsQueue.js')
+        const needsQueueStore = useNeedsQueueStore()
         const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-        statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
+        needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 2, 'food', 'hunger')
       }
 
       // Show eating reaction when food is consumed 
@@ -200,11 +200,10 @@ export const useHungerStore = defineStore('hunger', {
         const eatingReaction = this.getRandomReaction('eating')
         if (eatingReaction) {
           console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
-          // Show reaction with shorter delay for better timing
-          const statusStore = useStatusStore()
-          setTimeout(() => {
-            statusStore.showTemporaryMessage(eatingReaction.message, '🐹', 1200)
-          }, 800) // Show sooner after "Ate X" message
+          // Add eating reaction to message queue with high priority
+          const { useNeedsQueueStore } = require('./needsQueue.js')
+          const needsQueueStore = useNeedsQueueStore()
+          needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
         }
       }
       

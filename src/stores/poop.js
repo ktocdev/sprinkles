@@ -214,10 +214,6 @@ export const usePoopStore = defineStore('poop', {
     // Show poop-related messages
     showPoopMessage(type) {
       try {
-        // Import here to avoid circular dependencies
-        const { useStatusStore } = require('./status.js')
-        const statusStore = useStatusStore()
-        
         let message, emoji, duration
         
         switch (type) {
@@ -235,11 +231,31 @@ export const usePoopStore = defineStore('poop', {
             return
         }
         
-        console.log(`💩 [POOP] POOP: Showing ${type} poop message: "${message}" ${emoji}`)
-        statusStore.showTemporaryMessage(message, emoji, duration)
+        console.log(`💩 [POOP] POOP: Adding ${type} poop message to queue: "${message}" ${emoji}`)
+        
+        // Store message to be processed by needsQueue
+        if (!this._pendingPoopMessages) {
+          this._pendingPoopMessages = []
+        }
+        
+        this._pendingPoopMessages.push({
+          message,
+          emoji,
+          duration,
+          type: 'poop',
+          priority: 2,
+          timestamp: Date.now()
+        })
       } catch (error) {
-        console.warn('💩 [POOP] WARN: Could not show poop message:', error)
+        console.warn('💩 [POOP] WARN: Could not queue poop message:', error)
       }
+    },
+
+    // Get and clear pending poop messages (called by needsQueue)
+    getPendingPoopMessages() {
+      const messages = this._pendingPoopMessages || []
+      this._pendingPoopMessages = []
+      return messages
     },
     
     // Set poop intervals (for adjusting frequency)

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
-import { useStatusStore } from '../status.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
+import { usePoopStore } from '../poop.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -22,7 +22,14 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     updateInterval: 1000, // 1 second in milliseconds
     isActive: true,
     updateTimer: null, // Timer for continuous updates
-    timerPaused: false // Track if timer is paused
+    timerPaused: false, // Track if timer is paused
+    
+    // Message Queue System
+    messageQueue: [], // Array of message objects waiting to be displayed
+    currentMessage: null, // Currently displayed message
+    messageTimer: null, // Timer for current message
+    isProcessingQueue: false, // Flag to prevent concurrent processing
+    messageIdCounter: 0 // Simple counter for unique message IDs
   }),
 
   getters: {
@@ -201,6 +208,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
             store.handleStatusChangeReactions()
           }
           
+          // Process any pending reactions from this store
+          this.processPendingReactions(store, needName)
+          
+          // Check if we should show urgency messages
+          this.checkUrgencyMessage(store, needName)
+          
           queue.push({
             name: needName,
             storeName: storeName,
@@ -214,6 +227,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Sort by urgency (highest first)
       queue.sort((a, b) => b.urgency - a.urgency)
       this.queue = queue
+      
+      // Process pending poop messages
+      this.processPoopMessages()
+      
+      // Occasionally show wellness messages when there's no urgency
+      this.checkWellnessMessage()
     },
 
     calculateUrgency(store) {
@@ -324,6 +343,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         this.updateTimer = null
       }
       this.timerPaused = false
+      
+      // Clear all messages when stopping
+      this.clearAllMessages()
     },
 
     // Pause the timer without clearing it
@@ -365,6 +387,334 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         method: bestMethod?.name || 'unknown',
         urgency: topNeed.urgency,
         reason: `Need to fulfill ${topNeed.name} (urgency: ${topNeed.urgency})`
+      }
+    },
+
+    // Message Queue Methods
+    
+    // Add message to queue with priority-based insertion
+    addMessage(text, emoji, duration = 2000, priority = 5, type = 'default', needType = null) {
+      if (!text) return null
+      
+      // Check if game is paused - don't add messages when paused
+      const userStore = useUserStore()
+      const cageStore = useCageStore()
+      const isGamePaused = !userStore.name || cageStore.paused
+      
+      if (isGamePaused) {
+        return null
+      }
+      
+      const messageId = `msg_${++this.messageIdCounter}_${Date.now()}`
+      const message = {
+        id: messageId,
+        text,
+        emoji,
+        duration,
+        priority,
+        type,
+        needType,
+        timestamp: Date.now()
+      }
+      
+      // Insert message based on priority (lower number = higher priority)
+      let insertIndex = this.messageQueue.length
+      for (let i = 0; i < this.messageQueue.length; i++) {
+        if (this.messageQueue[i].priority > priority) {
+          insertIndex = i
+          break
+        }
+      }
+      
+      this.messageQueue.splice(insertIndex, 0, message)
+      console.log(`📋 [NEEDSQUEUE] MESSAGE: Added "${text}" (${type}, priority ${priority}) at index ${insertIndex}`)
+      
+      // Log current queue status
+      this.logQueueStatus()
+      
+      // Start processing if not already active
+      if (!this.isProcessingQueue && !this.currentMessage) {
+        this.processNextMessage()
+      }
+      
+      return messageId
+    },
+
+    // Insert high priority message at the front of queue
+    insertHighPriorityMessage(text, emoji, duration = 2000, type = 'urgent') {
+      return this.addMessage(text, emoji, duration, 1, type)
+    },
+
+    // Process the next message in the queue
+    processNextMessage() {
+      if (this.isProcessingQueue || this.messageQueue.length === 0) {
+        return
+      }
+      
+      // Get next message
+      const nextMessage = this.messageQueue.shift()
+      if (!nextMessage) return
+      
+      this.isProcessingQueue = true
+      this.currentMessage = nextMessage
+      
+      console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${nextMessage.text}" for ${nextMessage.duration}ms`)
+      
+      // Log what's coming up next
+      this.logQueueStatus()
+      
+      // Clear any existing timer
+      if (this.messageTimer) {
+        clearTimeout(this.messageTimer)
+      }
+      
+      // Set timer to clear message and process next
+      this.messageTimer = setTimeout(() => {
+        console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${nextMessage.text}"`)
+        this.currentMessage = null
+        this.isProcessingQueue = false
+        
+        // Process next message if available
+        if (this.messageQueue.length > 0) {
+          console.log(`📋 [NEEDSQUEUE] QUEUE: Processing next message in queue...`)
+          setTimeout(() => this.processNextMessage(), 100) // Small delay between messages
+        } else {
+          console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
+        }
+      }, nextMessage.duration)
+    },
+
+    // Clear messages of specific type/need
+    clearMessagesOfType(type, needType = null) {
+      const initialLength = this.messageQueue.length
+      this.messageQueue = this.messageQueue.filter(msg => {
+        if (msg.type !== type) return true
+        if (needType && msg.needType !== needType) return true
+        return false
+      })
+      
+      const removed = initialLength - this.messageQueue.length
+      if (removed > 0) {
+        console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared ${removed} messages of type "${type}"${needType ? ` for need "${needType}"` : ''}`)
+      }
+    },
+
+    // Clear all messages and stop processing
+    clearAllMessages() {
+      this.messageQueue = []
+      this.currentMessage = null
+      this.isProcessingQueue = false
+      
+      if (this.messageTimer) {
+        clearTimeout(this.messageTimer)
+        this.messageTimer = null
+      }
+      
+      console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared all messages`)
+    },
+
+    // Check if we should show urgency message for a need
+    checkUrgencyMessage(store, needName) {
+      // Only show urgency messages for urgent/critical needs
+      if (!store.isUrgent && !store.isCritical) {
+        return
+      }
+      
+      const config = store.messageConfig
+      if (!config || !store.urgencyMessages) {
+        return
+      }
+      
+      // Determine urgency level and interval
+      let urgencyLevel = 'normal'
+      let interval = config.intervals.normal
+      
+      if (store.isCritical) {
+        urgencyLevel = 'critical'
+        interval = config.intervals.critical
+      } else if (store.isUrgent) {
+        urgencyLevel = 'urgent'
+        interval = config.intervals.urgent
+      }
+      
+      // Check if enough time has passed since last urgency message for this need
+      const lastUrgencyKey = `urgency_${needName}`
+      const now = Date.now()
+      const lastTime = this[`_${lastUrgencyKey}`] || 0
+      
+      if (now - lastTime < interval) {
+        return // Too soon to show another urgency message
+      }
+      
+      // Get available messages
+      const messages = store.urgencyMessages[urgencyLevel] || []
+      if (messages.length === 0) {
+        return
+      }
+      
+      // Pick a random message
+      const message = messages[Math.floor(Math.random() * messages.length)]
+      const emoji = config.emoji || '⚠️'
+      
+      // Add urgency message to queue
+      this.addMessage(message, emoji, 2000, 3, 'urgency', needName)
+      
+      // Record when we showed this urgency message
+      this[`_${lastUrgencyKey}`] = now
+      
+      console.log(`📢 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message: "${message}"`)
+    },
+
+    // Check if we should show wellness message
+    checkWellnessMessage() {
+      // Only show wellness messages occasionally and when no urgent needs
+      const hasUrgentNeeds = this.queue.some(need => need.urgency > 50)
+      if (hasUrgentNeeds) {
+        return
+      }
+      
+      // Only show wellness message every 30 seconds
+      const now = Date.now()
+      const lastWellnessTime = this._lastWellnessMessage || 0
+      if (now - lastWellnessTime < 30000) {
+        return
+      }
+      
+      // Random chance to show wellness message (20%)
+      if (Math.random() > 0.2) {
+        return
+      }
+      
+      const wellnessMessage = this.wellnessMessage
+      const overallWellness = this.overallWellness
+      
+      // Choose emoji based on wellness level
+      let emoji = '😌' // default content
+      if (overallWellness >= 90) {
+        emoji = '🌟' // excellent
+      } else if (overallWellness >= 80) {
+        emoji = '😌' // content
+      } else if (overallWellness >= 60) {
+        emoji = '🙂' // okay
+      } else if (overallWellness >= 50) {
+        emoji = '😐' // could be better
+      } else {
+        emoji = '😟' // needs help
+      }
+      
+      // Add wellness message to queue
+      this.addMessage(wellnessMessage, emoji, 3000, 4, 'wellness')
+      
+      // Record when we showed wellness message
+      this._lastWellnessMessage = now
+      
+      console.log(`📢 [NEEDSQUEUE] WELLNESS: Added wellness message: "${wellnessMessage}" (${overallWellness}%)`)
+    },
+
+    // Process pending reactions from a need store
+    processPendingReactions(store, needName) {
+      if (!store.getPendingReactions) {
+        return // Store doesn't have pending reactions system
+      }
+      
+      const pendingReactions = store.getPendingReactions()
+      if (!pendingReactions || pendingReactions.length === 0) {
+        return
+      }
+      
+      // Check if game is paused - don't process reactions when paused
+      const userStore = useUserStore()
+      const cageStore = useCageStore()
+      const isGamePaused = !userStore.name || cageStore.paused
+      
+      if (isGamePaused || store.recentlyFulfilled) {
+        // Clear pending reactions when paused to avoid stale reactions
+        console.log(`🎭 [NEEDSQUEUE] REACTION: Clearing ${pendingReactions.length} pending reactions for ${needName} (game paused)`)
+        return
+      }
+      
+      // Process each pending reaction
+      pendingReactions.forEach(reaction => {
+        console.log(`🎭 [NEEDSQUEUE] REACTION: Processing pending reaction for ${needName}: "${reaction.message}" ${reaction.emoji}`)
+        
+        // Add reaction with highest priority (1) and type 'reaction'
+        this.addMessage(
+          reaction.message,
+          reaction.emoji,
+          1200, // 1.2 second duration
+          1, // Highest priority
+          'reaction',
+          reaction.needType
+        )
+      })
+    },
+
+    // Process pending poop messages
+    processPoopMessages() {
+      try {
+        // Get poop store
+        const poopStore = usePoopStore()
+        if (!poopStore || !poopStore.getPendingPoopMessages) {
+          return
+        }
+        
+        const pendingMessages = poopStore.getPendingPoopMessages()
+        if (!pendingMessages || pendingMessages.length === 0) {
+          return
+        }
+        
+        // Check if game is paused - don't process messages when paused
+        const userStore = useUserStore()
+        const cageStore = useCageStore()
+        const isGamePaused = !userStore.name || cageStore.paused
+        
+        if (isGamePaused) {
+          console.log(`💩 [NEEDSQUEUE] POOP: Clearing ${pendingMessages.length} pending poop messages (game paused)`)
+          return
+        }
+        
+        // Process each pending poop message
+        pendingMessages.forEach(msg => {
+          console.log(`💩 [NEEDSQUEUE] POOP: Processing pending poop message: "${msg.message}" ${msg.emoji}`)
+          
+          this.addMessage(
+            msg.message,
+            msg.emoji,
+            msg.duration,
+            msg.priority,
+            msg.type
+          )
+        })
+      } catch (error) {
+        console.warn(`💩 [NEEDSQUEUE] POOP: Could not process poop messages:`, error)
+      }
+    },
+
+    // Log current queue status to console
+    logQueueStatus() {
+      if (this.messageQueue.length === 0) {
+        console.log(`📋 [NEEDSQUEUE] QUEUE: Empty queue`)
+        return
+      }
+      
+      console.log(`📋 [NEEDSQUEUE] QUEUE: ${this.messageQueue.length} messages in queue:`)
+      this.messageQueue.slice(0, 5).forEach((msg, index) => {
+        const truncatedText = msg.text.length > 30 ? msg.text.substring(0, 30) + '...' : msg.text
+        console.log(`  ${index + 1}. [P${msg.priority}] ${msg.type}: "${truncatedText}" ${msg.emoji} (${msg.duration}ms)`)
+      })
+      
+      if (this.messageQueue.length > 5) {
+        console.log(`  ... and ${this.messageQueue.length - 5} more messages`)
+      }
+    },
+
+    // Get message queue status for debugging
+    getMessageQueueStatus() {
+      return {
+        queueLength: this.messageQueue.length,
+        currentMessage: this.currentMessage,
+        isProcessing: this.isProcessingQueue,
+        nextMessage: this.messageQueue[0] || null
       }
     }
   },

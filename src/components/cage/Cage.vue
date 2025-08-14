@@ -3,12 +3,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { usePoopStore } from '../../stores/poop'
-import { useStatusStore } from '../../stores/status'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
 const poopStore = usePoopStore()
-const statusStore = useStatusStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
@@ -99,8 +97,10 @@ function moveGuineaPig() {
     if (poopStore.shouldDropPoop && !cageStore.paused) {
       const poopAdded = cageStore.addPoop(next.x, next.y)
       if (poopAdded) {
-        // Show "guinea pig made a poop" message
-        statusStore.showTemporaryMessage('Guinea pig made a poop!', '💩', 1000)
+        // Show "guinea pig made a poop" message via message queue
+        const { useNeedsQueueStore } = require('../../stores/needs/needsQueue.js')
+        const needsQueueStore = useNeedsQueueStore()
+        needsQueueStore.addMessage('Guinea pig made a poop!', '💩', 1000, 2, 'poop')
       }
       poopStore.resetPoopTimer()
     }

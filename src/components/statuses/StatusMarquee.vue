@@ -1,33 +1,55 @@
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useCageStore } from '../../stores/cage'
 import { useMarketStore } from '../../stores/market'
 import { usePoopStore } from '../../stores/poop'
-import { useStatusStore } from '../../stores/status'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 
 const guineaPigStore = useGuineaPigStore()
 const cageStore = useCageStore()
 const marketStore = useMarketStore()
 const poopStore = usePoopStore()
-const statusStore = useStatusStore()
+const needsQueueStore = useNeedsQueueStore()
 
 const shouldBounce = ref(false)
 
-// Get current status display (message and emoji) from status store
+// Get current message from needsQueue or fallback to guinea pig state
 const currentStatus = computed(() => {
-  return statusStore.getCurrentStatusDisplay({
-    guineaPigStore,
-    cageStore,
-    poopStore,
-    marketStore
-  })
+  // Check if there's a message in the queue
+  if (needsQueueStore.currentMessage) {
+    return {
+      message: needsQueueStore.currentMessage.text,
+      emoji: needsQueueStore.currentMessage.emoji
+    }
+  }
+  
+  // Fallback to guinea pig location/state
+  const { x, y } = cageStore.guineaPigPos || { x: 0, y: 0 }
+  
+  // Check if guinea pig is on an item
+  const currentItem = cageStore.items?.find(item => item.x === x && item.y === y)
+  if (currentItem) {
+    const itemData = marketStore.getItemData(currentItem.name)
+    if (itemData && itemData.actionWord) {
+      const itemName = currentItem.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      return {
+        message: `The guinea pig is ${itemData.actionWord} the ${itemName}.`,
+        emoji: marketStore.getItemEmoji(currentItem.name)
+      }
+    }
+  }
+  
+  // Default to guinea pig state
+  return {
+    message: guineaPigStore.currentMessage,
+    emoji: guineaPigStore.currentEmoji
+  }
 })
 
 // Extract text and emoji from status display
 const statusText = computed(() => currentStatus.value.message)
 const statusEmoji = computed(() => currentStatus.value.emoji)
-
 
 // Watch for status changes and trigger bounce animation
 watch(() => currentStatus.value, (newValue, oldValue) => {
@@ -39,11 +61,10 @@ watch(() => currentStatus.value, (newValue, oldValue) => {
   }
 }, { deep: true })
 
-// Initialize status system on mount - always start fresh
+// Initialize needs system on mount
 onMounted(() => {
-  console.log('🔍 PLAN: StatusMarquee mounted, initializing status system')
-  statusStore.initialize()
-  statusStore.startUpdates()
+  console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
+  // No need to initialize statusStore anymore - needsQueue handles everything
 })
 
 </script>
