@@ -133,7 +133,8 @@
                 type="flat"
                 size="compact"
                 @click="consumeItem(item)"
-                title="Consume Item"
+                :class="{ 'gps-button--disabled': isConsumptionDisabled }"
+                :title="isConsumptionDisabled ? 'Guinea pig is full!' : 'Consume Item'"
               >
                 🍽️
               </Button>
@@ -283,6 +284,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
+import { useHungerStore } from '../../stores/needs/hunger'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
@@ -292,6 +294,7 @@ import FormGroup from '../shared/FormGroup.vue'
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
+const hungerStore = useHungerStore()
 
 // Modal states
 const showAddItemModal = ref(false)
@@ -341,6 +344,13 @@ const availableFoodItems = computed(() => {
 
 const hasAnyFoodItems = computed(() => {
   return Object.keys(availableFoodItems.value).length > 0
+})
+
+// Check if consumption should be disabled (hunger is full)
+// Use same rounding logic as NeedsNav to prevent button state mismatch
+const isConsumptionDisabled = computed(() => {
+  const roundedValue = Math.round(hungerStore.currentValue)
+  return roundedValue >= hungerStore.maxValue
 })
 
 // Dropdown options for item selection
@@ -505,6 +515,12 @@ function confirmMoveItem() {
 
 function consumeItem(item) {
   if (!item.isConsumable) return
+  
+  // Don't consume if guinea pig is full
+  if (isConsumptionDisabled.value) {
+    console.log('🚫 [CONSUME] Blocked: Guinea pig is full!')
+    return
+  }
   
   const success = cageStore.consumeItem(item.id)
   if (success) {
