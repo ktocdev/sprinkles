@@ -181,32 +181,30 @@ export const useHungerStore = defineStore('hunger', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
-      // Show "ate food" message via message queue
+      // Show both food consumption and reaction messages when food is consumed 
       if (actualImprovement > 0) {
         import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
           const needsQueueStore = useNeedsQueueStore()
           const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 2, 'food', 'hunger')
+          
+          // First show the "ate food" message
+          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 1, 'food', 'hunger')
+          
+          // Then show the eating reaction with a slight delay to ensure proper sequencing
+          const eatingReaction = this.getRandomReaction('eating')
+          if (eatingReaction) {
+            console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+            // Add reaction with same priority but slight delay to ensure it comes after food message
+            setTimeout(() => {
+              needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
+            }, 100) // 100ms delay to ensure food message is added first
+          }
         })
-      }
-
-      // Show eating reaction when food is consumed 
-      if (actualImprovement > 0) {
+        
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
-        
-        // Always show a general eating reaction after any food consumption
-        const eatingReaction = this.getRandomReaction('eating')
-        if (eatingReaction) {
-          console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
-          // Add eating reaction to message queue with high priority
-          import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
-            const needsQueueStore = useNeedsQueueStore()
-            needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
-          })
-        }
       }
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes

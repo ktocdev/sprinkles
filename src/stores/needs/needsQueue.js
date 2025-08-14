@@ -491,8 +491,23 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Log current queue status
       this.logQueueStatus()
       
-      // Start processing if not already active
+      // Start processing if not already active, OR if this is a high priority message that should interrupt
       if (!this.isProcessingQueue && !this.currentMessage) {
+        this.processNextMessage()
+      } else if (isHighPriorityMessage) {
+        // High priority messages should interrupt current message and start immediately
+        console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
+        
+        if (this.isProcessingQueue && this.messageTimer) {
+          // Clear current message timer to force immediate processing of high priority message
+          clearTimeout(this.messageTimer)
+          this.messageTimer = null
+          this.currentMessage = null
+          this.isProcessingQueue = false
+          console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
+        }
+        
+        // Start processing the high priority message immediately
         this.processNextMessage()
       }
       
