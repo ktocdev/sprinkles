@@ -23,7 +23,6 @@ export const useCageStore = defineStore('cage', {
     waterLevel: 100,
     guineaPigPos: { x: 0, y: 0 },
     items: [], // array of { id, name, type, x, y, isConsumable, quantity }
-    consumptionStats: {}, // Track consumption by item type
     paused: false // Game pause state
   }),
 
@@ -341,12 +340,6 @@ export const useCageStore = defineStore('cage', {
         }
       }
       
-      // Track consumption statistics
-      if (!this.consumptionStats[item.name]) {
-        this.consumptionStats[item.name] = 0
-      }
-      this.consumptionStats[item.name]++
-      
       // Remove item from grid
       this.removeItem(itemId)
       
@@ -363,16 +356,6 @@ export const useCageStore = defineStore('cage', {
         needImprovement: itemData.needImprovement,
         consumed: true
       }
-    },
-
-    // Get consumption statistics
-    getConsumptionStats() {
-      return this.consumptionStats
-    },
-
-    // Reset consumption statistics
-    resetConsumptionStats() {
-      this.consumptionStats = {}
     },
 
     // Pause the game
