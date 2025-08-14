@@ -77,8 +77,7 @@ export const usePoopStore = defineStore('poop', {
       
       this.poop.push(poop)
       
-      // Show fresh poop message
-      this.showPoopMessage('fresh')
+      // Guinea pig store now handles poop messages
       
       // Track poop creation in statistics
       const statisticsStore = useStatisticsStore()
@@ -200,45 +199,13 @@ export const usePoopStore = defineStore('poop', {
         }
       }
       
-      // Show old poop message
-      this.showPoopMessage('old')
+      // Guinea pig store now handles poop messages
       
       return {
         success: true,
         message: 'Stepped on poop - hygiene decreased',
         hygieneImpact: this.hygieneImpact,
         poopAge: poopAge
-      }
-    },
-
-    // Show poop-related messages
-    showPoopMessage(type) {
-      try {
-        // Import here to avoid circular dependencies
-        const { useStatusStore } = require('./status.js')
-        const statusStore = useStatusStore()
-        
-        let message, emoji, duration
-        
-        switch (type) {
-          case 'fresh':
-            message = 'The guinea pig just made a poop!'
-            emoji = '💩'
-            duration = 2000
-            break
-          case 'old':
-            message = 'Eww, stepped on old poop!'
-            emoji = '🤢'
-            duration = 1500
-            break
-          default:
-            return
-        }
-        
-        console.log(`💩 [POOP] POOP: Showing ${type} poop message: "${message}" ${emoji}`)
-        statusStore.showTemporaryMessage(message, emoji, duration)
-      } catch (error) {
-        console.warn('💩 [POOP] WARN: Could not show poop message:', error)
       }
     },
     

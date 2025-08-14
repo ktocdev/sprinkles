@@ -6,7 +6,6 @@ import { useNeedsQueueStore } from './needs/needsQueue.js'
 import { useHungerStore } from './needs/hunger.js'
 import { usePoopStore } from './poop.js'
 import { useStatisticsStore } from './statistics.js'
-import { useStatusStore } from './status.js'
 
 function createEmptyGrid(width, height) {
   return Array.from({ length: height }, () => Array.from({ length: width }, () => null))
@@ -287,11 +286,7 @@ export const useCageStore = defineStore('cage', {
       
       const interaction = poopStore.interactWithPoop(x, y)
       
-      // Show temporary message for poop interaction
-      if (interaction.success) {
-        const statusStore = useStatusStore()
-        statusStore.showTemporaryMessage(interaction.message, '💩', 1000)
-      }
+      // Poop messages are now handled by guinea pig store
       
       if (interaction.success && interaction.hygieneImpact > 0) {
         // Note: Hygiene store not implemented yet, so we'll skip this for now
@@ -327,6 +322,11 @@ export const useCageStore = defineStore('cage', {
         // Use the proper fulfillment system which handles reactions and messages
         if (itemData.needType === 'hunger') {
           const hungerStore = useHungerStore()
+          const inventoryStore = useInventoryStore()
+          
+          // Temporarily add item back to inventory for fulfillment to work
+          inventoryStore.addItem(item.name, 1)
+          
           // Call the proper fulfill function which handles everything
           const fulfillResult = hungerStore.fulfill(item.name)
           console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
@@ -355,12 +355,15 @@ export const useCageStore = defineStore('cage', {
     pauseGame() {
       this.paused = true
       
-      // Pause all timer-based systems to save CPU/battery
-      const statusStore = useStatusStore()
+      // Pause timer-based systems to save CPU/battery
       const needsQueueStore = useNeedsQueueStore()
-      
-      statusStore.pauseUpdates()
       needsQueueStore.pauseNeedsSystem()
+      
+      // Pause guinea pig status transitions
+      import('./guineaPig.js').then(({ useGuineaPigStore }) => {
+        const guineaPigStore = useGuineaPigStore()
+        guineaPigStore.pauseStatusSystem()
+      })
       
       console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
     },
@@ -369,12 +372,15 @@ export const useCageStore = defineStore('cage', {
     resumeGame() {
       this.paused = false
       
-      // Resume all timer-based systems
-      const statusStore = useStatusStore()
+      // Resume timer-based systems
       const needsQueueStore = useNeedsQueueStore()
-      
-      statusStore.resumeUpdates()
       needsQueueStore.resumeNeedsSystem()
+      
+      // Resume guinea pig status transitions
+      import('./guineaPig.js').then(({ useGuineaPigStore }) => {
+        const guineaPigStore = useGuineaPigStore()
+        guineaPigStore.resumeStatusSystem()
+      })
       
       console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
     },

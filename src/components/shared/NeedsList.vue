@@ -17,10 +17,13 @@
           <StatusBar 
             v-if="item.value !== null && item.value !== undefined"
             :value="item.value"
-            :color="getStatusColor(item.status)"
+            :color="getNeedColor(item)"
             :displayValue="`${item.value}/100`"
             :showLabel="false"
-            class="gps-needs-list__item-status-bar"
+            :class="[
+              'gps-needs-list__item-status-bar',
+              { 'gps-needs-list__item-status-bar--rainbow': item.needName === 'wellness' && item.colors?.rainbow }
+            ]"
           />
           <span 
             v-else-if="showUrgency && item.urgency !== undefined" 
@@ -65,7 +68,9 @@ const formattedItems = computed(() => {
       message: item.message || item.text || String(item),
       urgency: item.urgency,
       value: value,
-      status: status
+      status: status,
+      needName: item.needName,
+      colors: item.colors
     }
   })
 })
@@ -86,7 +91,39 @@ function getStatusFromValue(value) {
   return 'critical'
 }
 
-// Helper function to get status color
+// Helper function to get color for a specific need
+function getNeedColor(item) {
+  // If the item has custom colors, use them
+  if (item.colors) {
+    // Special handling for rainbow (wellness)
+    if (item.colors.rainbow && item.needName === 'wellness') {
+      // For rainbow, we'll return a gradient string
+      if (item.colors.pattern && item.colors.pattern.length > 0) {
+        return `linear-gradient(90deg, ${item.colors.pattern.join(', ')})`
+      }
+    }
+    
+    // Use status-specific color if available
+    if (item.colors[item.status]) {
+      return item.colors[item.status]
+    }
+    
+    // Use gradient if available
+    if (item.colors.gradient && item.colors.gradient.length >= 2) {
+      return `linear-gradient(90deg, ${item.colors.gradient.join(', ')})`
+    }
+    
+    // Use primary color
+    if (item.colors.primary) {
+      return item.colors.primary
+    }
+  }
+  
+  // Fallback to default status colors
+  return getStatusColor(item.status)
+}
+
+// Helper function to get default status colors (fallback)
 function getStatusColor(status) {
   switch (status) {
     case 'fulfilled': return 'var(--color-success)'
@@ -177,6 +214,11 @@ function getStatusColor(status) {
   margin-top: 0.5rem;
 }
 
+.gps-needs-list__item-status-bar--rainbow {
+  /* Ensure rainbow gradients display properly */
+  background-clip: padding-box;
+}
+
 .gps-needs-list__item--fulfilled .gps-needs-list__item-urgency {
   color: var(--color-success);
   border-color: var(--color-success);
@@ -234,7 +276,7 @@ function getStatusColor(status) {
   }
   
   .gps-needs-list__item-text {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
   }
   
   .gps-needs-list__item-urgency {

@@ -13,9 +13,18 @@ export const useThemeStore = defineStore('theme', () => {
     document.body.classList.toggle('theme-light', isLight.value)
   }
 
+  // Manual reset function for setup syntax stores
+  function $reset() {
+    isLight.value = false
+    document.body.classList.remove('theme-light')
+  }
+
   return {
     isLight,
     toggleTheme,
-    initTheme
+    initTheme,
+    $reset
   }
+}, {
+  persist: true
 }) 

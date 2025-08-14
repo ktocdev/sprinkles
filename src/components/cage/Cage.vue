@@ -3,12 +3,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { usePoopStore } from '../../stores/poop'
-import { useStatusStore } from '../../stores/status'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
 const poopStore = usePoopStore()
-const statusStore = useStatusStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
@@ -66,12 +64,14 @@ function moveGuineaPig() {
     return
   }
   
-  // 65% chance to sit
-  if (Math.random() < 0.65) {
-    guineaPigStore.setSitting(true)
+  // Check if guinea pig store allows movement
+  if (!guineaPigStore.canGuineaPigMove()) {
+    console.log(`🐹 [CAGE] MOVEMENT: Movement blocked by guinea pig store (${guineaPigStore.currentStatus})`)
     return
   }
-  guineaPigStore.setSitting(false)
+  
+  // Guinea pig store now handles its own status transitions automatically
+  // Just handle the physical movement in the cage
   // Find possible moves (adjacent cells)
   const { x, y } = cageStore.guineaPigPos
   const moves = []
@@ -83,6 +83,11 @@ function moveGuineaPig() {
     const next = moves[Math.floor(Math.random() * moves.length)]
     cageStore.setGuineaPigPos(next.x, next.y)
     
+    // Notify guinea pig store that physical movement occurred
+    if (guineaPigStore.currentStatus !== 'moving') {
+      guineaPigStore.changeStatus('moving')
+    }
+    
     // Check if guinea pig moved onto an item and interact with it
     const itemAtNewPos = cageStore.items.find(item => item.x === next.x && item.y === next.y)
     if (itemAtNewPos) {
@@ -92,15 +97,19 @@ function moveGuineaPig() {
     // Check if guinea pig moved onto poop and interact with it
     const poopAtNewPos = poopStore.isPoopAtPosition(next.x, next.y)
     if (poopAtNewPos) {
-      cageStore.interactWithPoop()
+      const interaction = cageStore.interactWithPoop()
+      // Notify guinea pig store if stepped on old poop
+      if (interaction.success && interaction.hygieneImpact > 0) {
+        guineaPigStore.handlePoopStepped()
+      }
     }
     
     // Drop a poop if it's time and game is not paused
     if (poopStore.shouldDropPoop && !cageStore.paused) {
       const poopAdded = cageStore.addPoop(next.x, next.y)
       if (poopAdded) {
-        // Show "guinea pig made a poop" message
-        statusStore.showTemporaryMessage('Guinea pig made a poop!', '💩', 1000)
+        // Notify guinea pig store about poop creation
+        guineaPigStore.handlePoopCreated()
       }
       poopStore.resetPoopTimer()
     }
@@ -140,7 +149,7 @@ onMounted(() => {
   if (poopStore.isEnabled) {
     poopStore.startPoopTimer()
   }
-  moveInterval = setInterval(moveGuineaPig, 2000)
+  moveInterval = setInterval(moveGuineaPig, 6000) // Slower movement to align with message timing (6 seconds)
 })
 
 onUnmounted(() => {

@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
-import { useStatusStore } from '../status.js'
 import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -105,6 +105,18 @@ export const useHungerStore = defineStore('hunger', {
         urgent: 12000,     // 12 seconds  
         critical: 8000    // 8 seconds
       }
+    },
+    
+    // Color theming for hunger
+    colors: {
+      primary: '#e67e22', // Orange color for hunger
+      gradient: ['#f39c12', '#e67e22'], // Light orange to darker orange
+      
+      // Status-specific colors
+      fulfilled: '#27ae60', // Green when satisfied
+      normal: '#f39c12',    // Orange when normal
+      urgent: '#e67e22',    // Darker orange when urgent
+      critical: '#d35400'   // Dark red-orange when critical
     }
   }),
 
@@ -182,37 +194,49 @@ export const useHungerStore = defineStore('hunger', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
-      // Show "ate food" message for automatic eating
+      // Show both food consumption and reaction messages when food is consumed 
       if (actualImprovement > 0) {
-        const statusStore = useStatusStore()
-        const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-        statusStore.showTemporaryMessage(`Ate ${itemDisplayName}`, '🍽️', 1500)
-      }
-
-      // Show eating reaction when food is consumed 
-      if (actualImprovement > 0) {
+        import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
+          const needsQueueStore = useNeedsQueueStore()
+          const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          
+          // Create a message chain for fulfillment + reaction
+          const eatingReaction = this.getRandomReaction('eating')
+          const messageChain = [
+            {
+              text: `Ate ${itemDisplayName}`,
+              emoji: '🍽️',
+              duration: MESSAGE_DURATIONS.FULFILLMENT,
+              type: 'fulfillment'
+            }
+          ]
+          
+          // Add reaction to chain if available
+          if (eatingReaction) {
+            console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+            messageChain.push({
+              text: eatingReaction.message,
+              emoji: '🐹',
+              duration: MESSAGE_DURATIONS.REACTION,
+              type: 'reaction'
+            })
+          }
+          
+          // Add the complete chain as a single high-priority unit
+          needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
+        })
+        
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
-        
-        // Always show a general eating reaction after any food consumption
-        const eatingReaction = this.getRandomReaction('eating')
-        if (eatingReaction) {
-          console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
-          // Show reaction with shorter delay for better timing
-          const statusStore = useStatusStore()
-          setTimeout(() => {
-            statusStore.showTemporaryMessage(eatingReaction.message, '🐹', 1200)
-          }, 800) // Show sooner after "Ate X" message
-        }
       }
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
       setTimeout(() => {
-        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after 500ms delay`)
+        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
-      }, 500) // 0.5 seconds should be enough to avoid conflicts
+      }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG) // Configurable delay to avoid conflicts
 
       // Track food consumption in statistics
       statisticsStore.trackFoodConsumption(methodName, actualImprovement)

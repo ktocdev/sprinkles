@@ -10,7 +10,7 @@ export function useNeedsList() {
 
   // Format needs data for NeedsList component
   const needsItems = computed(() => {
-    return needsQueueStore.queue
+    const formattedNeeds = needsQueueStore.queue
       .map(need => {
         const value = Math.round(need.currentValue) // Use actual current value
         
@@ -21,14 +21,35 @@ export function useNeedsList() {
         else if (value >= 50) status = 'urgent'
         else status = 'critical'
         
+        // Get the need store to access color configuration
+        const needStore = needsQueueStore.getNeedStore(need.storeName)
+        let colors = null
+        if (needStore && needStore.colors) {
+          colors = needStore.colors
+        }
+        
         return {
           message: `${formatNeedName(need.name)}: ${value}/100`,
           urgency: need.urgency,
           value: value,
-          status: status
+          status: status,
+          needName: need.name,
+          colors: colors
         }
       })
-      .slice(0, 5) // Limit to top 5 needs (sorted by urgency)
+
+    // Separate wellness from other needs
+    const wellnessNeed = formattedNeeds.find(need => need.needName === 'wellness')
+    const otherNeeds = formattedNeeds.filter(need => need.needName !== 'wellness')
+    
+    // Put wellness first, then other needs, limit total to 5
+    const sortedNeeds = []
+    if (wellnessNeed) {
+      sortedNeeds.push(wellnessNeed)
+    }
+    sortedNeeds.push(...otherNeeds)
+    
+    return sortedNeeds.slice(0, 5) // Limit to top 5 needs
   })
 
   // Check for urgent/critical items (useful for styling indicators)

@@ -1,33 +1,19 @@
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { useGuineaPigStore } from '../../stores/guineaPig'
-import { useCageStore } from '../../stores/cage'
-import { useMarketStore } from '../../stores/market'
-import { usePoopStore } from '../../stores/poop'
-import { useStatusStore } from '../../stores/status'
+import { computed, ref, watch, onMounted } from 'vue'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 
-const guineaPigStore = useGuineaPigStore()
-const cageStore = useCageStore()
-const marketStore = useMarketStore()
-const poopStore = usePoopStore()
-const statusStore = useStatusStore()
+const needsQueueStore = useNeedsQueueStore()
 
 const shouldBounce = ref(false)
 
-// Get current status display (message and emoji) from status store
+// Get current display message from needsQueue (handles all logic)
 const currentStatus = computed(() => {
-  return statusStore.getCurrentStatusDisplay({
-    guineaPigStore,
-    cageStore,
-    poopStore,
-    marketStore
-  })
+  return needsQueueStore.currentDisplayMessage
 })
 
 // Extract text and emoji from status display
-const statusText = computed(() => currentStatus.value.message)
+const statusText = computed(() => currentStatus.value.text)
 const statusEmoji = computed(() => currentStatus.value.emoji)
-
 
 // Watch for status changes and trigger bounce animation
 watch(() => currentStatus.value, (newValue, oldValue) => {
@@ -39,11 +25,10 @@ watch(() => currentStatus.value, (newValue, oldValue) => {
   }
 }, { deep: true })
 
-// Initialize status system on mount - always start fresh
+// Initialize needs system on mount
 onMounted(() => {
-  console.log('🔍 PLAN: StatusMarquee mounted, initializing status system')
-  statusStore.initialize()
-  statusStore.startUpdates()
+  console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
+  // No need to initialize statusStore anymore - needsQueue handles everything
 })
 
 </script>
