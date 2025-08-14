@@ -98,9 +98,10 @@ function moveGuineaPig() {
       const poopAdded = cageStore.addPoop(next.x, next.y)
       if (poopAdded) {
         // Show "guinea pig made a poop" message via message queue
-        const { useNeedsQueueStore } = require('../../stores/needs/needsQueue.js')
-        const needsQueueStore = useNeedsQueueStore()
-        needsQueueStore.addMessage('Guinea pig made a poop!', '💩', 1000, 2, 'poop')
+        import('../../stores/needs/needsQueue.js').then(({ useNeedsQueueStore }) => {
+          const needsQueueStore = useNeedsQueueStore()
+          needsQueueStore.addMessage('Guinea pig made a poop!', '💩', 1000, 2, 'poop')
+        })
       }
       poopStore.resetPoopTimer()
     }

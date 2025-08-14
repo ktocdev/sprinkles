@@ -183,10 +183,11 @@ export const useHungerStore = defineStore('hunger', {
 
       // Show "ate food" message via message queue
       if (actualImprovement > 0) {
-        const { useNeedsQueueStore } = require('./needsQueue.js')
-        const needsQueueStore = useNeedsQueueStore()
-        const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-        needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 2, 'food', 'hunger')
+        import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
+          const needsQueueStore = useNeedsQueueStore()
+          const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 2, 'food', 'hunger')
+        })
       }
 
       // Show eating reaction when food is consumed 
@@ -201,9 +202,10 @@ export const useHungerStore = defineStore('hunger', {
         if (eatingReaction) {
           console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
           // Add eating reaction to message queue with high priority
-          const { useNeedsQueueStore } = require('./needsQueue.js')
-          const needsQueueStore = useNeedsQueueStore()
-          needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
+          import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
+            const needsQueueStore = useNeedsQueueStore()
+            needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
+          })
         }
       }
       

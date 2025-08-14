@@ -288,7 +288,6 @@ export const useCageStore = defineStore('cage', {
       
       // Show temporary message for poop interaction via message queue
       if (interaction.success) {
-        const { useNeedsQueueStore } = require('./needs/needsQueue.js')
         const needsQueueStore = useNeedsQueueStore()
         needsQueueStore.addMessage(interaction.message, '💩', 1000, 2, 'poop')
       }
@@ -327,6 +326,11 @@ export const useCageStore = defineStore('cage', {
         // Use the proper fulfillment system which handles reactions and messages
         if (itemData.needType === 'hunger') {
           const hungerStore = useHungerStore()
+          const inventoryStore = useInventoryStore()
+          
+          // Temporarily add item back to inventory for fulfillment to work
+          inventoryStore.addItem(item.name, 1)
+          
           // Call the proper fulfill function which handles everything
           const fulfillResult = hungerStore.fulfill(item.name)
           console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
@@ -355,11 +359,8 @@ export const useCageStore = defineStore('cage', {
     pauseGame() {
       this.paused = true
       
-      // Pause all timer-based systems to save CPU/battery
-      const statusStore = useStatusStore()
+      // Pause timer-based systems to save CPU/battery
       const needsQueueStore = useNeedsQueueStore()
-      
-      statusStore.pauseUpdates()
       needsQueueStore.pauseNeedsSystem()
       
       console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
@@ -369,11 +370,8 @@ export const useCageStore = defineStore('cage', {
     resumeGame() {
       this.paused = false
       
-      // Resume all timer-based systems
-      const statusStore = useStatusStore()
+      // Resume timer-based systems
       const needsQueueStore = useNeedsQueueStore()
-      
-      statusStore.resumeUpdates()
       needsQueueStore.resumeNeedsSystem()
       
       console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
