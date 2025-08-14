@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
-import { useCageStore } from '../cage.js'
 import { useStatusStore } from '../status.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
@@ -20,7 +19,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     lastUpdate: Date.now(),
     updateInterval: 1000, // 1 second in milliseconds
     isActive: true,
-    updateTimer: null // Timer for continuous updates
+    updateTimer: null, // Timer for continuous updates
+    timerPaused: false // Track if timer is paused
   }),
 
   getters: {
@@ -157,12 +157,6 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         return // Don't update too frequently
       }
 
-      // Check if game is paused - don't degrade needs when paused
-      const cageStore = useCageStore()
-      if (cageStore.paused) {
-        this.lastUpdate = now
-        return // Skip degradation when game is paused
-      }
 
       // Degrade all needs
       for (const [needName, storeName] of Object.entries(this.needs)) {
@@ -302,7 +296,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Start the timer for continuous updates
       this.updateTimer = setInterval(() => {
-        if (this.isActive) {
+        if (this.isActive && !this.timerPaused) {
           this.updateAllNeeds()
         }
       }, 1000) // Update every second
@@ -315,6 +309,24 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
+      }
+      this.timerPaused = false
+    },
+
+    // Pause the timer without clearing it
+    pauseNeedsSystem() {
+      console.log('⏸️ [NEEDSQUEUE] PAUSE: Pausing needs system updates')
+      this.timerPaused = true
+    },
+
+    // Resume the paused timer
+    resumeNeedsSystem() {
+      console.log('▶️ [NEEDSQUEUE] RESUME: Resuming needs system updates')
+      this.timerPaused = false
+      
+      // Do immediate update when resuming
+      if (this.isActive && this.updateTimer) {
+        this.updateAllNeeds()
       }
     },
 

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useNeedsQueueStore } from './needs/needsQueue.js'
-import { useCageStore } from './cage.js'
 
 export const useStatusStore = defineStore('status', {
   state: () => ({
@@ -26,6 +25,7 @@ export const useStatusStore = defineStore('status', {
     // Update timer management
     updateTimer: null,
     updateInterval: 1000, // Update every 1 second
+    timerPaused: false, // Track if timer is paused
     
     // Initialization flag
     _initialized: false
@@ -179,8 +179,6 @@ export const useStatusStore = defineStore('status', {
         }
 
         // Determine urgency level and interval
-        console.log(`🔍 [STATUS] DEBUG: ${needType} - currentValue: ${status.currentValue}, isUrgent: ${status.isUrgent}, isCritical: ${status.isCritical}`)
-        
         let urgencyLevel = 'normal'
         let interval = config.intervals.normal
 
@@ -203,12 +201,6 @@ export const useStatusStore = defineStore('status', {
 
     // Show a specific need message
     showNeedMessage(needType, urgencyLevel, urgency, interval) {
-      // Check if game is paused first - exit silently if so
-      const cageStore = useCageStore()
-      if (cageStore.paused) {
-        return
-      }
-      
       const now = Date.now()
       
       console.log(`🔍 [STATUS] PLAN: Attempting to show ${needType} message (${urgencyLevel}, urgency: ${Math.round(urgency)})`)
@@ -364,7 +356,7 @@ export const useStatusStore = defineStore('status', {
       
       // Always create a fresh timer
       this.updateTimer = setInterval(() => {
-        if (this.enabled) {
+        if (this.enabled && !this.timerPaused) {
           this.updateUrgencyMessages()
         }
       }, this.updateInterval)
@@ -382,6 +374,24 @@ export const useStatusStore = defineStore('status', {
       if (this.updateTimer) {
         clearInterval(this.updateTimer)
         this.updateTimer = null
+      }
+      this.timerPaused = false
+    },
+
+    // Pause the timer without clearing it
+    pauseUpdates() {
+      console.log('⏸️ [STATUS] PAUSE: Pausing status system updates')
+      this.timerPaused = true
+    },
+
+    // Resume the paused timer
+    resumeUpdates() {
+      console.log('▶️ [STATUS] RESUME: Resuming status system updates')
+      this.timerPaused = false
+      
+      // Do immediate update when resuming
+      if (this.enabled && this.updateTimer) {
+        this.updateUrgencyMessages()
       }
     },
 

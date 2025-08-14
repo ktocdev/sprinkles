@@ -362,28 +362,28 @@ export const useCageStore = defineStore('cage', {
     pauseGame() {
       this.paused = true
       
-      // Stop all timer-based systems to save CPU/battery
+      // Pause all timer-based systems to save CPU/battery
       const statusStore = useStatusStore()
       const needsQueueStore = useNeedsQueueStore()
       
-      statusStore.stopUpdates()
-      needsQueueStore.stopNeedsSystem()
+      statusStore.pauseUpdates()
+      needsQueueStore.pauseNeedsSystem()
       
-      console.log('🛑 [CAGE] PAUSE: Game paused, all timers stopped')
+      console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
     },
 
     // Resume the game
     resumeGame() {
       this.paused = false
       
-      // Restart all timer-based systems
+      // Resume all timer-based systems
       const statusStore = useStatusStore()
       const needsQueueStore = useNeedsQueueStore()
       
-      statusStore.startUpdates()
-      needsQueueStore.startNeedsSystem()
+      statusStore.resumeUpdates()
+      needsQueueStore.resumeNeedsSystem()
       
-      console.log('▶️ [CAGE] RESUME: Game resumed, all timers restarted')
+      console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
     },
 
     // Toggle pause state
