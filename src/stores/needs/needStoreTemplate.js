@@ -46,6 +46,22 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
       }
     },
     
+    // Color theming for this need (REQUIRED)
+    colors: {
+      // Option 1: Single color
+      primary: '#3498db', // Replace with appropriate color for this need
+      
+      // Option 2: Multiple colors for gradient or patterns
+      // gradient: ['#3498db', '#2980b9'], // Start and end colors for gradient
+      // pattern: ['#3498db', '#2980b9', '#1f5f99'], // Multiple colors for complex patterns
+      
+      // Status-specific colors (optional overrides)
+      // fulfilled: '#27ae60',
+      // normal: '#3498db', 
+      // urgent: '#f39c12',
+      // critical: '#e74c3c'
+    },
+    
     // Reaction messages for status changes (REQUIRED)
     reactions: {
       // Improvement reactions
@@ -244,15 +260,20 @@ IMPLEMENTATION CHECKLIST:
 3. □ Customize urgencyMessages for your specific need
 4. □ Customize reaction messages to fit the need type
 5. □ Set appropriate degradationRate from STANDARD_DEGRADATION_RATES
-6. □ Implement fulfill() method based on your need's fulfillment pattern:
+6. □ Configure colors section with appropriate theme colors:
+   - Set primary color for the need
+   - Optional: Add gradient colors
+   - Optional: Add status-specific color overrides
+   - Special: Set rainbow: true for rainbow patterns (like wellness)
+7. □ Implement fulfill() method based on your need's fulfillment pattern:
    - Use predefined patterns from needsFulfillmentPatterns.js, OR
    - Integrate with external store (like food store), OR  
    - Custom implementation
-7. □ Update fulfillmentMethods getter to match your fulfill() implementation
-8. □ Add the new need to needsQueue.js needs object
-9. □ Update needsQueue.js getNeedStore() method to include your store
-10. □ Test the implementation
-11. □ Add any custom methods specific to your need type
+8. □ Update fulfillmentMethods getter to match your fulfill() implementation
+9. □ Add the new need to needsQueue.js needs object
+10. □ Update needsQueue.js getNeedStore() method to include your store
+11. □ Test the implementation
+12. □ Add any custom methods specific to your need type
 
 EXAMPLE USAGE:
 - Copy this file to useThirstStore.js

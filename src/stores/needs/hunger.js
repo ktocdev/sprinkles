@@ -104,6 +104,18 @@ export const useHungerStore = defineStore('hunger', {
         urgent: 12000,     // 12 seconds  
         critical: 8000    // 8 seconds
       }
+    },
+    
+    // Color theming for hunger
+    colors: {
+      primary: '#e67e22', // Orange color for hunger
+      gradient: ['#f39c12', '#e67e22'], // Light orange to darker orange
+      
+      // Status-specific colors
+      fulfilled: '#27ae60', // Green when satisfied
+      normal: '#f39c12',    // Orange when normal
+      urgent: '#e67e22',    // Darker orange when urgent
+      critical: '#d35400'   // Dark red-orange when critical
     }
   }),
 

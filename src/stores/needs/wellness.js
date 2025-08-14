@@ -46,6 +46,18 @@ export const useWellnessStore = defineStore('wellness', {
         urgent: 12000,    // 12 seconds  
         critical: 9000    // 9 seconds
       }
+    },
+    
+    // Color theming for wellness - rainbow pattern
+    colors: {
+      rainbow: true, // Special flag for rainbow coloring
+      pattern: ['#ff0000', '#ff8000', '#ffff00', '#80ff00', '#00ff00', '#00ff80', '#00ffff', '#0080ff', '#0000ff', '#8000ff', '#ff00ff', '#ff0080'], // Full rainbow spectrum
+      
+      // Status-specific colors (fallback if rainbow not supported)
+      fulfilled: '#00ff00', // Bright green
+      normal: '#ffff00',    // Yellow
+      urgent: '#ff8000',    // Orange
+      critical: '#ff0000'   // Red
     }
   }),
 
