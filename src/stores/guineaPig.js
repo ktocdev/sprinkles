@@ -18,6 +18,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Auto-transition timers
     statusTimer: null,
+    isPaused: false, // Track if guinea pig system is paused
     
     // Movement control
     canMove: true, // Whether the guinea pig is allowed to move physically
@@ -184,6 +185,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Add a transition message to pending queue
     addTransitionMessage(fromStatus, toStatus) {
+      // Don't add messages if paused
+      if (this.isPaused) {
+        console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping transition message - system is paused`)
+        return
+      }
+      
       const transitionKey = `${fromStatus}To${toStatus.charAt(0).toUpperCase() + toStatus.slice(1)}`
       const messages = this.transitionMessages[transitionKey] || []
       
@@ -220,6 +227,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Schedule the next automatic status transition
     scheduleNextTransition() {
+      // Don't schedule transitions if paused
+      if (this.isPaused) {
+        console.log(`🐹 [GUINEAPIG] SCHEDULE: Skipping transition scheduling - system is paused`)
+        return
+      }
+      
       // Clear any existing timer
       this.clearStatusTimer()
       
@@ -235,6 +248,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Perform a random status transition
     performRandomTransition() {
+      // Don't perform transitions if paused
+      if (this.isPaused) {
+        console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping random transition - system is paused`)
+        return
+      }
+      
       const currentStatus = this.currentStatus
       let possibleTransitions = []
       
@@ -397,10 +416,43 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }
     },
     
+    // Pause the guinea pig status system
+    pauseStatusSystem() {
+      console.log(`🐹 [GUINEAPIG] PAUSE: Pausing guinea pig status system`)
+      this.isPaused = true
+      this.clearStatusTimer() // Clear any pending transitions
+    },
+    
+    // Resume the guinea pig status system
+    resumeStatusSystem() {
+      console.log(`🐹 [GUINEAPIG] RESUME: Resuming guinea pig status system`)
+      this.isPaused = false
+      this.scheduleNextTransition() // Resume automatic transitions
+    },
+    
+    // Check if game is paused by looking at cage store
+    checkGamePaused() {
+      try {
+        // Dynamic import to avoid circular dependency
+        import('./cage.js').then(({ useCageStore }) => {
+          const cageStore = useCageStore()
+          if (cageStore.paused && !this.isPaused) {
+            this.pauseStatusSystem()
+          } else if (!cageStore.paused && this.isPaused) {
+            this.resumeStatusSystem()
+          }
+        })
+      } catch (error) {
+        // Fallback - continue with current state
+        console.warn(`🐹 [GUINEAPIG] PAUSE: Could not check cage pause state:`, error)
+      }
+    },
+
     // Stop the status system
     stop() {
       this.clearStatusTimer()
       this.pendingStatusMessages = []
+      this.isPaused = false
       this.forceAllowMovement() // Allow movement when stopping
     }
   },

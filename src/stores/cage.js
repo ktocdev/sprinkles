@@ -359,6 +359,12 @@ export const useCageStore = defineStore('cage', {
       const needsQueueStore = useNeedsQueueStore()
       needsQueueStore.pauseNeedsSystem()
       
+      // Pause guinea pig status transitions
+      import('./guineaPig.js').then(({ useGuineaPigStore }) => {
+        const guineaPigStore = useGuineaPigStore()
+        guineaPigStore.pauseStatusSystem()
+      })
+      
       console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
     },
 
@@ -369,6 +375,12 @@ export const useCageStore = defineStore('cage', {
       // Resume timer-based systems
       const needsQueueStore = useNeedsQueueStore()
       needsQueueStore.resumeNeedsSystem()
+      
+      // Resume guinea pig status transitions
+      import('./guineaPig.js').then(({ useGuineaPigStore }) => {
+        const guineaPigStore = useGuineaPigStore()
+        guineaPigStore.resumeStatusSystem()
+      })
       
       console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
     },
