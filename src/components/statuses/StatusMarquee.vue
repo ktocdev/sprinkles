@@ -1,54 +1,18 @@
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue'
-import { useGuineaPigStore } from '../../stores/guineaPig'
-import { useCageStore } from '../../stores/cage'
-import { useMarketStore } from '../../stores/market'
-import { usePoopStore } from '../../stores/poop'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 
-const guineaPigStore = useGuineaPigStore()
-const cageStore = useCageStore()
-const marketStore = useMarketStore()
-const poopStore = usePoopStore()
 const needsQueueStore = useNeedsQueueStore()
 
 const shouldBounce = ref(false)
 
-// Get current message from needsQueue or fallback to guinea pig state
+// Get current display message from needsQueue (handles all logic)
 const currentStatus = computed(() => {
-  // Check if there's a message in the queue
-  if (needsQueueStore.currentMessage) {
-    return {
-      message: needsQueueStore.currentMessage.text,
-      emoji: needsQueueStore.currentMessage.emoji
-    }
-  }
-  
-  // Fallback to guinea pig location/state
-  const { x, y } = cageStore.guineaPigPos || { x: 0, y: 0 }
-  
-  // Check if guinea pig is on an item
-  const currentItem = cageStore.items?.find(item => item.x === x && item.y === y)
-  if (currentItem) {
-    const itemData = marketStore.getItemData(currentItem.name)
-    if (itemData && itemData.actionWord) {
-      const itemName = currentItem.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      return {
-        message: `The guinea pig is ${itemData.actionWord} the ${itemName}.`,
-        emoji: marketStore.getItemEmoji(currentItem.name)
-      }
-    }
-  }
-  
-  // Default to guinea pig state
-  return {
-    message: guineaPigStore.currentMessage,
-    emoji: guineaPigStore.currentEmoji
-  }
+  return needsQueueStore.currentDisplayMessage
 })
 
 // Extract text and emoji from status display
-const statusText = computed(() => currentStatus.value.message)
+const statusText = computed(() => currentStatus.value.text)
 const statusEmoji = computed(() => currentStatus.value.emoji)
 
 // Watch for status changes and trigger bounce animation

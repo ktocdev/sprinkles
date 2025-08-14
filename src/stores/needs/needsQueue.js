@@ -3,6 +3,7 @@ import { useHungerStore } from './hunger.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { usePoopStore } from '../poop.js'
+import { useMarketStore } from '../market.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -29,7 +30,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     currentMessage: null, // Currently displayed message
     messageTimer: null, // Timer for current message
     isProcessingQueue: false, // Flag to prevent concurrent processing
-    messageIdCounter: 0 // Simple counter for unique message IDs
+    messageIdCounter: 0, // Simple counter for unique message IDs
+    fallbackMessage: null, // Fallback message when queue is empty
+    
+    // Message timing controls
+    lastMessageStartTime: 0, // When current message started displaying
+    minimumDisplayTime: 1500, // Minimum time any message must show (1.5 seconds)
   }),
 
   getters: {
@@ -138,6 +144,29 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       }
 
       return messageArray[Math.floor(Math.random() * messageArray.length)]
+    },
+
+    // Get current display message (from queue or fallback)
+    currentDisplayMessage() {
+      if (this.currentMessage) {
+        return {
+          text: this.currentMessage.text,
+          emoji: this.currentMessage.emoji
+        }
+      }
+      
+      if (this.fallbackMessage) {
+        return {
+          text: this.fallbackMessage.text,
+          emoji: this.fallbackMessage.emoji
+        }
+      }
+      
+      // Default wellness message
+      return {
+        text: this.wellnessMessage,
+        emoji: '🐹'
+      }
     }
   },
 
@@ -230,6 +259,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Process pending poop messages
       this.processPoopMessages()
+      
+      // Update fallback message based on guinea pig state
+      this.updateFallbackMessage()
       
       // Occasionally show wellness messages when there's no urgency
       this.checkWellnessMessage()
@@ -405,6 +437,33 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         return null
       }
       
+      const now = Date.now()
+      
+      // High priority messages (food, reactions) always get through regardless of timing
+      const isHighPriorityMessage = type === 'food' || type === 'reaction' || priority <= 2
+      
+      // Check minimum display time for current message (unless this is high priority)
+      if (!isHighPriorityMessage && this.currentMessage && this.lastMessageStartTime > 0) {
+        const timeDisplayed = now - this.lastMessageStartTime
+        if (timeDisplayed < this.minimumDisplayTime) {
+          console.log(`⏰ [NEEDSQUEUE] TIMING: Skipping "${text}" - current message needs ${this.minimumDisplayTime - timeDisplayed}ms more`)
+          return null
+        }
+      }
+      
+      // Special handling for ambient messages (movement, sitting, etc.)
+      if (type === 'ambient' && priority >= 8) {
+        // Don't add ambient messages if there are higher priority messages in queue
+        const hasHigherPriorityMessages = this.messageQueue.some(msg => msg.priority < 7)
+        if (hasHigherPriorityMessages || this.currentMessage) {
+          console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping ambient message "${text}" - higher priority messages present`)
+          return null
+        }
+        
+        // Remove other ambient messages to prevent spam
+        this.messageQueue = this.messageQueue.filter(msg => msg.type !== 'ambient')
+      }
+      
       const messageId = `msg_${++this.messageIdCounter}_${Date.now()}`
       const message = {
         id: messageId,
@@ -457,6 +516,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       this.isProcessingQueue = true
       this.currentMessage = nextMessage
+      this.lastMessageStartTime = Date.now() // Track when this message started
       
       console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${nextMessage.text}" for ${nextMessage.duration}ms`)
       
@@ -573,15 +633,15 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         return
       }
       
-      // Only show wellness message every 30 seconds
+      // Only show wellness message every 2 minutes (much less frequent)
       const now = Date.now()
       const lastWellnessTime = this._lastWellnessMessage || 0
-      if (now - lastWellnessTime < 30000) {
+      if (now - lastWellnessTime < 120000) { // 2 minutes instead of 30 seconds
         return
       }
       
-      // Random chance to show wellness message (20%)
-      if (Math.random() > 0.2) {
+      // Much lower random chance to show wellness message (5% instead of 20%)
+      if (Math.random() > 0.05) {
         return
       }
       
@@ -609,6 +669,36 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this._lastWellnessMessage = now
       
       console.log(`📢 [NEEDSQUEUE] WELLNESS: Added wellness message: "${wellnessMessage}" (${overallWellness}%)`)
+    },
+
+    // Update fallback message based on guinea pig state
+    updateFallbackMessage() {
+      const cageStore = useCageStore()
+      const marketStore = useMarketStore()
+      
+      if (!cageStore.guineaPigPos) {
+        this.fallbackMessage = null
+        return
+      }
+      
+      const { x, y } = cageStore.guineaPigPos
+      
+      // Check if guinea pig is on an item
+      const currentItem = cageStore.items?.find(item => item.x === x && item.y === y)
+      if (currentItem) {
+        const itemData = marketStore.getItemData(currentItem.name)
+        if (itemData && itemData.actionWord) {
+          const itemName = currentItem.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          this.fallbackMessage = {
+            text: `The guinea pig is ${itemData.actionWord} the ${itemName}.`,
+            emoji: marketStore.getItemEmoji(currentItem.name)
+          }
+          return
+        }
+      }
+      
+      // No special state, clear fallback (will use wellness message)
+      this.fallbackMessage = null
     },
 
     // Process pending reactions from a need store

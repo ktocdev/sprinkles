@@ -67,9 +67,22 @@ function moveGuineaPig() {
   // 65% chance to sit
   if (Math.random() < 0.65) {
     guineaPigStore.setSitting(true)
+    
+    // Add ambient sitting message (very low priority, won't interrupt other messages)
+    import('../../stores/needs/needsQueue.js').then(({ useNeedsQueueStore }) => {
+      const needsQueueStore = useNeedsQueueStore()
+      needsQueueStore.addMessage('Guinea pig is sitting.', '🛋️', 6000, 8, 'ambient') // Extended to 6 seconds
+    }).catch(() => {}) // Silently fail if import fails
+    
     return
   }
   guineaPigStore.setSitting(false)
+  
+  // Add ambient movement message (very low priority)
+  import('../../stores/needs/needsQueue.js').then(({ useNeedsQueueStore }) => {
+    const needsQueueStore = useNeedsQueueStore()
+    needsQueueStore.addMessage('Guinea pig is moving...', '🏃', 4000, 8, 'ambient') // Extended to 4 seconds
+  }).catch(() => {}) // Silently fail if import fails
   // Find possible moves (adjacent cells)
   const { x, y } = cageStore.guineaPigPos
   const moves = []
