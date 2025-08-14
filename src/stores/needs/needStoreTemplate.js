@@ -4,6 +4,7 @@
 import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
 import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const useNEEDNAMEStore = defineStore('NEEDNAME', {
   state: () => ({
@@ -201,13 +202,14 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
           
           const reaction = this.getRandomReaction(reactionType)
           if (reaction) {
-            this.triggerDelayedReaction(reaction)
+            // Use configurable timing for reaction duration
+            this.triggerDelayedReaction(reaction, 0, MESSAGE_DURATIONS.REACTION)
           }
           
           // Clear the flag after a short delay
           setTimeout(() => {
             this.recentlyFulfilled = false
-          }, 500)
+          }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG)
         }
 
         return {

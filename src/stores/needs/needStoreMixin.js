@@ -1,5 +1,6 @@
 // Shared methods for need stores to handle status improvements and reactions
 import { validateNeedStore } from './needStoreInterface.js'
+import { MESSAGE_DURATIONS, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const needStoreMixin = {
   // Check for status improvements and return reaction if any
@@ -89,6 +90,23 @@ export const needStoreMixin = {
     })
     
     console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Queued reaction: "${reaction.message}" ${reaction.emoji}`)
+  },
+
+  // Trigger a delayed reaction with configurable timing
+  triggerDelayedReaction(reaction, delay = 0, duration = MESSAGE_DURATIONS.REACTION) {
+    if (!reaction || !reaction.message || !reaction.emoji) {
+      return
+    }
+    
+    // Ensure minimum duration
+    duration = ensureMinimumDuration(duration)
+    
+    setTimeout(() => {
+      // Use the regular triggerReaction method after delay
+      this.triggerReaction(reaction)
+    }, delay)
+    
+    console.log(`🎭 [${this.needType.toUpperCase()}] DELAYED_REACTION: Scheduled reaction: "${reaction.message}" ${reaction.emoji} after ${delay}ms delay, duration: ${duration}ms`)
   },
 
   // Get and clear pending reactions (called by needsQueue)

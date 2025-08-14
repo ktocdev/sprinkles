@@ -5,6 +5,7 @@ import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { usePoopStore } from '../poop.js'
 import { useMarketStore } from '../market.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -363,7 +364,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     // Message Queue Methods
     
     // Add message to queue with priority-based insertion
-    addMessage(text, emoji, duration = 2000, priority = 5, type = 'default', needType = null) {
+    addMessage(text, emoji, duration = MESSAGE_DURATIONS.TEMPORARY, priority = 5, type = 'default', needType = null) {
+      // Ensure minimum duration
+      duration = ensureMinimumDuration(duration)
       if (!text) return null
       
       // Check if game is paused - don't add messages when paused
@@ -490,7 +493,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         // Process next message if available
         if (this.messageQueue.length > 0) {
           console.log(`📋 [NEEDSQUEUE] QUEUE: Processing next message in queue...`)
-          setTimeout(() => this.processNextMessage(), 100) // Small delay between messages
+          setTimeout(() => this.processNextMessage(), MESSAGE_DELAYS.QUEUE_PROCESSING) // Configurable delay between messages
         } else {
           console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
         }
@@ -570,7 +573,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       const emoji = config.emoji || '⚠️'
       
       // Add urgency message to queue
-      this.addMessage(message, emoji, 2000, 3, 'urgency', needName)
+      this.addMessage(message, emoji, MESSAGE_DURATIONS.URGENCY, 3, 'urgency', needName)
       
       // Record when we showed this urgency message
       this[`_${lastUrgencyKey}`] = now
@@ -639,7 +642,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         this.addMessage(
           reaction.message,
           reaction.emoji,
-          1200, // 1.2 second duration
+          MESSAGE_DURATIONS.STATUS_CHANGE, // Configurable duration for status change reactions
           1, // Highest priority
           'reaction',
           reaction.needType

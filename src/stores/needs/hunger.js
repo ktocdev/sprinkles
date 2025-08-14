@@ -5,6 +5,7 @@ import { useStatisticsStore } from '../statistics.js'
 import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -200,7 +201,7 @@ export const useHungerStore = defineStore('hunger', {
           const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
           
           // First show the "ate food" message
-          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', 1500, 1, 'food', 'hunger')
+          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', MESSAGE_DURATIONS.FULFILLMENT, 1, 'food', 'hunger')
           
           // Then show the eating reaction with a slight delay to ensure proper sequencing
           const eatingReaction = this.getRandomReaction('eating')
@@ -208,8 +209,8 @@ export const useHungerStore = defineStore('hunger', {
             console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
             // Add reaction with same priority but slight delay to ensure it comes after food message
             setTimeout(() => {
-              needsQueueStore.addMessage(eatingReaction.message, '🐹', 1200, 1, 'reaction', 'hunger')
-            }, 100) // 100ms delay to ensure food message is added first
+              needsQueueStore.addMessage(eatingReaction.message, '🐹', MESSAGE_DURATIONS.REACTION, 1, 'reaction', 'hunger')
+            }, MESSAGE_DELAYS.FULFILLMENT_TO_REACTION) // Configurable delay to ensure food message is added first
           }
         })
         
@@ -221,9 +222,9 @@ export const useHungerStore = defineStore('hunger', {
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
       setTimeout(() => {
-        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after 500ms delay`)
+        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
-      }, 500) // 0.5 seconds should be enough to avoid conflicts
+      }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG) // Configurable delay to avoid conflicts
 
       // Track food consumption in statistics
       statisticsStore.trackFoodConsumption(methodName, actualImprovement)

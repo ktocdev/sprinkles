@@ -4,7 +4,7 @@ import { useNeedsQueueStore } from './needsQueue.js'
 export const useWellnessStore = defineStore('wellness', {
   state: () => ({
     // Core properties to match need interface
-    currentValue: 100,
+    // Note: currentValue is calculated dynamically in getters, not stored in state
     degradationRate: 0, // Wellness doesn't degrade - it's calculated
     maxValue: 100,
     minValue: 0,

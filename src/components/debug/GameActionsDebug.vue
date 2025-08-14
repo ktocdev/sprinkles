@@ -65,11 +65,14 @@ function resetGame() {
     // Reset all stores automatically using Pinia's active store registry
     const pinia = getActivePinia()
     if (pinia && pinia._s) {
-      pinia._s.forEach(store => {
+      pinia._s.forEach((store, storeId) => {
         try {
           store.$reset()
+          console.log(`✅ Reset store: ${storeId}`)
         } catch (error) {
-          console.warn(`Failed to reset store:`, error)
+          console.warn(`❌ Failed to reset store "${storeId}":`, error)
+          // For setup syntax stores without $reset, we can't auto-reset them
+          // They should implement their own $reset method
         }
       })
     }
