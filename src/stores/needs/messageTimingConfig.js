@@ -3,10 +3,10 @@
 
 export const MESSAGE_DURATIONS = {
   // Fulfillment messages (e.g., "Ate Carrots")
-  FULFILLMENT: 2000, // 2 seconds - shows what action was taken
+  FULFILLMENT: 1000, // 1 second - shows what action was taken
   
   // Reaction messages (e.g., "Nom nom nom!")
-  REACTION: 2000, // 2 seconds - shows guinea pig's reaction
+  REACTION: 1750, // 1.5 seconds - shows guinea pig's reaction (extended for better visibility)
   
   // Status change reactions (automatic when needs change)
   STATUS_CHANGE: 1500, // 1.5 seconds - automatic status improvements/degradations
@@ -48,8 +48,8 @@ export const MESSAGE_PRIORITIES = {
 
 // Delays between message types
 export const MESSAGE_DELAYS = {
-  // Delay between fulfillment message and reaction message
-  FULFILLMENT_TO_REACTION: 100, // 0.1 seconds
+  // Delay between fulfillment message and reaction message (not used anymore - both added immediately to queue)
+  FULFILLMENT_TO_REACTION: 100, // 0.1 seconds - legacy, not currently used
   
   // Delay to clear recently fulfilled flag
   CLEAR_FULFILLED_FLAG: 500, // 0.5 seconds

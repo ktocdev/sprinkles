@@ -200,18 +200,30 @@ export const useHungerStore = defineStore('hunger', {
           const needsQueueStore = useNeedsQueueStore()
           const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
           
-          // First show the "ate food" message
-          needsQueueStore.addMessage(`Ate ${itemDisplayName}`, '🍽️', MESSAGE_DURATIONS.FULFILLMENT, 1, 'food', 'hunger')
-          
-          // Then show the eating reaction with a slight delay to ensure proper sequencing
+          // Create a message chain for fulfillment + reaction
           const eatingReaction = this.getRandomReaction('eating')
+          const messageChain = [
+            {
+              text: `Ate ${itemDisplayName}`,
+              emoji: '🍽️',
+              duration: MESSAGE_DURATIONS.FULFILLMENT,
+              type: 'fulfillment'
+            }
+          ]
+          
+          // Add reaction to chain if available
           if (eatingReaction) {
             console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
-            // Add reaction with same priority but slight delay to ensure it comes after food message
-            setTimeout(() => {
-              needsQueueStore.addMessage(eatingReaction.message, '🐹', MESSAGE_DURATIONS.REACTION, 1, 'reaction', 'hunger')
-            }, MESSAGE_DELAYS.FULFILLMENT_TO_REACTION) // Configurable delay to ensure food message is added first
+            messageChain.push({
+              text: eatingReaction.message,
+              emoji: '🐹',
+              duration: MESSAGE_DURATIONS.REACTION,
+              type: 'reaction'
+            })
           }
+          
+          // Add the complete chain as a single high-priority unit
+          needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
         })
         
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)

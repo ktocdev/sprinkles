@@ -379,7 +379,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     // Message Queue Methods
     
     // Add message to queue with priority-based insertion
-    addMessage(text, emoji, duration = MESSAGE_DURATIONS.TEMPORARY, priority = 5, type = 'default', needType = null) {
+    addMessage(text, emoji, duration = MESSAGE_DURATIONS.TEMPORARY, priority = 5, type = 'default', needType = null, sequenceId = null) {
       // Ensure minimum duration
       duration = ensureMinimumDuration(duration)
       if (!text) return null
@@ -443,6 +443,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         priority,
         type,
         needType,
+        sequenceId,
         timestamp: Date.now()
       }
       
@@ -465,20 +466,29 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (!this.isProcessingQueue && !this.currentMessage) {
         this.processNextMessage()
       } else if (isHighPriorityMessage) {
-        // High priority messages should interrupt current message and start immediately
-        console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
+        // Check if current message is part of the same sequence (don't interrupt sequences)
+        const currentSequenceId = this.currentMessage?.sequenceId
+        const isSameSequence = sequenceId && currentSequenceId && sequenceId === currentSequenceId
         
-        if (this.isProcessingQueue && this.messageTimer) {
-          // Clear current message timer to force immediate processing of high priority message
-          clearTimeout(this.messageTimer)
-          this.messageTimer = null
-          this.currentMessage = null
-          this.isProcessingQueue = false
-          console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
+        if (!isSameSequence) {
+          // High priority messages should interrupt current message and start immediately
+          console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
+          
+          if (this.isProcessingQueue && this.messageTimer) {
+            // Clear current message timer to force immediate processing of high priority message
+            clearTimeout(this.messageTimer)
+            this.messageTimer = null
+            this.currentMessage = null
+            this.isProcessingQueue = false
+            console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
+          }
+          
+          // Start processing the high priority message immediately
+          this.processNextMessage()
+        } else {
+          console.log(`📋 [NEEDSQUEUE] SEQUENCE: Not interrupting - same sequence ID: ${sequenceId}`)
+          // Don't call processNextMessage for same sequence - let natural flow handle it
         }
-        
-        // Start processing the high priority message immediately
-        this.processNextMessage()
       }
       
       return messageId
@@ -489,9 +499,66 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       return this.addMessage(text, emoji, duration, 1, type)
     },
 
-    // Process the next message in the queue
+    // Add a chain of messages that play in sequence as a single unit
+    addMessageChain(messageChain, priority = 5, needType = null) {
+      if (!messageChain || !Array.isArray(messageChain) || messageChain.length === 0) {
+        console.warn('🚫 [NEEDSQUEUE] CHAIN: Invalid message chain provided')
+        return null
+      }
+
+      // Calculate total duration of all sub-messages
+      const totalDuration = messageChain.reduce((total, msg) => total + (msg.duration || 1000), 0)
+
+      // Create chain message object
+      const chainId = `chain_${++this.messageIdCounter}_${Date.now()}`
+      const chainMessage = {
+        id: chainId,
+        type: 'chain',
+        priority,
+        needType,
+        messages: messageChain,
+        currentIndex: 0,
+        totalDuration,
+        timestamp: Date.now()
+      }
+
+      // Check if game is paused - don't add messages when paused
+      const userStore = useUserStore()
+      const cageStore = useCageStore()
+      const isGamePaused = !userStore.name || cageStore.paused
+
+      if (isGamePaused) {
+        return null
+      }
+
+      // Insert chain based on priority
+      let insertIndex = this.messageQueue.length
+      for (let i = 0; i < this.messageQueue.length; i++) {
+        if (this.messageQueue[i].priority > priority) {
+          insertIndex = i
+          break
+        }
+      }
+
+      this.messageQueue.splice(insertIndex, 0, chainMessage)
+      console.log(`📋 [NEEDSQUEUE] CHAIN: Added chain with ${messageChain.length} messages (priority ${priority}) at index ${insertIndex}`)
+
+      // Log chain details
+      messageChain.forEach((msg, index) => {
+        console.log(`  ${index + 1}. "${msg.text}" ${msg.emoji} (${msg.duration}ms)`)
+      })
+
+      // Start processing if not already active
+      if (!this.isProcessingQueue && !this.currentMessage) {
+        this.processNextMessage()
+      }
+
+      return chainId
+    },
+
+    // Process the next message in the queue (handles both regular and chain messages)
     processNextMessage() {
-      if (this.isProcessingQueue || this.messageQueue.length === 0) {
+      if (this.messageQueue.length === 0) {
         return
       }
       
@@ -499,13 +566,25 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       const nextMessage = this.messageQueue.shift()
       if (!nextMessage) return
       
-      this.isProcessingQueue = true
-      this.currentMessage = nextMessage
-      this.lastMessageStartTime = Date.now() // Track when this message started
+      // For seamless transitions, only set isProcessingQueue if not already processing
+      if (!this.isProcessingQueue) {
+        this.isProcessingQueue = true
+      }
       
-      console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${nextMessage.text}" for ${nextMessage.duration}ms`)
+      // Handle chain messages differently
+      if (nextMessage.type === 'chain') {
+        this.processChainMessage(nextMessage)
+      } else {
+        this.processRegularMessage(nextMessage)
+      }
+    },
+
+    // Process a regular (non-chain) message
+    processRegularMessage(message) {
+      this.currentMessage = message
+      this.lastMessageStartTime = Date.now()
       
-      // Log what's coming up next
+      console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${message.text}" for ${message.duration}ms`)
       this.logQueueStatus()
       
       // Clear any existing timer
@@ -513,20 +592,89 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         clearTimeout(this.messageTimer)
       }
       
-      // Set timer to clear message and process next
+      // Set timer to process next message
       this.messageTimer = setTimeout(() => {
-        console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${nextMessage.text}"`)
+        console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${message.text}"`)
+        this.finishCurrentMessage()
+      }, message.duration)
+    },
+
+    // Process a chain message (multiple sub-messages in sequence)
+    processChainMessage(chainMessage) {
+      if (!chainMessage.messages || chainMessage.messages.length === 0) {
+        console.warn('🚫 [NEEDSQUEUE] CHAIN: Empty chain message, skipping')
+        this.finishCurrentMessage()
+        return
+      }
+
+      // Reset chain index if needed
+      if (!chainMessage.hasOwnProperty('currentIndex')) {
+        chainMessage.currentIndex = 0
+      }
+
+      this.processChainStep(chainMessage)
+    },
+
+    // Process a single step in a message chain
+    processChainStep(chainMessage) {
+      const currentStep = chainMessage.messages[chainMessage.currentIndex]
+      if (!currentStep) {
+        console.log(`📢 [NEEDSQUEUE] CHAIN: Chain completed`)
+        this.finishCurrentMessage()
+        return
+      }
+
+      // Create a display message for the current step
+      this.currentMessage = {
+        ...chainMessage,
+        text: currentStep.text,
+        emoji: currentStep.emoji,
+        duration: currentStep.duration,
+        chainStep: chainMessage.currentIndex + 1,
+        chainTotal: chainMessage.messages.length
+      }
+      
+      this.lastMessageStartTime = Date.now()
+      
+      console.log(`📢 [NEEDSQUEUE] CHAIN: Step ${chainMessage.currentIndex + 1}/${chainMessage.messages.length}: "${currentStep.text}" for ${currentStep.duration}ms`)
+      this.logQueueStatus()
+      
+      // Clear any existing timer
+      if (this.messageTimer) {
+        clearTimeout(this.messageTimer)
+      }
+      
+      // Set timer for this step
+      this.messageTimer = setTimeout(() => {
+        console.log(`📢 [NEEDSQUEUE] CHAIN: Finished step ${chainMessage.currentIndex + 1}: "${currentStep.text}"`)
+        
+        // Move to next step in chain
+        chainMessage.currentIndex++
+        
+        if (chainMessage.currentIndex < chainMessage.messages.length) {
+          // More steps in chain - process next step immediately
+          console.log(`📢 [NEEDSQUEUE] CHAIN: Moving to step ${chainMessage.currentIndex + 1}`)
+          this.processChainStep(chainMessage)
+        } else {
+          // Chain completed - move to next message in queue
+          console.log(`📢 [NEEDSQUEUE] CHAIN: All steps completed`)
+          this.finishCurrentMessage()
+        }
+      }, currentStep.duration)
+    },
+
+    // Finish the current message and move to next
+    finishCurrentMessage() {
+      // Process next message immediately if available (seamless transition)
+      if (this.messageQueue.length > 0) {
+        console.log(`📋 [NEEDSQUEUE] QUEUE: Seamlessly transitioning to next message...`)
+        this.processNextMessage() // No delay, immediate transition
+      } else {
+        // Only clear current message when no next message is available
         this.currentMessage = null
         this.isProcessingQueue = false
-        
-        // Process next message if available
-        if (this.messageQueue.length > 0) {
-          console.log(`📋 [NEEDSQUEUE] QUEUE: Processing next message in queue...`)
-          setTimeout(() => this.processNextMessage(), MESSAGE_DELAYS.QUEUE_PROCESSING) // Configurable delay between messages
-        } else {
-          console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
-        }
-      }, nextMessage.duration)
+        console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
+      }
     },
 
     // Clear messages of specific type/need
