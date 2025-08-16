@@ -195,7 +195,7 @@ onUnmounted(() => {
 <style>
 .gps-cage {
   width: 100%;
-  max-width: 75%;
+  /* max-width: 75%; */
   overflow: hidden;
 }
 

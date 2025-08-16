@@ -1,102 +1,149 @@
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, nextTick } from 'vue'
 import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 
 const needsQueueStore = useNeedsQueueStore()
 
-const shouldBounce = ref(false)
+// Keep track of recent messages for ticker effect
+const recentMessages = ref([])
+const maxMessages = 5 // Show up to 5 recent messages
+const tickerContainer = ref(null)
 
 // Get current display message from needsQueue (handles all logic)
 const currentStatus = computed(() => {
   return needsQueueStore.currentDisplayMessage
 })
 
-// Extract text and emoji from status display
-const statusText = computed(() => currentStatus.value.text)
-const statusEmoji = computed(() => currentStatus.value.emoji)
-
-// Watch for status changes and trigger bounce animation
-watch(() => currentStatus.value, (newValue, oldValue) => {
-  if (oldValue !== undefined) { // Don't trigger on initial mount
-    shouldBounce.value = true
-    setTimeout(() => {
-      shouldBounce.value = false
-    }, 2000) // Reset after animation duration
+// Watch for status changes and add to ticker
+watch(() => currentStatus.value, async (newValue, oldValue) => {
+  if (oldValue !== undefined && newValue && newValue.text) {
+    // Check if this message is the same as the most recent one
+    const isDuplicate = recentMessages.value.length > 0 && 
+                       recentMessages.value[0].text === newValue.text &&
+                       recentMessages.value[0].emoji === newValue.emoji
+    
+    // Only add if it's not a duplicate
+    if (!isDuplicate) {
+      // Create message object with unique ID for smooth transitions
+      const message = {
+        id: Date.now() + Math.random(),
+        text: newValue.text,
+        emoji: newValue.emoji,
+        timestamp: Date.now()
+      }
+      
+      // Add new message to the beginning of array
+      recentMessages.value.unshift(message)
+      
+      // Keep only the most recent messages
+      if (recentMessages.value.length > maxMessages) {
+        recentMessages.value = recentMessages.value.slice(0, maxMessages)
+      }
+      
+      // Trigger smooth scroll animation
+      await nextTick()
+      animateNewMessage()
+    }
   }
 }, { deep: true })
 
-// Initialize needs system on mount
+// Animate the entrance of a new message
+function animateNewMessage() {
+  if (tickerContainer.value) {
+    const firstMessage = tickerContainer.value.querySelector('.gps-status-marquee__message')
+    if (firstMessage) {
+      firstMessage.classList.add('gps-status-marquee__message--entering')
+      setTimeout(() => {
+        firstMessage.classList.remove('gps-status-marquee__message--entering')
+      }, 600)
+    }
+  }
+}
+
+// Initialize with current message if it exists
 onMounted(() => {
   console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
+  
+  if (currentStatus.value && currentStatus.value.text) {
+    recentMessages.value = [{
+      id: Date.now(),
+      text: currentStatus.value.text,
+      emoji: currentStatus.value.emoji,
+      timestamp: Date.now()
+    }]
+  }
 })
 
 </script>
 
 <template>
   <div class="gps-status-marquee">
-    <div class="gps-status-marquee__content">
-      <div class="gps-status-marquee__emoji-container">
-        <span class="gps-status-marquee__emoji" :class="{ 'gps-status-marquee__emoji--bounce': shouldBounce }">{{ statusEmoji }}</span>
-      </div>
-      <div class="gps-status-marquee__text-container">
-        <span class="gps-status-marquee__text">{{ statusText }}</span>
-      </div>
+    <div class="gps-status-marquee__ticker" ref="tickerContainer">
+      <transition-group name="ticker" tag="div" class="gps-status-marquee__messages">
+        <div 
+          v-for="message in recentMessages" 
+          :key="message.id"
+          class="gps-status-marquee__message"
+        >
+          <div class="gps-status-marquee__message-content">
+            <span class="gps-status-marquee__emoji">{{ message.emoji }}</span>
+            <span class="gps-status-marquee__text">{{ message.text }}</span>
+          </div>
+        </div>
+      </transition-group>
     </div>
   </div>
 </template>
 
 <style>
 .gps-status-marquee {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  background: linear-gradient(135deg, var(--color-panel), var(--color-border));
   border: 2px solid var(--color-accent-light);
   border-radius: var(--border-radius);
-  padding: 0.75rem 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-block-end: .5rem;
   position: relative;
+  width: 100%;
+  height: 60px;
+  overflow: hidden;
 }
 
-.gps-status-marquee__content {
+.gps-status-marquee__ticker {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.gps-status-marquee__messages {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+}
+
+.gps-status-marquee__message {
+  height: 60px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  padding: 0 1.5rem;
+  position: relative;
+  background: transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gps-status-marquee__message-content {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
-  position: relative;
-  z-index: 1;
-}
-
-.gps-status-marquee__emoji-container {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-.gps-status-marquee__text-container {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
 }
 
 .gps-status-marquee__emoji {
   font-size: 1.2em;
-}
-
-.gps-status-marquee__emoji--bounce {
-  animation: bounce 2s ease-in-out;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-5px);
-  }
-  60% {
-    transform: translateY(-3px);
-  }
+  flex-shrink: 0;
 }
 
 .gps-status-marquee__text {
@@ -111,13 +158,99 @@ onMounted(() => {
   line-height: 1.2;
 }
 
+/* News ticker animations */
+.ticker-enter-active {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ticker-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ticker-enter-from {
+  transform: translateY(60px);
+  opacity: 0;
+}
+
+.ticker-enter-to {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ticker-leave-from {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ticker-leave-to {
+  transform: translateY(-60px);
+  opacity: 0;
+}
+
+.ticker-move {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Entering message special animation */
+.gps-status-marquee__message--entering {
+  animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Subtle glow effect for newest message */
+.gps-status-marquee__message:first-child {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(var(--color-accent-rgb), 0.1) 50%, 
+    transparent 100%);
+}
+
+.gps-status-marquee__message:first-child .gps-status-marquee__text {
+  color: var(--color-accent);
+}
+
+/* Fade out older messages */
+.gps-status-marquee__message:nth-child(2) {
+  opacity: 0.8;
+}
+
+.gps-status-marquee__message:nth-child(3) {
+  opacity: 0.6;
+}
+
+.gps-status-marquee__message:nth-child(4) {
+  opacity: 0.4;
+}
+
+.gps-status-marquee__message:nth-child(5) {
+  opacity: 0.2;
+}
+
 /* Mobile-first responsive design */
 @media (max-width: 480px) {
   .gps-status-marquee {
-    padding: 0.5rem 1rem;
+    height: 50px;
   }
   
-  .gps-status-marquee__content {
+  .gps-status-marquee__message {
+    height: 50px;
+    padding: 0 1rem;
+  }
+  
+  .gps-status-marquee__message-content {
     gap: 0.5rem;
   }
   
@@ -128,11 +261,35 @@ onMounted(() => {
   .gps-status-marquee__text {
     font-size: 1em;
   }
+  
+  .ticker-enter-from,
+  .ticker-leave-to {
+    transform: translateY(50px);
+  }
+  
+  @keyframes slideUpFade {
+    0% {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 }
 
 @media (min-width: 768px) {
   .gps-status-marquee {
-    padding: 1rem 2rem;
+    height: 70px;
+  }
+  
+  .gps-status-marquee__message {
+    height: 70px;
+    padding: 0 2rem;
   }
   
   .gps-status-marquee__emoji {
@@ -141,6 +298,25 @@ onMounted(() => {
   
   .gps-status-marquee__text {
     font-size: 1.2em;
+  }
+  
+  .ticker-enter-from,
+  .ticker-leave-to {
+    transform: translateY(70px);
+  }
+  
+  @keyframes slideUpFade {
+    0% {
+      transform: translateY(70px);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 </style> 

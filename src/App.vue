@@ -131,8 +131,10 @@ function handleGameReset() {
       
       <div class="gps-app__content-area">
         <div class="gps-main" v-if="userStore.name">
-          <Cage />
-          <StatusMarquee />
+          <div class="gps-cage-status-wrapper">
+            <Cage />
+            <StatusMarquee />
+          </div>
           <CageControlsSection />
         </div>
       </div>
@@ -187,7 +189,13 @@ function handleGameReset() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+}
+
+.gps-cage-status-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
 }
 
 </style>

@@ -1,171 +1,162 @@
 <template>
   <div class="gps-cage-item-manager">
-    <div v-if="cageStore.items.length > 0" class="gps-cage-item-manager__actions">
-      <Button 
-        type="primary"
-        size="compact"
-        @click="showAddItemModal = true"
-        title="Add Item to Cage"
-      >
-        ➕ Add Item
-      </Button>
-      <Button 
-        type="secondary"
-        size="compact"
-        @click="placeItemsRandomly"
-        title="Place items randomly in cage"
-        :class="{ 'gps-button--disabled': !hasAnyItems }"
-      >
-        🎲 Random Place
-      </Button>
-      <Button 
-        type="warning"
-        size="compact"
-        @click="placeFoodRandomly"
-        title="Place random food items in cage"
-        :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
-      >
-        🥕 Feed Time
-      </Button>
+    <div class="gps-cage-item-manager__actions">
+      <h4 class="gps-cage-item-manager__actions-header">Quick Add Items</h4>
+      <div class="gps-cage-item-manager__actions-buttons">
+        <Button 
+          type="secondary"
+          size="compact"
+          @click="placeFurnitureRandomly"
+          title="Place furniture items randomly in cage"
+          :class="{ 'gps-button--disabled': !hasAnyFurnitureItems }"
+        >
+          🪑 Place Furniture
+        </Button>
+        <Button 
+          type="secondary"
+          size="compact"
+          @click="placeFoodRandomly"
+          title="Place food items randomly in cage"
+          :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
+        >
+          🥕 Place Food
+        </Button>
+        <Button 
+          type="secondary"
+          size="compact"
+          @click="placeChewsRandomly"
+          title="Place chew items randomly in cage"
+          :class="{ 'gps-button--disabled': !hasAnyChewItems }"
+        >
+          🦷 Place Chews
+        </Button>
+      </div>
     </div>
 
     <!-- Item Lists -->
-    <div v-if="cageStore.items.length === 0" class="gps-cage-item-manager__no-cage-items">
-      <div class="gps-cage-item-manager__no-cage-items-content">
-        <h4>No items in cage yet</h4>
-        <p>Add some items to your cage to get started!</p>
-        <div class="gps-cage-item-manager__first-item-actions">
-          <Button 
-            type="primary"
-            size="compact"
-            @click="showAddItemModal = true"
-          >
-            ➕ Add Your First Item
-          </Button>
-          <Button 
-            type="secondary"
-            size="compact"
-            @click="placeItemsRandomly"
-            title="Place items randomly in cage"
-            :class="{ 'gps-button--disabled': !hasAnyItems }"
-          >
-            🎲 Random Place
-          </Button>
-          <Button 
-            type="warning"
-            size="compact"
-            @click="placeFoodRandomly"
-            title="Place random food items in cage"
-            :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
-          >
-            🥕 Feed Time
-          </Button>
-        </div>
-      </div>
-    </div>
-    
-    <div v-else class="gps-cage-item-manager__sections">
-      <!-- Permanent Items -->
-      <div class="gps-cage-item-manager__section">
-        <h4 class="gps-cage-item-manager__section-title">🏠 Permanent Items</h4>
-        <div v-if="cageStore.permanentItems.length === 0" class="gps-cage-item-manager__empty">
-          No permanent items in cage
-        </div>
-        <div v-else class="gps-cage-item-manager__items">
-          <div 
-            v-for="item in cageStore.permanentItems" 
-            :key="item.id"
-            class="gps-cage-item-manager__item"
-          >
-            <div class="gps-cage-item-manager__item-info">
-              <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
+    <div>
+      <!-- Tabs for different item views -->
+      <Tabs :tabs="tabs" v-model="activeTab" variant="default">
+        <!-- Permanent Items Tab -->
+        <template #permanent>
+          <div class="gps-cage-item-manager__section">
+            <div v-if="cageStore.permanentItems.length === 0" class="gps-cage-item-manager__empty">
+              No permanent items in cage
             </div>
-            <div class="gps-cage-item-manager__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="moveItem(item)"
-                title="Move Item"
+            <div v-else class="gps-cage-item-manager__items">
+              <div 
+                v-for="item in cageStore.permanentItems" 
+                :key="item.id"
+                class="gps-cage-item-manager__item"
               >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="returnToInventory(item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
-              <Button 
-                type="danger"
-                size="compact"
-                @click="throwOutItem(item)"
-                title="Throw Out"
-              >
-                🗑️
-              </Button>
+                <div class="gps-cage-item-manager__item-info">
+                  <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
+                  <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
+                </div>
+                <div class="gps-cage-item-manager__item-actions">
+                  <Button 
+                    type="flat"
+                    size="compact"
+                    @click="moveItem(item)"
+                    title="Move Item"
+                  >
+                    📍
+                  </Button>
+                  <Button 
+                    type="flat"
+                    size="compact"
+                    @click="returnToInventory(item)"
+                    title="Return to Inventory"
+                  >
+                    📦
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
 
-      <!-- Consumable Items -->
-      <div class="gps-cage-item-manager__section">
-        <h4 class="gps-cage-item-manager__section-title">🍽️ Consumable Items</h4>
-        <div v-if="cageStore.consumableItems.length === 0" class="gps-cage-item-manager__empty">
-          No consumable items in cage
-        </div>
-        <div v-else class="gps-cage-item-manager__items">
-          <div 
-            v-for="item in cageStore.consumableItems" 
-            :key="item.id"
-            class="gps-cage-item-manager__item"
-          >
-            <div class="gps-cage-item-manager__item-info">
-              <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-manager__item-quantity">({{ item.quantity }})</span>
-              <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
+        <!-- Consumable Items Tab -->
+        <template #consumable>
+          <div class="gps-cage-item-manager__section">
+            <div v-if="cageStore.consumableItems.length === 0" class="gps-cage-item-manager__empty">
+              No consumable items in cage
             </div>
-            <div class="gps-cage-item-manager__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="consumeItem(item)"
-                :class="{ 'gps-button--disabled': isConsumptionDisabled }"
-                :title="getConsumptionDisabledReason"
+            <div v-else class="gps-cage-item-manager__items">
+              <div 
+                v-for="item in cageStore.consumableItems" 
+                :key="item.id"
+                class="gps-cage-item-manager__item"
               >
-                🍽️
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="moveItem(item)"
-                title="Move Item"
-              >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="returnToInventory(item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
-              <Button 
-                type="danger"
-                size="compact"
-                @click="throwOutItem(item)"
-                title="Throw Out"
-              >
-                🗑️
-              </Button>
+                <div class="gps-cage-item-manager__item-info">
+                  <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
+                  <span class="gps-cage-item-manager__item-quantity">({{ item.quantity }})</span>
+                  <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
+                </div>
+                <div class="gps-cage-item-manager__item-actions">
+                  <Button 
+                    type="flat"
+                    size="compact"
+                    @click="consumeItem(item)"
+                    :class="{ 'gps-button--disabled': isConsumptionDisabled }"
+                    :title="getConsumptionDisabledReason"
+                  >
+                    🍽️
+                  </Button>
+                  <Button 
+                    type="flat"
+                    size="compact"
+                    @click="moveItem(item)"
+                    title="Move Item"
+                  >
+                    📍
+                  </Button>
+                  <Button 
+                    type="flat"
+                    size="compact"
+                    @click="returnToInventory(item)"
+                    title="Return to Inventory"
+                  >
+                    📦
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
+
+        <!-- Inventory Tab -->
+        <template #inventory>
+          <div class="gps-cage-item-manager__section">
+            <div v-if="Object.keys(allInventoryItems).length === 0" class="gps-cage-item-manager__empty">
+              No items in inventory
+            </div>
+            <div v-else class="gps-cage-item-manager__items">
+              <div 
+                v-for="(item, itemName) in allInventoryItems" 
+                :key="itemName"
+                class="gps-cage-item-manager__item"
+              >
+                <div class="gps-cage-item-manager__item-info">
+                  <span class="gps-cage-item-manager__item-name">{{ formatItemName(itemName) }}</span>
+                  <span class="gps-cage-item-manager__item-quantity">({{ item.quantity }})</span>
+                  <span class="gps-cage-item-manager__item-type">{{ item.isConsumable ? 'Consumable' : 'Permanent' }}</span>
+                </div>
+                <div class="gps-cage-item-manager__item-actions">
+                  <Button 
+                    type="primary"
+                    size="compact"
+                    @click="addItemToCageFromInventory(itemName)"
+                    title="Add to Cage"
+                  >
+                    ➕ Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Tabs>
     </div>
 
     <!-- Add Item Modal -->
@@ -291,6 +282,7 @@ import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
 import Input from '../shared/Input.vue'
 import FormGroup from '../shared/FormGroup.vue'
+import Tabs from '../shared/Tabs.vue'
 
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
@@ -307,6 +299,9 @@ const itemY = ref(null)
 const itemToMove = ref(null)
 const moveX = ref(null)
 const moveY = ref(null)
+
+// Tab state
+const activeTab = ref(0)
 
 // Computed properties
 const availableConsumables = computed(() => {
@@ -347,6 +342,73 @@ const availableFoodItems = computed(() => {
 const hasAnyFoodItems = computed(() => {
   return Object.keys(availableFoodItems.value).length > 0
 })
+
+const availableFurnitureItems = computed(() => {
+  const furnitureItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if ((itemDefinitions[item].type === 'furniture' || itemDefinitions[item].type === 'shelter' || itemDefinitions[item].type === 'enrichment') && inventoryStore.items[item] > 0) {
+      furnitureItems[item] = inventoryStore.items[item]
+    }
+  })
+  return furnitureItems
+})
+
+const hasAnyFurnitureItems = computed(() => {
+  return Object.keys(availableFurnitureItems.value).length > 0
+})
+
+const availableChewItems = computed(() => {
+  const chewItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if (itemDefinitions[item].type === 'chew' && inventoryStore.items[item] > 0) {
+      chewItems[item] = inventoryStore.items[item]
+    }
+  })
+  return chewItems
+})
+
+const hasAnyChewItems = computed(() => {
+  return Object.keys(availableChewItems.value).length > 0
+})
+
+// All inventory items (not in cage)
+const allInventoryItems = computed(() => {
+  const allItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if (inventoryStore.items[item] > 0) {
+      allItems[item] = {
+        name: item,
+        quantity: inventoryStore.items[item],
+        isConsumable: itemDefinitions[item].isConsumable,
+        type: itemDefinitions[item].type,
+        ...itemDefinitions[item]
+      }
+    }
+  })
+  return allItems
+})
+
+// Tab configuration
+const tabs = computed(() => [
+  {
+    id: 'permanent',
+    label: 'Permanent Items',
+    icon: '🏠',
+    badge: cageStore.permanentItems.length || null
+  },
+  {
+    id: 'consumable',
+    label: 'Consumable Items', 
+    icon: '🍽️',
+    badge: cageStore.consumableItems.length || null
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    icon: '📦',
+    badge: Object.keys(allInventoryItems.value).length || null
+  }
+])
 
 // Check if consumption should be disabled (hunger is full or guinea pig is sleeping)
 // Use same rounding logic as NeedsNav to prevent button state mismatch
@@ -560,12 +622,12 @@ function returnToInventory(item) {
   inventoryStore.addItem(item.name, 1)
 }
 
-function throwOutItem(item) {
-  const confirmed = confirm(`Are you sure you want to throw out ${formatItemName(item.name)}? This action cannot be undone.`)
-  if (confirmed) {
-    cageStore.removeItem(item.id)
-  }
+function addItemToCageFromInventory(itemName) {
+  // Set the selected item and show the add item modal
+  selectedItem.value = itemName
+  showAddItemModal.value = true
 }
+
 
 // Check if an item can fit at a specific position
 function canItemFitAtPosition(itemSize, x, y) {
@@ -613,27 +675,24 @@ function getAvailablePositionsForItem(itemSize) {
   return availablePositions
 }
 
-// Place items randomly in the cage
-function placeItemsRandomly() {
-  if (!hasAnyItems.value) {
-    alert('No items available in inventory! Visit the Market to buy items first.')
+// Place furniture items randomly in the cage
+function placeFurnitureRandomly() {
+  if (!hasAnyFurnitureItems.value) {
+    alert('No furniture items available in inventory! Visit the Market to buy furniture first.')
     return
   }
   
-  // Get a random selection of items to place (3-6 items)
-  const allAvailableItems = [
-    ...Object.keys(availableConsumables.value),
-    ...Object.keys(availablePermanents.value)
-  ]
+  // Get all available furniture items
+  const allAvailableFurnitureItems = Object.keys(availableFurnitureItems.value)
   
-  if (allAvailableItems.length === 0) {
-    alert('No items available in inventory!')
+  if (allAvailableFurnitureItems.length === 0) {
+    alert('No furniture items available in inventory!')
     return
   }
   
-  // Decide how many items to place (between 1 and min(6, available items))
-  const maxItems = Math.min(6, allAvailableItems.length)
-  const numItemsToPlace = Math.max(1, Math.min(maxItems, 3 + Math.floor(Math.random() * 4)))
+  // Decide how many furniture items to place (between 1 and min(4, available furniture items))
+  const maxItems = Math.min(4, allAvailableFurnitureItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 3)))
   
   let placedItems = 0
   let attempts = 0
@@ -642,8 +701,8 @@ function placeItemsRandomly() {
   while (placedItems < numItemsToPlace && attempts < maxAttempts) {
     attempts++
     
-    // Pick a random item
-    const randomItemName = allAvailableItems[Math.floor(Math.random() * allAvailableItems.length)]
+    // Pick a random furniture item
+    const randomItemName = allAvailableFurnitureItems[Math.floor(Math.random() * allAvailableFurnitureItems.length)]
     const itemDef = itemDefinitions[randomItemName]
     
     if (!itemDef) continue
@@ -674,9 +733,9 @@ function placeItemsRandomly() {
   }
   
   if (placedItems > 0) {
-    alert(`Successfully placed ${placedItems} item${placedItems === 1 ? '' : 's'} randomly in the cage!`)
+    alert(`Successfully placed ${placedItems} furniture item${placedItems === 1 ? '' : 's'} randomly in the cage! 🪑`)
   } else {
-    alert('Could not place any items. Try cleaning up the cage or check your inventory.')
+    alert('Could not place any furniture items. Try cleaning up the cage or check your furniture inventory.')
   }
 }
 
@@ -744,6 +803,70 @@ function placeFoodRandomly() {
   }
 }
 
+// Place chew items randomly in the cage
+function placeChewsRandomly() {
+  if (!hasAnyChewItems.value) {
+    alert('No chew items available in inventory! Visit the Market to buy chew toys first.')
+    return
+  }
+  
+  // Get all available chew items
+  const allAvailableChewItems = Object.keys(availableChewItems.value)
+  
+  if (allAvailableChewItems.length === 0) {
+    alert('No chew items available in inventory!')
+    return
+  }
+  
+  // Decide how many chew items to place (between 1 and min(3, available chew items))
+  const maxItems = Math.min(3, allAvailableChewItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 2)))
+  
+  let placedItems = 0
+  let attempts = 0
+  const maxAttempts = 100 // Prevent infinite loops
+  
+  while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+    attempts++
+    
+    // Pick a random chew item
+    const randomItemName = allAvailableChewItems[Math.floor(Math.random() * allAvailableChewItems.length)]
+    const itemDef = itemDefinitions[randomItemName]
+    
+    if (!itemDef) continue
+    
+    // Get available positions for this specific item size
+    const availablePositions = getAvailablePositionsForItem(itemDef.size)
+    
+    if (availablePositions.length === 0) {
+      // This item can't fit anywhere, try another item
+      continue
+    }
+    
+    // Pick a random available position that can fit this item
+    const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
+    
+    // Try to place the item
+    const success = cageStore.addItem({
+      name: randomItemName,
+      type: itemDef.type,
+      isConsumable: itemDef.isConsumable,
+      size: itemDef.size
+    }, randomPos.x, randomPos.y)
+    
+    if (success) {
+      inventoryStore.removeItem(randomItemName, 1)
+      placedItems++
+    }
+  }
+  
+  if (placedItems > 0) {
+    alert(`Successfully placed ${placedItems} chew item${placedItems === 1 ? '' : 's'} randomly in the cage! 🦷`)
+  } else {
+    alert('Could not place any chew items. Try cleaning up the cage or check your chew inventory.')
+  }
+}
+
 </script>
 
 <style>
@@ -754,10 +877,29 @@ function placeFoodRandomly() {
 }
 
 .gps-cage-item-manager__actions {
+  margin-block-end: 1rem;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.gps-cage-item-manager__actions-header {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  margin: 0 0 0.75rem 0;
+}
+
+.gps-cage-item-manager__actions-buttons {
   display: flex;
   gap: 0.5rem;
-  margin-block-end: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
+}
+
+.gps-cage-item-manager__actions-buttons .gps-button {
+  border-color: var(--color-border-light);
 }
 
 .gps-cage-item-manager__sections {
@@ -833,6 +975,13 @@ function placeFoodRandomly() {
   font-size: var(--font-size-xs);
 }
 
+.gps-cage-item-manager__item-type {
+  color: var(--color-accent);
+  opacity: 0.8;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
 .gps-cage-item-manager__item-actions {
   display: flex;
   gap: 0.25rem;
@@ -877,37 +1026,11 @@ function placeFoodRandomly() {
   color: var(--color-accent);
 }
 
-.gps-cage-item-manager__first-item-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.gps-cage-item-manager__no-cage-items {
-  background: var(--color-panel);
-  border-radius: var(--border-radius);
-  padding: 2rem 1.5rem;
-}
-
-.gps-cage-item-manager__no-cage-items-content h4 {
-  color: var(--color-accent);
-  font-size: var(--font-size-base);
-  margin: 0 0 0.75rem 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-.gps-cage-item-manager__no-cage-items-content p {
-  color: var(--color-text);
-  opacity: 0.8;
-  margin: 0 0 1.5rem 0;
-  font-size: var(--font-size-sm);
-}
 
 /* Tablet and above constraints */
 @media (min-width: 768px) {
   .gps-cage-item-manager {
-    max-width: 500px;
+    /* max-width: 500px; */
   }
   
   .gps-cage-item-manager__sections {

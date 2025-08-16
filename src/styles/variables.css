@@ -1,11 +1,12 @@
 :root {
   /* Dark theme (default) */
   --color-bg: #181a1b;
-  --color-text: #f5f6fa;
+  --color-text: hsl(228, 33%, 97%);
   --color-panel: #23272a;
   --color-border: #333;
   --color-accent: #42b883;
   --color-accent-hover: #369870;
+  --color-accent-dark: #024527;
   --color-danger: #e74c3c;
   --color-danger-hover: #c0392b;
   --color-warning: #e67e22;

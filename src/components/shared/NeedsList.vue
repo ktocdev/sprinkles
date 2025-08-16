@@ -272,7 +272,7 @@ function getStatusColor(status) {
   
   .gps-needs-list__item-text {
     flex: 1;
-    font-size: var(--font-size-base);
+    font-size: var(--font-sm);
   }
   
   .gps-needs-list__item-status-bar {
