@@ -25,13 +25,15 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     lastUpdate: Date.now(),
     updateInterval: 1000, // 1 second in milliseconds
     isActive: true,
-    updateTimer: null, // Timer for continuous updates
     timerPaused: false, // Track if timer is paused
+    
+    // Non-persisted timer (set in memory only)
+    _updateTimer: null, // Timer for continuous updates (not persisted)
     
     // Message Queue System
     messageQueue: [], // Array of message objects waiting to be displayed
     currentMessage: null, // Currently displayed message
-    messageTimer: null, // Timer for current message
+    _messageTimer: null, // Timer for current message (not persisted)
     isProcessingQueue: false, // Flag to prevent concurrent processing
     messageIdCounter: 0, // Simple counter for unique message IDs
     fallbackMessage: null, // Fallback message when queue is empty
@@ -281,10 +283,10 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.isActive = true
       this.lastUpdate = Date.now()
       
-      // Clear any stale timer ID from persisted state
-      if (this.updateTimer) {
-        clearInterval(this.updateTimer)
-        this.updateTimer = null
+      // Clear any stale timer from persisted state or memory
+      if (this._updateTimer) {
+        clearInterval(this._updateTimer)
+        this._updateTimer = null
       }
       
       // Initialize all need stores
@@ -310,7 +312,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.updateQueue()
       
       // Start the timer for continuous updates
-      this.updateTimer = setInterval(() => {
+      this._updateTimer = setInterval(() => {
         if (this.isActive && !this.timerPaused) {
           this.updateAllNeeds()
         }
@@ -321,9 +323,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.isActive = false
       
       // Clear the timer
-      if (this.updateTimer) {
-        clearInterval(this.updateTimer)
-        this.updateTimer = null
+      if (this._updateTimer) {
+        clearInterval(this._updateTimer)
+        this._updateTimer = null
       }
       this.timerPaused = false
       
@@ -350,7 +352,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.lastUpdate = Date.now()
       
       // Just update the queue display without degrading
-      if (this.isActive && this.updateTimer) {
+      if (this.isActive && this._updateTimer) {
         this.updateQueue()
       }
     },
@@ -477,10 +479,10 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           // High priority messages should interrupt current message and start immediately
           console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
           
-          if (this.isProcessingQueue && this.messageTimer) {
+          if (this.isProcessingQueue && this._messageTimer) {
             // Clear current message timer to force immediate processing of high priority message
-            clearTimeout(this.messageTimer)
-            this.messageTimer = null
+            clearTimeout(this._messageTimer)
+            this._messageTimer = null
             this.currentMessage = null
             this.isProcessingQueue = false
             console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
@@ -591,12 +593,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.logQueueStatus()
       
       // Clear any existing timer
-      if (this.messageTimer) {
-        clearTimeout(this.messageTimer)
+      if (this._messageTimer) {
+        clearTimeout(this._messageTimer)
       }
       
       // Set timer to process next message
-      this.messageTimer = setTimeout(() => {
+      this._messageTimer = setTimeout(() => {
         console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${message.text}"`)
         this.finishCurrentMessage()
       }, message.duration)
@@ -643,12 +645,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.logQueueStatus()
       
       // Clear any existing timer
-      if (this.messageTimer) {
-        clearTimeout(this.messageTimer)
+      if (this._messageTimer) {
+        clearTimeout(this._messageTimer)
       }
       
       // Set timer for this step
-      this.messageTimer = setTimeout(() => {
+      this._messageTimer = setTimeout(() => {
         console.log(`📢 [NEEDSQUEUE] CHAIN: Finished step ${chainMessage.currentIndex + 1}: "${currentStep.text}"`)
         
         // Move to next step in chain
@@ -701,9 +703,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.currentMessage = null
       this.isProcessingQueue = false
       
-      if (this.messageTimer) {
-        clearTimeout(this.messageTimer)
-        this.messageTimer = null
+      if (this._messageTimer) {
+        clearTimeout(this._messageTimer)
+        this._messageTimer = null
       }
       
       console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared all messages`)
@@ -864,8 +866,24 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       console.log(`📋 [NEEDSQUEUE] QUEUE: ${this.messageQueue.length} messages in queue:`)
       this.messageQueue.slice(0, 5).forEach((msg, index) => {
-        const truncatedText = msg.text.length > 30 ? msg.text.substring(0, 30) + '...' : msg.text
-        console.log(`  ${index + 1}. [P${msg.priority}] ${msg.type}: "${truncatedText}" ${msg.emoji} (${msg.duration}ms)`)
+        let displayText = 'No text'
+        let displayEmoji = '❓'
+        let displayDuration = 0
+        
+        if (msg.type === 'chain' && msg.messages && msg.messages.length > 0) {
+          // For chain messages, show summary of chain
+          const firstMsg = msg.messages[0]
+          displayText = `Chain: ${firstMsg.text || 'Unknown'} (+${msg.messages.length - 1} more)`
+          displayEmoji = firstMsg.emoji || '🔗'
+          displayDuration = msg.totalDuration || 0
+        } else if (msg.text) {
+          // For regular messages
+          displayText = msg.text.length > 30 ? msg.text.substring(0, 30) + '...' : msg.text
+          displayEmoji = msg.emoji || '❓'
+          displayDuration = msg.duration || 0
+        }
+        
+        console.log(`  ${index + 1}. [P${msg.priority}] ${msg.type}: "${displayText}" ${displayEmoji} (${displayDuration}ms)`)
       })
       
       if (this.messageQueue.length > 5) {

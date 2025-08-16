@@ -28,7 +28,6 @@ watch(() => currentStatus.value, (newValue, oldValue) => {
 // Initialize needs system on mount
 onMounted(() => {
   console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
-  // No need to initialize statusStore anymore - needsQueue handles everything
 })
 
 </script>

@@ -16,9 +16,11 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     lastStatusChange: Date.now(),
     pendingStatusMessages: [], // Messages waiting to be processed by needsQueue
     
-    // Auto-transition timers
-    statusTimer: null,
+    // Auto-transition timers (not persisted to avoid memory leaks)
     isPaused: false, // Track if guinea pig system is paused
+    
+    // Non-persisted timer (set in memory only)
+    _statusTimer: null, // Timer for status transitions (not persisted)
     
     // Movement control
     canMove: true, // Whether the guinea pig is allowed to move physically
@@ -218,7 +220,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       // Set up random transition timing (5-15 seconds)
       const delay = 5000 + Math.random() * 10000
       
-      this.statusTimer = setTimeout(() => {
+      this._statusTimer = setTimeout(() => {
         this.performRandomTransition()
       }, delay)
       
@@ -274,9 +276,9 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Clear status transition timer
     clearStatusTimer() {
-      if (this.statusTimer) {
-        clearTimeout(this.statusTimer)
-        this.statusTimer = null
+      if (this._statusTimer) {
+        clearTimeout(this._statusTimer)
+        this._statusTimer = null
       }
     },
     
