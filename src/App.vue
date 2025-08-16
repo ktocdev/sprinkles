@@ -109,7 +109,7 @@ function handleGameReset() {
 
 <template>
   <div class="gps-app">
-    <TopBar v-if="userStore.name" @openGuineaPigInfo="openGuineaPigInfo" />
+    <TopBar v-if="userStore.name" @openGuineaPigInfo="openGuineaPigInfo" @gameReset="handleGameReset" />
     
     <!-- Needs Navigation (desktop: horizontal, mobile: fixed right) -->
     <NeedsNav v-if="userStore.name" />

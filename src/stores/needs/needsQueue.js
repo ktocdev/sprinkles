@@ -117,16 +117,26 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
-      // Default wellness message from wellness store
-      const wellnessStore = this.getNeedStore('wellness')
-      if (wellnessStore) {
-        const wellnessText = wellnessStore.getWellnessMessage()
-        const wellnessEmoji = wellnessStore.getWellnessEmoji()
-        console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
-        return {
-          text: wellnessText,
-          emoji: wellnessEmoji
+      // Default wellness message from wellness store (unless guinea pig is sleeping)
+      try {
+        const guineaPigStore = useGuineaPigStore()
+        if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
+          console.log(`💤 [NEEDSQUEUE] FALLBACK: Skipping wellness message - guinea pig is sleeping`)
+        } else {
+          const wellnessStore = this.getNeedStore('wellness')
+          if (wellnessStore) {
+            const wellnessText = wellnessStore.getWellnessMessage()
+            const wellnessEmoji = wellnessStore.getWellnessEmoji()
+            console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
+            return {
+              text: wellnessText,
+              emoji: wellnessEmoji
+            }
+          }
         }
+      } catch (error) {
+        console.warn(`💤 [NEEDSQUEUE] FALLBACK: Could not check guinea pig status for wellness:`, error)
+        // Fall through to final fallback if there's an error
       }
       
       // Final fallback - use guinea pig store directly
@@ -765,6 +775,17 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
 
     // Efficiently check urgency messages for all needs in a single batch
     checkAllUrgencyMessages() {
+      // Don't show urgency messages if guinea pig is sleeping
+      try {
+        const guineaPigStore = useGuineaPigStore()
+        if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
+          console.log(`💤 [NEEDSQUEUE] URGENCY: Skipping all urgency messages - guinea pig is sleeping`)
+          return
+        }
+      } catch (error) {
+        console.warn(`💤 [NEEDSQUEUE] URGENCY: Could not check guinea pig status:`, error)
+      }
+      
       const now = Date.now()
       const readyNeeds = []
       

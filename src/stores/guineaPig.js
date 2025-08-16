@@ -336,6 +336,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Add poop-related message
     addPoopMessage(type) {
+      // Don't add poop messages if guinea pig is sleeping
+      if (this.currentStatus === 'sleeping') {
+        console.log(`💤 [GUINEAPIG] POOP: Skipping ${type} poop message - guinea pig is sleeping`)
+        return
+      }
+      
       const messages = this.poopMessages[type] || []
       if (messages.length === 0) return
       
@@ -364,6 +370,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Handle poop creation (called when guinea pig makes poop)
     handlePoopCreated() {
+      // Don't show poop messages if guinea pig is sleeping
+      if (this.currentStatus === 'sleeping') {
+        console.log(`💤 [GUINEAPIG] POOP: Skipping poop messages - guinea pig is sleeping`)
+        return
+      }
+      
       const needsQueueStore = useNeedsQueueStore()
       
       // Get random messages for the chain
