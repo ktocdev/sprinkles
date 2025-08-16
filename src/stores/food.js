@@ -28,7 +28,7 @@ export const useFoodStore = defineStore('food', {
         priority: 1,
         itemType: 'food',
         description: 'Nutritious processed food',
-        emoji: '🍽️'
+        emoji: '🟤'
       },
       lettuce: {
         name: 'lettuce',

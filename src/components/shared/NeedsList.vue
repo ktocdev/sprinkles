@@ -275,10 +275,6 @@ function getStatusColor(status) {
     padding: 1rem 1.25rem;
   }
   
-  .gps-needs-list__item-text {
-    font-size: var(--font-size-md);
-  }
-  
   .gps-needs-list__item-urgency {
     font-size: var(--font-size-base);
   }

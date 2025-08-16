@@ -6,6 +6,8 @@ import { useCageStore } from '../cage.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
+import { useNeedsQueueStore } from './needsQueue.js'
+import { getMessageIntervals } from './messageFrequencyConfig.js'
 
 export const useHungerStore = defineStore('hunger', {
   state: () => ({
@@ -97,14 +99,10 @@ export const useHungerStore = defineStore('hunger', {
       ]
     },
     
-    // Message configuration
+    // Message configuration using centralized frequency settings
     messageConfig: {
       emoji: '🍽️',
-      intervals: {
-        normal: 18000,    // 18 seconds
-        urgent: 12000,     // 12 seconds  
-        critical: 8000    // 8 seconds
-      }
+      intervals: getMessageIntervals('hunger')
     },
     
     // Color theming for hunger
@@ -122,11 +120,11 @@ export const useHungerStore = defineStore('hunger', {
 
   getters: {
     isUrgent() {
-      return this.currentValue <= 60 
+      return this.currentValue >= 50 && this.currentValue < 70
     },
     
     isCritical() {
-      return this.currentValue <= 40 
+      return this.currentValue < 50
     },
     
     isFulfilled() {
@@ -196,35 +194,33 @@ export const useHungerStore = defineStore('hunger', {
 
       // Show both food consumption and reaction messages when food is consumed 
       if (actualImprovement > 0) {
-        import('./needsQueue.js').then(({ useNeedsQueueStore }) => {
-          const needsQueueStore = useNeedsQueueStore()
-          const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-          
-          // Create a message chain for fulfillment + reaction
-          const eatingReaction = this.getRandomReaction('eating')
-          const messageChain = [
-            {
-              text: `Ate ${itemDisplayName}`,
-              emoji: '🍽️',
-              duration: MESSAGE_DURATIONS.FULFILLMENT,
-              type: 'fulfillment'
-            }
-          ]
-          
-          // Add reaction to chain if available
-          if (eatingReaction) {
-            console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
-            messageChain.push({
-              text: eatingReaction.message,
-              emoji: '🐹',
-              duration: MESSAGE_DURATIONS.REACTION,
-              type: 'reaction'
-            })
+        const needsQueueStore = useNeedsQueueStore()
+        const itemDisplayName = methodName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        
+        // Create a message chain for fulfillment + reaction
+        const eatingReaction = this.getRandomReaction('eating')
+        const messageChain = [
+          {
+            text: `Ate ${itemDisplayName}`,
+            emoji: '🍽️',
+            duration: MESSAGE_DURATIONS.FULFILLMENT,
+            type: 'fulfillment'
           }
-          
-          // Add the complete chain as a single high-priority unit
-          needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
-        })
+        ]
+        
+        // Add reaction to chain if available
+        if (eatingReaction) {
+          console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+          messageChain.push({
+            text: eatingReaction.message,
+            emoji: '🐹',
+            duration: MESSAGE_DURATIONS.REACTION,
+            type: 'reaction'
+          })
+        }
+        
+        // Add the complete chain as a single high-priority unit
+        needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
         
         console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         

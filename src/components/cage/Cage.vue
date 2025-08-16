@@ -3,10 +3,12 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import { usePoopStore } from '../../stores/poop'
+import { useFoodStore } from '../../stores/food'
 
 const cageStore = useCageStore()
 const guineaPigStore = useGuineaPigStore()
 const poopStore = usePoopStore()
+const foodStore = useFoodStore()
 
 const grid = computed(() => cageStore.grid)
 const width = computed(() => cageStore.size.width)
@@ -23,13 +25,9 @@ function cellContent(cell, x, y) {
     // Return appropriate emoji based on specific item name
     const itemName = cell.name
     
-    // Food items
-    if (itemName === 'hay') return '🌾'
-    if (itemName === 'pellets') return '🟤'
-    if (itemName === 'lettuce') return '🥬'
-    if (itemName === 'blueberries') return '🫐'
-    if (itemName === 'carrots') return '🥕'
-    if (itemName === 'cucumbers') return '🥒'
+    // Food items - get emoji from food store
+    const food = foodStore.getFoodByName(itemName)
+    if (food) return food.emoji
     
     // Bedding
     if (itemName === 'bedding') return '🛏️'
@@ -98,10 +96,7 @@ function moveGuineaPig() {
     const poopAtNewPos = poopStore.isPoopAtPosition(next.x, next.y)
     if (poopAtNewPos) {
       const interaction = cageStore.interactWithPoop()
-      // Notify guinea pig store if stepped on old poop
-      if (interaction.success && interaction.hygieneImpact > 0) {
-        guineaPigStore.handlePoopStepped()
-      }
+      // Poop store now handles all messaging through message chains
     }
     
     // Drop a poop if it's time and game is not paused

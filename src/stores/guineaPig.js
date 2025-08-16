@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { MESSAGE_DURATIONS, MESSAGE_PRIORITIES } from './needs/messageTimingConfig.js'
+import { useNeedsQueueStore } from './needs/needsQueue.js'
 
 export const useGuineaPigStore = defineStore('guineaPig', {
   state: () => ({
@@ -16,9 +17,11 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     lastStatusChange: Date.now(),
     pendingStatusMessages: [], // Messages waiting to be processed by needsQueue
     
-    // Auto-transition timers
-    statusTimer: null,
+    // Auto-transition timers (not persisted to avoid memory leaks)
     isPaused: false, // Track if guinea pig system is paused
+    
+    // Non-persisted timer (set in memory only)
+    _statusTimer: null, // Timer for status transitions (not persisted)
     
     // Movement control
     canMove: true, // Whether the guinea pig is allowed to move physically
@@ -118,26 +121,13 @@ export const useGuineaPigStore = defineStore('guineaPig', {
   }),
   
   getters: {
-    // Legacy compatibility getters
-    sitting() {
-      return this.currentStatus === 'sitting'
-    },
-    
-    moving() {
-      return this.currentStatus === 'moving'
-    },
-    
-    sleeping() {
-      return this.currentStatus === 'sleeping'
-    },
-    
     currentEmoji() {
       return this.statusEmojis[this.currentStatus] || '🐹'
     },
     
     currentMessage() {
       const messages = this.statusMessages[this.currentStatus] || []
-      return messages[Math.floor(Math.random() * messages.length)] || 'Guinea pig is here.'
+      return messages[Math.floor(Math.random() * messages.length)] || 'The guinea pig is sitting.'
     }
   },
   
@@ -148,14 +138,6 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }
     },
     
-    // Legacy compatibility method
-    setSitting(sitting) {
-      if (sitting && this.currentStatus !== 'sitting') {
-        this.changeStatus('sitting')
-      } else if (!sitting && this.currentStatus === 'sitting') {
-        this.changeStatus('moving')
-      }
-    },
     
     // Change status and trigger messaging
     changeStatus(newStatus) {
@@ -239,7 +221,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       // Set up random transition timing (5-15 seconds)
       const delay = 5000 + Math.random() * 10000
       
-      this.statusTimer = setTimeout(() => {
+      this._statusTimer = setTimeout(() => {
         this.performRandomTransition()
       }, delay)
       
@@ -295,9 +277,9 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Clear status transition timer
     clearStatusTimer() {
-      if (this.statusTimer) {
-        clearTimeout(this.statusTimer)
-        this.statusTimer = null
+      if (this._statusTimer) {
+        clearTimeout(this._statusTimer)
+        this._statusTimer = null
       }
     },
     
@@ -347,18 +329,33 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Handle poop creation (called when guinea pig makes poop)
     handlePoopCreated() {
-      this.addPoopMessage('fresh')
+      const needsQueueStore = useNeedsQueueStore()
       
-      // Add a reaction message after a short delay
-      setTimeout(() => {
-        this.addPoopMessage('reaction')
-      }, MESSAGE_DURATIONS.POOP + 100) // Show reaction after poop message
+      // Get random messages for the chain
+      const freshMessage = this.poopMessages.fresh[Math.floor(Math.random() * this.poopMessages.fresh.length)]
+      const reactionMessage = this.poopMessages.reaction[Math.floor(Math.random() * this.poopMessages.reaction.length)]
+      
+      const messageChain = [
+        {
+          text: freshMessage,
+          emoji: '💩',
+          duration: MESSAGE_DURATIONS.POOP,
+          type: 'poop_creation'
+        },
+        {
+          text: reactionMessage,
+          emoji: '🐹',
+          duration: MESSAGE_DURATIONS.REACTION,
+          type: 'reaction'
+        }
+      ]
+      
+      // Add the complete chain as a single high-priority unit
+      needsQueueStore.addMessageChain(messageChain, 1, 'poop')
+      
+      console.log(`💩 [GUINEAPIG] POOP: Created poop with chain: "${freshMessage}" → "${reactionMessage}"`)
     },
     
-    // Handle stepping on old poop
-    handlePoopStepped() {
-      this.addPoopMessage('old')
-    },
     
     // Update movement control based on status
     updateMovementControl(status) {
