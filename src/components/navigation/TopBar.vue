@@ -1,10 +1,13 @@
 <script setup>
 import { defineEmits } from 'vue'
 import Button from '../shared/Button.vue'
+import { getActivePinia } from 'pinia'
 import { useCageStore } from '../../stores/cage'
+import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
 
 const cageStore = useCageStore()
-const emit = defineEmits(['openGuineaPigInfo'])
+const needsQueueStore = useNeedsQueueStore()
+const emit = defineEmits(['openGuineaPigInfo', 'gameReset'])
 
 function togglePause() {
   cageStore.togglePause()
@@ -12,6 +15,40 @@ function togglePause() {
 
 function openGuineaPigInfo() {
   emit('openGuineaPigInfo')
+}
+
+function resetGame() {
+  if (window.confirm('Are you to start a new game? All progess will be lost.')) {
+    // Stop needs system before reset
+    needsQueueStore.stopNeedsSystem()
+    
+    // Reset all stores automatically using Pinia's active store registry
+    const pinia = getActivePinia()
+    if (pinia && pinia._s) {
+      pinia._s.forEach((store, storeId) => {
+        try {
+          store.$reset()
+          console.log(`✅ Reset store: ${storeId}`)
+        } catch (error) {
+          console.warn(`❌ Failed to reset store "${storeId}":`, error)
+        }
+      })
+    }
+    
+    // Clear all persisted state from localStorage
+    Object.keys(localStorage).forEach(key => {
+      localStorage.removeItem(key)
+    })
+    
+    // Restart needs system after everything is reset
+    needsQueueStore.startNeedsSystem()
+    
+    // Pause the game so user has to click "Play" to start
+    cageStore.pauseGame()
+    
+    // Emit event to notify parent about reset
+    emit('gameReset')
+  }
 }
 </script>
 
@@ -34,6 +71,15 @@ function openGuineaPigInfo() {
          <Button 
            type="flat"
            size="compact"
+           @click="resetGame"
+           class="gps-topbar__reset-button"
+           title="New Game"
+         >
+           🆕 New Game
+         </Button>
+         <Button 
+           type="flat"
+           size="compact"
            @click="togglePause"
            class="gps-topbar__pause-button"
            :title="cageStore.paused ? 'Resume Game' : 'Pause Game'"
@@ -51,7 +97,7 @@ function openGuineaPigInfo() {
   background: var(--color-panel);
   border-block-end: 2px solid var(--color-accent);
   box-shadow: var(--box-shadow);
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   z-index: 100;
@@ -118,6 +164,11 @@ function openGuineaPigInfo() {
   align-items: center;
 }
 
+.gps-topbar__reset-button {
+  font-size: var(--font-size-sm);
+  padding: 0.25rem 0.75rem;
+}
+
 .gps-topbar__pause-button {
   font-size: var(--font-size-sm);
   padding: 0.25rem 0.75rem;
@@ -130,6 +181,10 @@ function openGuineaPigInfo() {
   
   .gps-topbar__controls {
     gap: 0.25rem;
+  }
+  
+  .gps-topbar__reset-button {
+    padding: 0.25rem 0.5rem;
   }
   
   .gps-topbar__pause-button {
@@ -177,6 +232,11 @@ function openGuineaPigInfo() {
   
   .gps-topbar__title {
     font-size: var(--font-size-2xl);
+  }
+  
+  .gps-topbar__reset-button {
+    padding: 0.5rem 1rem;
+    font-size: var(--font-size-base);
   }
   
   .gps-topbar__pause-button {

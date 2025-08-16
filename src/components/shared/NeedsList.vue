@@ -103,19 +103,37 @@ function getNeedColor(item) {
       }
     }
     
-    // Use status-specific color if available
-    if (item.colors[item.status]) {
-      return item.colors[item.status]
+    // For urgent and critical status, apply overlays to the need's gradient
+    if (item.status === 'urgent' || item.status === 'critical') {
+      const overlayColor = item.status === 'urgent' ? 'rgba(230, 126, 34, 0.3)' : 'rgba(231, 76, 60, 0.4)'
+      
+      // Use gradient if available, with status overlay
+      if (item.colors.gradient && item.colors.gradient.length >= 2) {
+        return `linear-gradient(90deg, ${item.colors.gradient.join(', ')}), linear-gradient(90deg, ${overlayColor}, ${overlayColor})`
+      }
+      
+      // Use primary color with status overlay
+      if (item.colors.primary) {
+        return `linear-gradient(90deg, ${item.colors.primary}, ${item.colors.primary}), linear-gradient(90deg, ${overlayColor}, ${overlayColor})`
+      }
     }
     
-    // Use gradient if available
-    if (item.colors.gradient && item.colors.gradient.length >= 2) {
-      return `linear-gradient(90deg, ${item.colors.gradient.join(', ')})`
-    }
-    
-    // Use primary color
-    if (item.colors.primary) {
-      return item.colors.primary
+    // For normal and fulfilled status, use pure need colors
+    if (item.status === 'normal' || item.status === 'fulfilled') {
+      // Prioritize gradient to maintain need's color identity
+      if (item.colors.gradient && item.colors.gradient.length >= 2) {
+        return `linear-gradient(90deg, ${item.colors.gradient.join(', ')})`
+      }
+      
+      // Use status-specific color as fallback
+      if (item.colors[item.status]) {
+        return item.colors[item.status]
+      }
+      
+      // Use primary color as final fallback
+      if (item.colors.primary) {
+        return item.colors.primary
+      }
     }
   }
   

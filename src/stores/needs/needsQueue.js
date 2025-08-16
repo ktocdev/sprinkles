@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
 import { useWellnessStore } from './wellness.js'
+import { useSleepStore } from './sleep.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { useMarketStore } from '../market.js'
@@ -49,7 +50,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       },
       hunger: {
         allowAllLevels: true,    // Show messages at normal level too
-        enableDebugLogs: false   // Standard logging for hunger
+        enableDebugLogs: true    // Enable detailed logging for hunger
+      },
+      sleep: {
+        allowAllLevels: false,   // Never show urgency messages for sleep
+        enableDebugLogs: true,   // Enable detailed logging for sleep
+        noUrgencyMessages: false // Temporarily enable urgency messages for testing
       }
       // Add more special configurations here as needed:
       // love: { priorityBoost: 1 }
@@ -111,16 +117,26 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         }
       }
       
-      // Default wellness message from wellness store
-      const wellnessStore = this.getNeedStore('wellness')
-      if (wellnessStore) {
-        const wellnessText = wellnessStore.getWellnessMessage()
-        const wellnessEmoji = wellnessStore.getWellnessEmoji()
-        console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
-        return {
-          text: wellnessText,
-          emoji: wellnessEmoji
+      // Default wellness message from wellness store (unless guinea pig is sleeping)
+      try {
+        const guineaPigStore = useGuineaPigStore()
+        if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
+          console.log(`💤 [NEEDSQUEUE] FALLBACK: Skipping wellness message - guinea pig is sleeping`)
+        } else {
+          const wellnessStore = this.getNeedStore('wellness')
+          if (wellnessStore) {
+            const wellnessText = wellnessStore.getWellnessMessage()
+            const wellnessEmoji = wellnessStore.getWellnessEmoji()
+            console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
+            return {
+              text: wellnessText,
+              emoji: wellnessEmoji
+            }
+          }
         }
+      } catch (error) {
+        console.warn(`💤 [NEEDSQUEUE] FALLBACK: Could not check guinea pig status for wellness:`, error)
+        // Fall through to final fallback if there's an error
       }
       
       // Final fallback - use guinea pig store directly
@@ -140,6 +156,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           return useHungerStore()
         case 'wellness':
           return useWellnessStore()
+        case 'sleep':
+          return useSleepStore()
         // Add other need stores here as they're created
         // case 'thirst':
         //   return useThirstStore()
@@ -199,6 +217,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           // Let the store handle its own status change reactions
           if (store.handleStatusChangeReactions) {
             store.handleStatusChangeReactions()
+          }
+          
+          // Handle special sleep auto-fulfillment when guinea pig is sleeping
+          if (needName === 'sleep' && store.checkAutoFulfillment) {
+            store.checkAutoFulfillment()
           }
           
           // Process any pending reactions from this store
@@ -752,6 +775,17 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
 
     // Efficiently check urgency messages for all needs in a single batch
     checkAllUrgencyMessages() {
+      // Don't show urgency messages if guinea pig is sleeping
+      try {
+        const guineaPigStore = useGuineaPigStore()
+        if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
+          console.log(`💤 [NEEDSQUEUE] URGENCY: Skipping all urgency messages - guinea pig is sleeping`)
+          return
+        }
+      } catch (error) {
+        console.warn(`💤 [NEEDSQUEUE] URGENCY: Could not check guinea pig status:`, error)
+      }
+      
       const now = Date.now()
       const readyNeeds = []
       
@@ -763,6 +797,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         // Check if this need should show urgency messages
         const needConfig = this.needConfigs[needName] || {}
         const allowAllLevels = needConfig.allowAllLevels || false
+        const noUrgencyMessages = needConfig.noUrgencyMessages || false
+        
+        // Skip needs that explicitly disable urgency messages
+        if (noUrgencyMessages) {
+          continue
+        }
         
         if (!allowAllLevels && !store.isUrgent && !store.isCritical) {
           continue

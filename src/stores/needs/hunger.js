@@ -107,14 +107,14 @@ export const useHungerStore = defineStore('hunger', {
     
     // Color theming for hunger
     colors: {
-      primary: '#e67e22', // Orange color for hunger
-      gradient: ['#f39c12', '#e67e22'], // Light orange to darker orange
+      primary: '#ff8c00', // Orange color for hunger
+      gradient: ['#ff69b4', '#ff8c00', '#ffd700'], // Magenta to orange to gold
       
       // Status-specific colors
-      fulfilled: '#27ae60', // Green when satisfied
-      normal: '#f39c12',    // Orange when normal
-      urgent: '#e67e22',    // Darker orange when urgent
-      critical: '#d35400'   // Dark red-orange when critical
+      fulfilled: '#ffb3dd', // Light magenta when satisfied (maintains magenta theme)
+      normal: '#ff69b4',    // Magenta when normal
+      urgent: '#ff8c00',    // Orange when urgent (will get orange overlay)
+      critical: '#ffd700'   // Gold when critical (will get red overlay)
     }
   }),
 
