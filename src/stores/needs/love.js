@@ -89,11 +89,11 @@ export const useLoveStore = defineStore('love', {
   getters: {
     // Status thresholds
     isUrgent() {
-      return this.currentValue <= 60 
+      return this.currentValue >= 50 && this.currentValue < 70
     },
     
     isCritical() {
-      return this.currentValue <= 40 
+      return this.currentValue < 50
     },
     
     isFulfilled() {

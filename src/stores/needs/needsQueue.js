@@ -46,9 +46,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       wellness: {
         allowAllLevels: true,    // Show messages at all status levels (not just urgent/critical)
         enableDebugLogs: true,    // Enable detailed logging for this need
+      },
+      hunger: {
+        allowAllLevels: true,    // Show messages at normal level too
+        enableDebugLogs: false   // Standard logging for hunger
       }
       // Add more special configurations here as needed:
-      // hunger: { skipWhenFulfilled: true },
       // love: { priorityBoost: 1 }
     },
     
