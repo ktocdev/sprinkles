@@ -38,6 +38,20 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     messageIdCounter: 0, // Simple counter for unique message IDs
     fallbackMessage: null, // Fallback message when queue is empty
     
+    // Urgency timing system (centralized to avoid dynamic property pollution)
+    lastUrgencyTimes: {}, // needName -> timestamp mapping
+    
+    // Configuration for special-case needs (scalable approach)
+    needConfigs: {
+      wellness: {
+        allowAllLevels: true,    // Show messages at all status levels (not just urgent/critical)
+        enableDebugLogs: true,    // Enable detailed logging for this need
+      }
+      // Add more special configurations here as needed:
+      // hunger: { skipWhenFulfilled: true },
+      // love: { priorityBoost: 1 }
+    },
+    
     // Message timing controls
     lastMessageStartTime: 0, // When current message started displaying
     minimumDisplayTime: 1500, // Minimum time any message must show (1.5 seconds)
@@ -187,8 +201,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           // Process any pending reactions from this store
           this.processPendingReactions(store, needName)
           
-          // Check if we should show urgency messages
-          this.checkUrgencyMessage(store, needName)
+          // Urgency messages will be checked in batch after all needs are processed
           
           queue.push({
             name: needName,
@@ -203,6 +216,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Sort by urgency (highest first)
       queue.sort((a, b) => b.urgency - a.urgency)
       this.queue = queue
+      
+      // Batch check urgency messages for all needs (more efficient at scale)
+      this.checkAllUrgencyMessages()
       
       // Poop messages are now handled by guinea pig store
       
@@ -731,84 +747,104 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared all messages`)
     },
 
-    // Check if we should show urgency message for a need
-    checkUrgencyMessage(store, needName) {
-      // Special case for wellness - always allow messages to show positive status
-      // For other needs, only show urgency messages for urgent/critical needs
-      if (needName !== 'wellness' && !store.isUrgent && !store.isCritical) {
-        return
-      }
+    // Efficiently check urgency messages for all needs in a single batch
+    checkAllUrgencyMessages() {
+      const now = Date.now()
+      const readyNeeds = []
       
-      // For wellness, we want to show messages at all levels to provide status updates
-      if (needName === 'wellness') {
-        console.log(`🌟 [WELLNESS] URGENCY: Checking wellness message (${store.percentage}%, status: ${store.needStatus})`)
-      }
-      
-      const config = store.messageConfig
-      if (!config || !store.urgencyMessages) {
-        if (needName === 'wellness') {
-          console.log(`🌟 [WELLNESS] URGENCY: Missing config or urgency messages for wellness`)
+      // First pass: identify which needs are ready for urgency messages
+      for (const [needName, storeName] of Object.entries(this.needs)) {
+        const store = this.getNeedStore(storeName)
+        if (!store) continue
+        
+        // Check if this need should show urgency messages
+        const needConfig = this.needConfigs[needName] || {}
+        const allowAllLevels = needConfig.allowAllLevels || false
+        
+        if (!allowAllLevels && !store.isUrgent && !store.isCritical) {
+          continue
         }
-        return
+        
+        // Check if enough time has passed since last message
+        const lastTime = this.lastUrgencyTimes[needName] || 0
+        const config = store.messageConfig
+        if (!config || !store.urgencyMessages) continue
+        
+        // Determine interval based on status
+        let interval = config.intervals.normal
+        if (store.isCritical && config.intervals.critical) {
+          interval = config.intervals.critical
+        } else if (store.isUrgent && config.intervals.urgent) {
+          interval = config.intervals.urgent
+        } else if (store.isFulfilled && config.intervals.fulfilled) {
+          interval = config.intervals.fulfilled
+        }
+        
+        if (now - lastTime >= interval) {
+          readyNeeds.push({ needName, store, interval })
+        }
       }
       
-      // Determine urgency level and interval
-      let urgencyLevel = 'normal'
-      let interval = config.intervals.normal
+      // Second pass: process ready needs (prevents timing conflicts)
+      for (const { needName, store } of readyNeeds) {
+        this.processUrgencyMessage(store, needName, now)
+      }
       
+      if (readyNeeds.length > 0) {
+        console.log(`📋 [NEEDSQUEUE] URGENCY_BATCH: Processed ${readyNeeds.length} urgency messages this cycle`)
+      }
+    },
+
+    // Process a single urgency message (extracted from checkUrgencyMessage)
+    processUrgencyMessage(store, needName, now) {
+      // Determine urgency level for message selection
+      let urgencyLevel = 'normal'
       if (store.isCritical) {
         urgencyLevel = 'critical'
-        interval = config.intervals.critical
       } else if (store.isUrgent) {
         urgencyLevel = 'urgent'
-        interval = config.intervals.urgent
-      } else if (store.isFulfilled && config.intervals.fulfilled) {
-        // Special case for fulfilled status (especially wellness)
+      } else if (store.isFulfilled && store.urgencyMessages.fulfilled) {
         urgencyLevel = 'fulfilled'
-        interval = config.intervals.fulfilled
-      }
-      
-      // Check if enough time has passed since last urgency message for this need
-      const lastUrgencyKey = `urgency_${needName}`
-      const now = Date.now()
-      const lastTime = this[`_${lastUrgencyKey}`] || 0
-      const timeSinceLastMessage = now - lastTime
-      
-      if (needName === 'wellness') {
-        console.log(`🌟 [WELLNESS] URGENCY: Checking timing - ${urgencyLevel} level, interval: ${interval}ms, time since last: ${timeSinceLastMessage}ms`)
-      }
-      
-      if (timeSinceLastMessage < interval) {
-        if (needName === 'wellness') {
-          console.log(`🌟 [WELLNESS] URGENCY: Too soon for next message (need ${interval - timeSinceLastMessage}ms more)`)
-        }
-        return // Too soon to show another urgency message
       }
       
       // Get available messages
       const messages = store.urgencyMessages[urgencyLevel] || []
       if (messages.length === 0) {
-        if (needName === 'wellness') {
-          console.log(`🌟 [WELLNESS] URGENCY: No messages available for ${urgencyLevel} level`)
+        const needConfig = this.needConfigs[needName] || {}
+        if (needConfig.enableDebugLogs) {
+          console.log(`🌟 [${needName.toUpperCase()}] URGENCY: No messages available for ${urgencyLevel} level`)
         }
         return
       }
       
       // Pick a random message
       const message = messages[Math.floor(Math.random() * messages.length)]
-      const emoji = config.emoji || '⚠️'
+      const emoji = store.messageConfig.emoji || '⚠️'
       
       // Add urgency message to queue
       this.addMessage(message, emoji, MESSAGE_DURATIONS.URGENCY, 3, 'urgency', needName)
       
-      // Record when we showed this urgency message
-      this[`_${lastUrgencyKey}`] = now
+      // Record timing
+      this.lastUrgencyTimes[needName] = now
       
-      if (needName === 'wellness') {
-        console.log(`🌟 [WELLNESS] URGENCY: Added urgency message "${message}" ${emoji} (${urgencyLevel} level, ${MESSAGE_DURATIONS.URGENCY}ms duration)`)
+      // Log based on configuration
+      const needConfig = this.needConfigs[needName] || {}
+      if (needConfig.enableDebugLogs) {
+        console.log(`🌟 [${needName.toUpperCase()}] URGENCY: Added urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
       } else {
-        console.log(`📢 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message: "${message}"`)
+        console.log(`📋 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
       }
+    },
+
+    // Legacy method for backward compatibility (deprecated - use checkAllUrgencyMessages)
+    checkUrgencyMessage(store, needName) {
+      // This method is now deprecated in favor of batch processing
+      // Individual calls are redirected to the optimized batch system
+      console.warn(`⚠️ [NEEDSQUEUE] DEPRECATED: checkUrgencyMessage() called individually for ${needName}. Use checkAllUrgencyMessages() for better performance.`)
+      
+      // Process this single need immediately if not already done this cycle
+      const now = Date.now()
+      this.processUrgencyMessage(store, needName, now)
     },
 
 
