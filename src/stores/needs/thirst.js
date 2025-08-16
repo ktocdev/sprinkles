@@ -94,6 +94,18 @@ export const useThirstStore = defineStore('thirst', {
         'DEHYDRATION EMERGENCY!',
         'NEED WATER IMMEDIATELY!'
       ]
+    },
+    
+    // Blue/cyan color theming for thirst
+    colors: {
+      primary: '#00bcd4', // Cyan color for water/thirst
+      gradient: ['#87ceeb', '#00bcd4'], // Light blue to cyan
+      
+      // Status-specific colors
+      fulfilled: '#b2ebf2', // Light cyan when hydrated (maintains cyan theme)
+      normal: '#87ceeb',    // Light blue when normal
+      urgent: '#00bcd4',    // Cyan when urgent
+      critical: '#0097a7'   // Darker cyan when critical
     }
   }),
 

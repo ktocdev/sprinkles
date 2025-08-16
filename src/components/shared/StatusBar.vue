@@ -6,6 +6,12 @@
       :value="value" 
       max="100"
       :style="{ '--progress-color': color }"
+      :class="{
+        'gps-status-bar__progress--urgent': value >= 50 && value < 70,
+        'gps-status-bar__progress--critical': value < 50,
+        'gps-status-bar__progress--normal': value >= 70 && value < 90,
+        'gps-status-bar__progress--fulfilled': value >= 90
+      }"
     ></progress>
     <span v-if="showValue" class="gps-status-bar__value">{{ displayValue || value }}</span>
   </div>
@@ -67,6 +73,7 @@ const props = defineProps({
   border-radius: var(--border-radius);
   background: var(--color-border);
   flex-shrink: 0;
+  transition: box-shadow 0.3s ease, filter 0.3s ease;
 }
 
 .gps-status-bar__progress::-webkit-progress-bar {
@@ -83,6 +90,44 @@ const props = defineProps({
 .gps-status-bar__progress::-moz-progress-bar {
   border-radius: var(--border-radius);
   background: var(--progress-color, var(--color-accent));
+}
+
+/* Glow effects for different status levels */
+.gps-status-bar__progress--fulfilled {
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.4);
+}
+
+.gps-status-bar__progress--normal {
+  box-shadow: 0 0 6px rgba(var(--progress-color-rgb, 52, 152, 219), 0.3);
+}
+
+.gps-status-bar__progress--urgent {
+  box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
+  animation: pulse-urgent 2s ease-in-out infinite alternate;
+}
+
+.gps-status-bar__progress--critical {
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.6);
+  animation: pulse-critical 1.5s ease-in-out infinite alternate;
+}
+
+/* Pulse animations for urgent states */
+@keyframes pulse-urgent {
+  from {
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.4);
+  }
+  to {
+    box-shadow: 0 0 14px rgba(230, 126, 34, 0.7);
+  }
+}
+
+@keyframes pulse-critical {
+  from {
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+  }
+  to {
+    box-shadow: 0 0 16px rgba(231, 76, 60, 0.8);
+  }
 }
 
 .gps-status-bar__value {

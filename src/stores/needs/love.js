@@ -83,6 +83,18 @@ export const useLoveStore = defineStore('love', {
         'LOVE EMERGENCY!',
         'NEED HUMAN INTERACTION!'
       ]
+    },
+    
+    // Pink/rose color theming for love
+    colors: {
+      primary: '#e91e63', // Deep pink/rose color for love
+      gradient: ['#f8bbd9', '#e91e63'], // Light pink to deep pink
+      
+      // Status-specific colors
+      fulfilled: '#fce4ec', // Light pink when love is fulfilled (maintains pink theme)
+      normal: '#f8bbd9',    // Light pink when normal
+      urgent: '#e91e63',    // Deep pink when urgent
+      critical: '#c2185b'   // Darker pink/magenta when critical
     }
   }),
 

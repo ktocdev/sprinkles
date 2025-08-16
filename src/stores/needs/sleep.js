@@ -78,16 +78,16 @@ export const useSleepStore = defineStore('sleep', {
       }
     },
     
-    // Calming blue color theming for sleep
+    // Deep, calming blue color theming for sleep
     colors: {
-      primary: '#3498db', // Calming blue color for sleep
-      gradient: ['#5dade2', '#3498db'], // Light blue to darker blue
+      primary: '#2c3e50', // Deep calming blue for sleep
+      gradient: ['#85c1e9', '#2980b9', '#1f4e79'], // Light blue to deep blue gradient
       
       // Status-specific colors
-      fulfilled: '#27ae60', // Green when well-rested
-      normal: '#5dade2',    // Light blue when normal  
-      urgent: '#3498db',    // Medium blue when urgent
-      critical: '#2980b9'   // Darker blue when critical
+      fulfilled: '#b3d9ff', // Light blue when well-rested (maintains blue theme)
+      normal: '#85c1e9',    // Light calming blue when normal  
+      urgent: '#2980b9',    // Medium blue when urgent
+      critical: '#1f4e79'   // Deep navy blue when critical
     }
   }),
 
