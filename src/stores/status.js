@@ -125,7 +125,7 @@ export const useStatusStore = defineStore('status', {
       
       // Default to guinea pig state (low priority)
       // Show normal need messages more frequently (40% chance when guinea pig is sitting)
-      if (urgencyMessage && urgencyMessage.urgencyLevel === 'normal' && guineaPigStore.sitting && Math.random() < 0.4) {
+      if (urgencyMessage && urgencyMessage.urgencyLevel === 'normal' && guineaPigStore.currentStatus === 'sitting' && Math.random() < 0.4) {
         const needsQueueStore = useNeedsQueueStore()
         const needStore = needsQueueStore.getNeedStore(urgencyMessage.needType)
         const config = needStore?.messageConfig

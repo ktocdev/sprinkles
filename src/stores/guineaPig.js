@@ -118,26 +118,13 @@ export const useGuineaPigStore = defineStore('guineaPig', {
   }),
   
   getters: {
-    // Legacy compatibility getters
-    sitting() {
-      return this.currentStatus === 'sitting'
-    },
-    
-    moving() {
-      return this.currentStatus === 'moving'
-    },
-    
-    sleeping() {
-      return this.currentStatus === 'sleeping'
-    },
-    
     currentEmoji() {
       return this.statusEmojis[this.currentStatus] || '🐹'
     },
     
     currentMessage() {
       const messages = this.statusMessages[this.currentStatus] || []
-      return messages[Math.floor(Math.random() * messages.length)] || 'Guinea pig is here.'
+      return messages[Math.floor(Math.random() * messages.length)] || 'Guinea pig is sitting.'
     }
   },
   
@@ -148,14 +135,6 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }
     },
     
-    // Legacy compatibility method
-    setSitting(sitting) {
-      if (sitting && this.currentStatus !== 'sitting') {
-        this.changeStatus('sitting')
-      } else if (!sitting && this.currentStatus === 'sitting') {
-        this.changeStatus('moving')
-      }
-    },
     
     // Change status and trigger messaging
     changeStatus(newStatus) {
