@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { useCageStore } from './cage.js'
 import { useStatisticsStore } from './statistics.js'
+import { useNeedsQueueStore } from './needs/needsQueue.js'
+import { MESSAGE_DURATIONS } from './needs/messageTimingConfig.js'
 
 export const usePoopStore = defineStore('poop', {
   state: () => ({
@@ -199,7 +201,27 @@ export const usePoopStore = defineStore('poop', {
         }
       }
       
-      // Guinea pig store now handles poop messages
+      // Create message chain for stepping on old poop (like hunger fulfillment)
+      const needsQueueStore = useNeedsQueueStore()
+      const messageChain = [
+        {
+          text: 'Stepped on poop - hygiene decreased',
+          emoji: '💩',
+          duration: MESSAGE_DURATIONS.FULFILLMENT,
+          type: 'hygiene_impact'
+        },
+        {
+          text: 'Guinea pig seems unbothered',
+          emoji: '🐹',
+          duration: MESSAGE_DURATIONS.REACTION,
+          type: 'reaction'
+        }
+      ]
+      
+      // Add the complete chain as a single high-priority unit
+      needsQueueStore.addMessageChain(messageChain, 1, 'hygiene')
+      
+      console.log(`💩 [POOP] STEPPED: Guinea pig stepped on old poop, hygiene impact: ${this.hygieneImpact}`)
       
       return {
         success: true,

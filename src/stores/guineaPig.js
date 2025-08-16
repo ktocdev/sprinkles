@@ -336,10 +336,6 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }, MESSAGE_DURATIONS.POOP + 100) // Show reaction after poop message
     },
     
-    // Handle stepping on old poop
-    handlePoopStepped() {
-      this.addPoopMessage('old')
-    },
     
     // Update movement control based on status
     updateMovementControl(status) {

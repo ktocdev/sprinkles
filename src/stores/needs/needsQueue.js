@@ -218,6 +218,26 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       const percentage = store.percentage
       const degradationRate = store.degradationRate
       
+      // Special case for wellness - different urgency calculation
+      if (store.needType === 'wellness') {
+        // For wellness, urgency is based on how far from perfect (100%) it is
+        // This ensures wellness gets attention even when doing well
+        let urgency = Math.abs(100 - percentage) * 0.8 // Scale factor for visibility
+        
+        // Add boosts based on status levels
+        if (store.isCritical) {
+          urgency += 50
+        } else if (store.isUrgent) {
+          urgency += 25
+        } else if (percentage >= 80) {
+          // Give good wellness some urgency to show positive messages
+          urgency = Math.max(urgency, 20)
+        }
+        
+        return Math.min(100, Math.max(0, urgency))
+      }
+      
+      // Standard urgency calculation for other needs
       // Base urgency on how low the need is
       let urgency = 100 - percentage
       
@@ -713,12 +733,15 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
 
     // Check if we should show urgency message for a need
     checkUrgencyMessage(store, needName) {
-      // Only show urgency messages for urgent/critical needs
-      if (!store.isUrgent && !store.isCritical) {
-        if (needName === 'wellness') {
-          console.log(`🌟 [WELLNESS] URGENCY: Wellness not urgent/critical (${store.percentage}%), skipping urgency message`)
-        }
+      // Special case for wellness - always allow messages to show positive status
+      // For other needs, only show urgency messages for urgent/critical needs
+      if (needName !== 'wellness' && !store.isUrgent && !store.isCritical) {
         return
+      }
+      
+      // For wellness, we want to show messages at all levels to provide status updates
+      if (needName === 'wellness') {
+        console.log(`🌟 [WELLNESS] URGENCY: Checking wellness message (${store.percentage}%, status: ${store.needStatus})`)
       }
       
       const config = store.messageConfig
@@ -739,6 +762,10 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       } else if (store.isUrgent) {
         urgencyLevel = 'urgent'
         interval = config.intervals.urgent
+      } else if (store.isFulfilled && config.intervals.fulfilled) {
+        // Special case for fulfilled status (especially wellness)
+        urgencyLevel = 'fulfilled'
+        interval = config.intervals.fulfilled
       }
       
       // Check if enough time has passed since last urgency message for this need

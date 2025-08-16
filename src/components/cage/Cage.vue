@@ -96,10 +96,7 @@ function moveGuineaPig() {
     const poopAtNewPos = poopStore.isPoopAtPosition(next.x, next.y)
     if (poopAtNewPos) {
       const interaction = cageStore.interactWithPoop()
-      // Notify guinea pig store if stepped on old poop
-      if (interaction.success && interaction.hygieneImpact > 0) {
-        guineaPigStore.handlePoopStepped()
-      }
+      // Poop store now handles all messaging through message chains
     }
     
     // Drop a poop if it's time and game is not paused

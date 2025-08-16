@@ -15,6 +15,16 @@ export const useWellnessStore = defineStore('wellness', {
     
     // Wellness status messages for different levels
     urgencyMessages: {
+      fulfilled: [
+        'Guinea pig is excellent!',
+        'Thriving guinea pig!',
+        'Perfect health!',
+        'Living the best life!',
+        'Absolutely fantastic!',
+        'In peak condition!',
+        'Couldn\'t be better!',
+        'Everything is wonderful!'
+      ],
       normal: [
         'Guinea pig is content',
         'Happy and healthy',
@@ -42,9 +52,10 @@ export const useWellnessStore = defineStore('wellness', {
     messageConfig: {
       emoji: '🌟',
       intervals: {
-        normal: 15000,    // 15 seconds
-        urgent: 12000,    // 12 seconds  
-        critical: 9000    // 9 seconds
+        fulfilled: 20000,  // 20 seconds - show positive messages regularly
+        normal: 15000,     // 15 seconds
+        urgent: 12000,     // 12 seconds  
+        critical: 9000     // 9 seconds
       }
     },
     
@@ -161,24 +172,8 @@ export const useWellnessStore = defineStore('wellness', {
       const wellness = this.overallWellness
       const level = this.needStatus
       
-      let messageArray
-      if (level === 'fulfilled') {
-        // Add excellent messages for very high wellness
-        messageArray = [
-          'Guinea pig is excellent!',
-          'Thriving guinea pig!',
-          'Perfect health!',
-          'Living the best life!',
-          'Absolutely fantastic!'
-        ]
-      } else if (level === 'normal') {
-        messageArray = this.urgencyMessages.normal
-      } else if (level === 'urgent') {
-        messageArray = this.urgencyMessages.urgent
-      } else {
-        messageArray = this.urgencyMessages.critical
-      }
-
+      let messageArray = this.urgencyMessages[level] || this.urgencyMessages.normal
+      
       const selectedMessage = messageArray[Math.floor(Math.random() * messageArray.length)]
       console.log(`🌟 [WELLNESS] MESSAGE: Selected "${selectedMessage}" (${level} level, ${wellness}%)`)
       return selectedMessage
@@ -226,14 +221,6 @@ export const useWellnessStore = defineStore('wellness', {
       return []
     },
 
-    // Handle status change tracking
-    handleStatusChangeReactions() {
-      const currentStatus = this.needStatus
-      if (this.previousStatus && this.previousStatus !== currentStatus) {
-        console.log(`🌟 [WELLNESS] STATUS: Changed from ${this.previousStatus} → ${currentStatus} (${this.overallWellness}%)`)
-        this.previousStatus = currentStatus
-      }
-    },
 
     initialize() {
       this.ensureMessageConfig()
