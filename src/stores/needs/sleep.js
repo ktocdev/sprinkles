@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
-import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { STANDARD_DEGRADATION_RATES, getPreferredItemsForNeed, isPreferredItemForNeed, getItemQualityForNeed, getFulfillmentBonusForItem, getGroundPenaltyForNeed, findNearestItemForNeed } from './needsFulfillmentPatterns.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
 import { useNeedsQueueStore } from './needsQueue.js'
 import { useGuineaPigStore } from '../guineaPig.js'
+import { useCageStore } from '../cage.js'
 
 export const useSleepStore = defineStore('sleep', {
   state: () => ({
@@ -143,8 +144,8 @@ export const useSleepStore = defineStore('sleep', {
       this.currentValue = Math.max(this.minValue, this.currentValue - degradeAmount)
     },
 
-    // Automatic fulfillment when guinea pig is sleeping
-    fulfill(methodName = 'automatic_sleep') {
+    // Automatic fulfillment when guinea pig is sleeping with location-based quality
+    fulfill(methodName = 'automatic_sleep', itemName = null) {
       if (methodName !== 'automatic_sleep') {
         return { success: false, message: 'Sleep can only be fulfilled through natural sleeping' }
       }
@@ -154,12 +155,31 @@ export const useSleepStore = defineStore('sleep', {
       }
 
       const oldValue = this.currentValue
-      const improvement = 15 // Sleep increases faster than it decreases (degradation is 0.01/sec, this gives 15 points)
+      let improvement = 15 // Base sleep improvement
+      let sleepLocation = 'ground'
+      
+      // Check if guinea pig is sleeping on a preferred item
+      if (itemName && this.isPreferredSleepItem(itemName)) {
+        const bonus = this.getSleepFulfillmentBonus(itemName)
+        if (bonus) {
+          improvement = bonus
+          sleepLocation = itemName
+          console.log(`💤 [SLEEP] ITEM_BONUS: Using ${itemName} for ${improvement} sleep points (bonus: ${bonus - 15})`)
+        }
+      } else {
+        // Check for ground penalty
+        const groundPenalty = this.getGroundSleepPenalty()
+        if (groundPenalty) {
+          improvement = groundPenalty
+          console.log(`💤 [SLEEP] GROUND_PENALTY: Sleeping on ground for only ${improvement} sleep points (penalty: ${15 - groundPenalty})`)
+        }
+      }
+
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
       if (actualImprovement > 0) {
-        console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping on ${sleepLocation}, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
@@ -176,9 +196,11 @@ export const useSleepStore = defineStore('sleep', {
 
       return {
         success: true,
-        message: `Sleep improved by ${actualImprovement} points through natural sleeping`,
+        message: `Sleep improved by ${actualImprovement} points through natural sleeping on ${sleepLocation}`,
         improvement: actualImprovement,
-        method: methodName
+        method: methodName,
+        location: sleepLocation,
+        bonus: improvement - 15 // Track bonus/penalty
       }
     },
 
@@ -201,11 +223,40 @@ export const useSleepStore = defineStore('sleep', {
         if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
           // Auto-fulfill sleep when guinea pig is sleeping
           if (this.canFulfill) {
-            this.fulfill('automatic_sleep')
+            // Detect what item the guinea pig is sleeping on
+            const sleepingOnItem = this.detectSleepingLocation()
+            this.fulfill('automatic_sleep', sleepingOnItem)
           }
         }
       } catch (error) {
         console.warn(`💤 [SLEEP] AUTO_FULFILL: Could not check guinea pig status:`, error)
+      }
+    },
+
+    // Detect what item the guinea pig is currently sleeping on
+    detectSleepingLocation() {
+      try {
+        const cageStore = useCageStore()
+        if (!cageStore.guineaPigPos) return null
+        
+        const gpX = cageStore.guineaPigPos.x
+        const gpY = cageStore.guineaPigPos.y
+        
+        // Find if guinea pig is on any preferred sleep item
+        const itemAtPosition = cageStore.items.find(item => 
+          item.x === gpX && item.y === gpY && this.isPreferredSleepItem(item.name)
+        )
+        
+        if (itemAtPosition) {
+          console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
+          return itemAtPosition.name
+        }
+        
+        console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ground at (${gpX}, ${gpY})`)
+        return null // Sleeping on ground
+      } catch (error) {
+        console.warn(`💤 [SLEEP] LOCATION: Could not detect sleeping location:`, error)
+        return null
       }
     },
 
@@ -217,6 +268,64 @@ export const useSleepStore = defineStore('sleep', {
       this.ensureMessageConfig()
       this.validateInterface()
       this.initializePreviousStatus()
+    },
+
+    // Sleep item detection and utility functions (using reusable system)
+    
+    // Get all preferred sleep items currently in the cage
+    getPreferredSleepItems() {
+      try {
+        const cageStore = useCageStore()
+        return getPreferredItemsForNeed('sleep', cageStore)
+      } catch (error) {
+        console.warn(`💤 [SLEEP] ITEMS: Could not get preferred sleep items:`, error)
+        return []
+      }
+    },
+
+    // Check if a specific item is good for sleeping
+    isPreferredSleepItem(itemName) {
+      return isPreferredItemForNeed('sleep', itemName)
+    },
+
+    // Rate sleep items by quality/comfort level (higher = better)
+    getSleepItemQuality(itemName) {
+      return getItemQualityForNeed('sleep', itemName)
+    },
+
+    // Get sleep fulfillment bonus for an item
+    getSleepFulfillmentBonus(itemName) {
+      return getFulfillmentBonusForItem('sleep', itemName)
+    },
+
+    // Get ground sleep penalty
+    getGroundSleepPenalty() {
+      return getGroundPenaltyForNeed('sleep')
+    },
+
+    // Find the nearest and best sleep item for the guinea pig
+    findNearestSleepItem(guineaPigX = null, guineaPigY = null) {
+      try {
+        const cageStore = useCageStore()
+        
+        // Get guinea pig position if not provided
+        if (guineaPigX === null || guineaPigY === null) {
+          if (!cageStore.guineaPigPos) return null
+          guineaPigX = cageStore.guineaPigPos.x
+          guineaPigY = cageStore.guineaPigPos.y
+        }
+
+        const bestItem = findNearestItemForNeed('sleep', guineaPigX, guineaPigY, cageStore)
+        
+        if (bestItem) {
+          console.log(`💤 [SLEEP] NEAREST: Found ${bestItem.name} at (${bestItem.x}, ${bestItem.y}) distance ${bestItem.distance}, quality ${bestItem.quality}`)
+        }
+        
+        return bestItem
+      } catch (error) {
+        console.warn(`💤 [SLEEP] NEAREST: Could not find nearest sleep item:`, error)
+        return null
+      }
     }
   },
 

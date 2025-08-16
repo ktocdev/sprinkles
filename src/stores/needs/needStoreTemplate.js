@@ -69,7 +69,7 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
       critical: '#2980b9'   // Darker version with red overlay (0-49%)
       
       // COLOR THEME SUGGESTIONS (maintain theme identity at all status levels):
-      // 🍽️ Hunger: Yellow tones ['#f4d03f', '#f1c40f'] fulfilled: '#fef9e7' (avoids orange conflict)
+      // 🍽️ Hunger: Yellow to yellow-orange ['#fef5e7', '#f7dc6f', '#f39c12'] fulfilled: '#fef5e7'
       // 💧 Thirst: Blue/cyan tones ['#87ceeb', '#00bcd4'] fulfilled: '#b2ebf2'
       // 💕 Love: Pink/rose tones ['#f8bbd9', '#e91e63'] fulfilled: '#fce4ec'
       // 💤 Sleep: Deep blue tones ['#85c1e9', '#2980b9', '#1f4e79'] fulfilled: '#b3d9ff'

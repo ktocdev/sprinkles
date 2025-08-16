@@ -140,9 +140,19 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     
     // Change status and trigger messaging
-    changeStatus(newStatus) {
+    async changeStatus(newStatus) {
       if (newStatus === this.currentStatus) {
         return // No change needed
+      }
+      
+      // Special handling for sleep transitions
+      if (newStatus === 'sleeping') {
+        const shouldAllowSleep = await this.shouldAllowSleepTransition()
+        if (!shouldAllowSleep.allowed) {
+          console.log(`💤 [GUINEAPIG] SLEEP_BLOCK: ${shouldAllowSleep.reason}`)
+          // Force movement to seek better sleep location
+          newStatus = 'moving'
+        }
       }
       
       const oldStatus = this.currentStatus
@@ -228,8 +238,8 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       console.log(`🐹 [GUINEAPIG] SCHEDULE: Next transition in ${Math.round(delay/1000)}s`)
     },
     
-    // Perform a random status transition
-    performRandomTransition() {
+    // Perform a random status transition with intelligent sleep behavior
+    async performRandomTransition() {
       // Don't perform transitions if paused
       if (this.isPaused) {
         console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping random transition - system is paused`)
@@ -239,25 +249,50 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       const currentStatus = this.currentStatus
       let possibleTransitions = []
       
-      // Define possible transitions from each state
+      // Check sleep need for intelligent behavior
+      const shouldSeekSleep = await this.shouldSeekSleep()
+      const hasPreferredSleepItems = await this.hasPreferredSleepItems()
+      
+      // Define possible transitions from each state with intelligent sleep logic
       switch (currentStatus) {
         case 'sitting':
           possibleTransitions = ['moving', 'sleeping']
+          
+          // If sleep is urgently needed and no preferred items, wait until urgent (69%)
+          if (shouldSeekSleep.urgent && !hasPreferredSleepItems) {
+            console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: Sleep urgent (${shouldSeekSleep.sleepLevel}%) but no preferred items, waiting`)
+            possibleTransitions = ['moving'] // Only allow movement to seek items
+          }
           break
+          
         case 'moving':
           possibleTransitions = ['sitting', 'sleeping']
+          
+          // If sleep is needed, try to find preferred items first
+          if (shouldSeekSleep.needed) {
+            if (hasPreferredSleepItems) {
+              // Move toward preferred sleep item
+              const targetItem = await this.findBestSleepDestination()
+              if (targetItem) {
+                console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: Moving toward ${targetItem.name} at (${targetItem.x}, ${targetItem.y})`)
+                await this.moveTowardSleepItem(targetItem)
+                return // Skip normal transition to handle movement
+              }
+            } else if (shouldSeekSleep.urgent) {
+              // No preferred items but urgent need - prepare to sleep on ground
+              console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: No preferred items available, will sleep on ground`)
+              possibleTransitions = ['sleeping'] // Force sleep transition
+            }
+          }
           break
+          
         case 'sleeping':
           possibleTransitions = ['sitting', 'moving']
           break
       }
       
-      // Weight transitions (sitting is most common)
-      const weights = {
-        sitting: 3,
-        moving: 2,
-        sleeping: 1
-      }
+      // Weight transitions with sleep behavior priority
+      const weights = this.calculateSleepAwareWeights(possibleTransitions, shouldSeekSleep)
       
       // Create weighted array
       const weightedTransitions = []
@@ -271,7 +306,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       // Pick random transition
       if (weightedTransitions.length > 0) {
         const newStatus = weightedTransitions[Math.floor(Math.random() * weightedTransitions.length)]
-        this.changeStatus(newStatus)
+        await this.changeStatus(newStatus)
       }
     },
     
@@ -451,6 +486,204 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       this.pendingStatusMessages = []
       this.isPaused = false
       this.forceAllowMovement() // Allow movement when stopping
+    },
+
+    // Intelligent sleep behavior helper methods
+
+    // Check if guinea pig should seek sleep based on sleep need level
+    async shouldSeekSleep() {
+      try {
+        // Dynamic import to avoid circular dependency
+        const { useSleepStore } = await import('./needs/sleep.js')
+        const sleepStore = useSleepStore()
+        
+        const sleepLevel = sleepStore.currentValue
+        const sleepStatus = sleepStore.needStatus
+        
+        return {
+          needed: sleepLevel < 80, // Start considering sleep at 80%
+          urgent: sleepLevel <= 69, // Urgent at 69% (when ground sleep kicks in)
+          critical: sleepLevel < 50, // Critical below 50%
+          sleepLevel: sleepLevel,
+          status: sleepStatus
+        }
+      } catch (error) {
+        console.warn(`💤 [GUINEAPIG] SLEEP_CHECK: Could not check sleep store:`, error)
+        return { needed: false, urgent: false, critical: false, sleepLevel: 100, status: 'fulfilled' }
+      }
+    },
+
+    // Check if preferred sleep items are available in the cage
+    async hasPreferredSleepItems() {
+      try {
+        const { useSleepStore } = await import('./needs/sleep.js')
+        const sleepStore = useSleepStore()
+        
+        const preferredItems = sleepStore.getPreferredSleepItems()
+        return preferredItems.length > 0
+      } catch (error) {
+        console.warn(`💤 [GUINEAPIG] SLEEP_ITEMS: Could not check preferred items:`, error)
+        return false
+      }
+    },
+
+    // Find the best sleep destination (nearest high-quality item)
+    async findBestSleepDestination() {
+      try {
+        const { useCageStore } = await import('./cage.js')
+        const { useSleepStore } = await import('./needs/sleep.js')
+        const cageStore = useCageStore()
+        const sleepStore = useSleepStore()
+        
+        if (!cageStore.guineaPigPos) return null
+        
+        const bestItem = sleepStore.findNearestSleepItem(
+          cageStore.guineaPigPos.x,
+          cageStore.guineaPigPos.y
+        )
+        
+        return bestItem
+      } catch (error) {
+        console.warn(`💤 [GUINEAPIG] SLEEP_DESTINATION: Could not find best sleep destination:`, error)
+        return null
+      }
+    },
+
+    // Move guinea pig toward a preferred sleep item
+    async moveTowardSleepItem(targetItem) {
+      try {
+        const { useCageStore } = await import('./cage.js')
+        const cageStore = useCageStore()
+        
+        if (!cageStore.guineaPigPos || !targetItem) return false
+        
+        const currentX = cageStore.guineaPigPos.x
+        const currentY = cageStore.guineaPigPos.y
+        const targetX = targetItem.x
+        const targetY = targetItem.y
+        
+        // Calculate direction to move (one step at a time)
+        let newX = currentX
+        let newY = currentY
+        
+        // Move horizontally first, then vertically (Manhattan pathfinding)
+        if (currentX < targetX) {
+          newX = currentX + 1
+        } else if (currentX > targetX) {
+          newX = currentX - 1
+        } else if (currentY < targetY) {
+          newY = currentY + 1
+        } else if (currentY > targetY) {
+          newY = currentY - 1
+        }
+        
+        // Move guinea pig to new position
+        if (newX !== currentX || newY !== currentY) {
+          cageStore.moveGuineaPig(newX, newY)
+          console.log(`💤 [GUINEAPIG] MOVEMENT: Moving toward ${targetItem.name} from (${currentX}, ${currentY}) to (${newX}, ${newY})`)
+          
+          // Check if we've reached the target
+          if (newX === targetX && newY === targetY) {
+            console.log(`💤 [GUINEAPIG] MOVEMENT: Reached sleep item ${targetItem.name}!`)
+            // Transition to sleeping when we reach the item
+            setTimeout(async () => {
+              await this.changeStatus('sleeping')
+            }, 1000) // Small delay to let movement settle
+          }
+          
+          return true
+        }
+        
+        return false
+      } catch (error) {
+        console.warn(`💤 [GUINEAPIG] MOVEMENT: Could not move toward sleep item:`, error)
+        return false
+      }
+    },
+
+    // Calculate transition weights based on sleep needs
+    calculateSleepAwareWeights(possibleTransitions, sleepInfo) {
+      const baseWeights = {
+        sitting: 3,
+        moving: 2,
+        sleeping: 1
+      }
+      
+      // Adjust weights based on sleep needs
+      if (sleepInfo.urgent) {
+        // Heavily prioritize sleeping when urgent
+        baseWeights.sleeping = 6
+        baseWeights.sitting = 1
+        baseWeights.moving = 2
+      } else if (sleepInfo.needed) {
+        // Moderately prioritize sleeping when needed
+        baseWeights.sleeping = 3
+        baseWeights.sitting = 2
+        baseWeights.moving = 2
+      }
+      
+      // Filter to only include possible transitions
+      const filteredWeights = {}
+      possibleTransitions.forEach(transition => {
+        filteredWeights[transition] = baseWeights[transition] || 1
+      })
+      
+      return filteredWeights
+    },
+
+    // Check if sleep transition should be allowed based on guinea pig rules
+    async shouldAllowSleepTransition() {
+      try {
+        const { useSleepStore } = await import('./needs/sleep.js')
+        const { useCageStore } = await import('./cage.js')
+        const sleepStore = useSleepStore()
+        const cageStore = useCageStore()
+        
+        if (!cageStore.guineaPigPos) {
+          return { allowed: false, reason: 'No guinea pig position available' }
+        }
+        
+        const sleepLevel = sleepStore.currentValue
+        const hasPreferredItems = await this.hasPreferredSleepItems()
+        
+        // If sleep is above 69% and no preferred items, don't sleep on ground
+        if (sleepLevel > 69 && !hasPreferredItems) {
+          return { 
+            allowed: false, 
+            reason: `Sleep level ${sleepLevel.toFixed(1)}% too high for ground sleeping (needs <= 69%)` 
+          }
+        }
+        
+        // If there are preferred items available, check if guinea pig is on one
+        if (hasPreferredItems) {
+          const currentItem = sleepStore.detectSleepingLocation()
+          if (!currentItem) {
+            // Preferred items exist but guinea pig isn't on one
+            const nearestItem = await this.findBestSleepDestination()
+            if (nearestItem) {
+              return { 
+                allowed: false, 
+                reason: `Preferred item ${nearestItem.name} available at (${nearestItem.x}, ${nearestItem.y}) - should move there first` 
+              }
+            }
+          }
+        }
+        
+        // Allow sleep if: 
+        // 1. On a preferred item, OR
+        // 2. No preferred items and sleep <= 69%, OR  
+        // 3. Sleep is critical (< 50%)
+        return { 
+          allowed: true, 
+          reason: sleepLevel <= 50 ? 'Critical sleep level' : 
+                  hasPreferredItems ? 'On preferred sleep item' : 
+                  'Ground sleep allowed (urgent level)'
+        }
+        
+      } catch (error) {
+        console.warn(`💤 [GUINEAPIG] SLEEP_TRANSITION: Could not check sleep transition rules:`, error)
+        return { allowed: true, reason: 'Default allow due to error' }
+      }
     }
   },
   

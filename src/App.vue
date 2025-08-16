@@ -166,21 +166,17 @@ function handleGameReset() {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 5rem 0 1rem 0; /* Add right padding for mobile needs nav */
-  overflow-x: hidden; /* Prevent horizontal scrollbar on page */
-  min-width: 0; /* Allow flex child to shrink */
+  align-items: center; 
+  min-height: calc(100vh - 7rem); 
+  padding: 1rem 0;
+  overflow-x: hidden; 
+  min-width: 0; 
 }
 
-/* Mobile-first responsive styles */
 @media (min-width: 768px) {
   .gps-app__main-layout {
-    margin-inline-start: 50px;
-    width: calc(100% - 50px);
-  }
-  
-  .gps-app__content-area {
-    padding: 5rem 0 1rem; /* Keep standard padding on desktop */
-    overflow-x: hidden; /* Prevent horizontal scrollbar on page */
+    margin-inline-start: 70px;
+    width: calc(100% - 70px);
   }
 }
 

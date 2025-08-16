@@ -108,13 +108,13 @@ export const useHungerStore = defineStore('hunger', {
     // Color theming for hunger
     colors: {
       primary: '#f1c40f', // Medium yellow color for hunger
-      gradient: ['#fcf3cf', '#f7dc6f', '#f1c40f'], // Very light yellow to bright yellow to golden yellow
+      gradient: ['#fffe7b', 'rgba(210, 201, 16, 1)', '#e69807ff'], // Very light yellow to bright yellow to golden yellow
       
       // Status-specific colors
-      fulfilled: '#fef9e7', // Very light yellow when satisfied (maintains yellow theme)
-      normal: '#f7dc6f',    // Bright yellow when normal
-      urgent: '#f1c40f',    // Golden yellow when urgent (will get orange overlay)
-      critical: '#d4ac0d'   // Darker yellow when critical (will get red overlay)
+      fulfilled: '#fff6d4ff', // Very light yellow when satisfied (maintains yellow theme)
+      normal: '#fffe7b',    // Bright yellow when normal
+      urgent: 'rgba(210, 201, 16, 1)',    // Golden yellow when urgent (will get orange overlay)
+      critical: '#e69807ff'   // Darker yellow when critical (will get red overlay)
     }
   }),
 

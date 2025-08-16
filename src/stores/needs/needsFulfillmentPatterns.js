@@ -307,3 +307,173 @@ export const STANDARD_THRESHOLDS = {
   urgent: 50,       // 50-69: Need requires attention
   critical: 30      // 0-49: Need is critical
 }
+
+// Item interaction patterns for guinea pig behavior
+// Defines which items different needs prefer and their quality ratings
+export const ITEM_INTERACTION_PATTERNS = {
+  sleep: {
+    description: 'Items that provide comfort and rest for sleeping',
+    preferredItems: [
+      'small_bed',
+      'large_bed', 
+      'small_hammock',
+      'large_hammock',
+      'small_house',
+      'large_house'
+    ],
+    qualityRatings: {
+      'large_bed': 120,      // Best sleep quality
+      'small_bed': 100,      // Excellent sleep quality
+      'large_hammock': 100,  // Excellent sleep quality
+      'small_hammock': 80,   // Good sleep quality
+      'large_house': 80,     // Good sleep quality + security
+      'small_house': 60      // Decent sleep quality + security
+    },
+    fulfillmentBonus: {
+      // Bonus sleep recovery when using these items
+      'large_bed': 25,       // +25 sleep points per cycle
+      'small_bed': 20,       // +20 sleep points per cycle
+      'large_hammock': 20,   // +20 sleep points per cycle
+      'small_hammock': 15,   // +15 sleep points per cycle
+      'large_house': 15,     // +15 sleep points per cycle
+      'small_house': 12      // +12 sleep points per cycle
+    },
+    groundPenalty: 8         // Only 8 sleep points when sleeping on ground
+  },
+
+  shelter: {
+    description: 'Items that provide security and protection',
+    preferredItems: [
+      'small_house',
+      'large_house',
+      'small_tunnel', 
+      'large_tunnel',
+      'small_hammock',
+      'large_hammock'
+    ],
+    qualityRatings: {
+      'large_house': 120,    // Best shelter quality
+      'small_house': 100,    // Excellent shelter quality
+      'large_tunnel': 90,    // Great for hiding
+      'small_tunnel': 70,    // Good for hiding
+      'large_hammock': 60,   // Some overhead protection
+      'small_hammock': 50    // Minimal overhead protection
+    }
+  },
+
+  chew: {
+    description: 'Items that satisfy dental health needs',
+    preferredItems: [
+      'small_chew_stick',
+      'large_chew_stick',
+      'chew_cube'
+    ],
+    qualityRatings: {
+      'large_chew_stick': 100, // Best chew quality
+      'chew_cube': 90,         // Excellent chew quality
+      'small_chew_stick': 80   // Good chew quality
+    }
+  },
+
+  enrichment: {
+    description: 'Items that provide mental stimulation and play',
+    preferredItems: [
+      'small_ball',
+      'large_ball',
+      'small_tunnel',
+      'large_tunnel',
+      'small_chew_stick',
+      'large_chew_stick',
+      'chew_cube'
+    ],
+    qualityRatings: {
+      'large_ball': 100,       // Best enrichment quality
+      'small_ball': 80,        // Good enrichment quality
+      'large_tunnel': 90,      // Great for exploration
+      'small_tunnel': 70,      // Good for exploration
+      'large_chew_stick': 70,  // Dual purpose (chew + play)
+      'small_chew_stick': 60,  // Dual purpose (chew + play)
+      'chew_cube': 65          // Dual purpose (chew + play)
+    }
+  }
+}
+
+// Reusable utility functions for item interactions
+// These can be used by any need store to find and interact with preferred items
+
+// Get all preferred items for a specific need from the cage
+export function getPreferredItemsForNeed(needType, cageStore) {
+  const pattern = ITEM_INTERACTION_PATTERNS[needType]
+  if (!pattern || !cageStore?.items) return []
+
+  // Filter cage items for this need's preferred items
+  const preferredItems = cageStore.items.filter(item => {
+    return pattern.preferredItems.includes(item.name)
+  })
+
+  // Add quality ratings
+  return preferredItems.map(item => ({
+    ...item,
+    quality: pattern.qualityRatings[item.name] || 0,
+    distance: 0 // Will be calculated when needed
+  }))
+}
+
+// Check if a specific item is preferred by a need
+export function isPreferredItemForNeed(needType, itemName) {
+  const pattern = ITEM_INTERACTION_PATTERNS[needType]
+  return pattern ? pattern.preferredItems.includes(itemName) : false
+}
+
+// Get quality rating for an item for a specific need
+export function getItemQualityForNeed(needType, itemName) {
+  const pattern = ITEM_INTERACTION_PATTERNS[needType]
+  return pattern?.qualityRatings[itemName] || 0
+}
+
+// Get fulfillment bonus for using an item (sleep-specific for now)
+export function getFulfillmentBonusForItem(needType, itemName) {
+  const pattern = ITEM_INTERACTION_PATTERNS[needType]
+  return pattern?.fulfillmentBonus?.[itemName] || null
+}
+
+// Get ground penalty for a need (when no preferred items are used)
+export function getGroundPenaltyForNeed(needType) {
+  const pattern = ITEM_INTERACTION_PATTERNS[needType]
+  return pattern?.groundPenalty || null
+}
+
+// Find the nearest and best item for a specific need
+export function findNearestItemForNeed(needType, guineaPigX, guineaPigY, cageStore) {
+  try {
+    // Get all preferred items for this need
+    const preferredItems = getPreferredItemsForNeed(needType, cageStore)
+    if (preferredItems.length === 0) return null
+
+    // Calculate distances and find the best option
+    const itemsWithDistance = preferredItems.map(item => {
+      const distance = Math.abs(item.x - guineaPigX) + Math.abs(item.y - guineaPigY) // Manhattan distance
+      return {
+        ...item,
+        distance
+      }
+    })
+
+    // Sort by priority: prefer higher quality items, but consider distance
+    // Quality is weighted more heavily than distance for better outcomes
+    const bestItem = itemsWithDistance.reduce((best, current) => {
+      if (!best) return current
+
+      // Calculate score: higher quality is better, lower distance is better
+      const currentScore = current.quality - (current.distance * 2) // Quality weighted 50% more than distance
+      const bestScore = best.quality - (best.distance * 2)
+
+      return currentScore > bestScore ? current : best
+    }, null)
+
+    return bestItem
+  } catch (error) {
+    console.warn(`🔍 [ITEM_SEARCH] Could not find nearest item for ${needType}:`, error)
+    return null
+  }
+}

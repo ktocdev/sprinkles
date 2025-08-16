@@ -134,7 +134,7 @@
                 size="compact"
                 @click="consumeItem(item)"
                 :class="{ 'gps-button--disabled': isConsumptionDisabled }"
-                :title="isConsumptionDisabled ? 'Guinea pig is full!' : 'Consume Item'"
+                :title="getConsumptionDisabledReason"
               >
                 🍽️
               </Button>
@@ -285,6 +285,7 @@ import { useCageStore } from '../../stores/cage'
 import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
 import { useHungerStore } from '../../stores/needs/hunger'
+import { useGuineaPigStore } from '../../stores/guineaPig'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
@@ -295,6 +296,7 @@ const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
 const hungerStore = useHungerStore()
+const guineaPigStore = useGuineaPigStore()
 
 // Modal states
 const showAddItemModal = ref(false)
@@ -346,11 +348,28 @@ const hasAnyFoodItems = computed(() => {
   return Object.keys(availableFoodItems.value).length > 0
 })
 
-// Check if consumption should be disabled (hunger is full)
+// Check if consumption should be disabled (hunger is full or guinea pig is sleeping)
 // Use same rounding logic as NeedsNav to prevent button state mismatch
 const isConsumptionDisabled = computed(() => {
   const roundedValue = Math.round(hungerStore.currentValue)
-  return roundedValue >= hungerStore.maxValue
+  const isFull = roundedValue >= hungerStore.maxValue
+  const isSleeping = guineaPigStore.currentStatus === 'sleeping'
+  return isFull || isSleeping
+})
+
+// Get the reason why consumption is disabled for tooltip text
+const getConsumptionDisabledReason = computed(() => {
+  const roundedValue = Math.round(hungerStore.currentValue)
+  const isFull = roundedValue >= hungerStore.maxValue
+  const isSleeping = guineaPigStore.currentStatus === 'sleeping'
+  
+  if (isSleeping) {
+    return 'Guinea pig is sleeping!'
+  } else if (isFull) {
+    return 'Guinea pig is full!'
+  } else {
+    return 'Consume Item'
+  }
 })
 
 // Dropdown options for item selection
@@ -516,9 +535,17 @@ function confirmMoveItem() {
 function consumeItem(item) {
   if (!item.isConsumable) return
   
-  // Don't consume if guinea pig is full
+  // Don't consume if guinea pig is full or sleeping
   if (isConsumptionDisabled.value) {
-    console.log('🚫 [CONSUME] Blocked: Guinea pig is full!')
+    const roundedValue = Math.round(hungerStore.currentValue)
+    const isFull = roundedValue >= hungerStore.maxValue
+    const isSleeping = guineaPigStore.currentStatus === 'sleeping'
+    
+    if (isSleeping) {
+      console.log('🚫 [CONSUME] Blocked: Guinea pig is sleeping!')
+    } else if (isFull) {
+      console.log('🚫 [CONSUME] Blocked: Guinea pig is full!')
+    }
     return
   }
   

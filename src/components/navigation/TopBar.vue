@@ -51,7 +51,7 @@ function openGuineaPigInfo() {
   background: var(--color-panel);
   border-block-end: 2px solid var(--color-accent);
   box-shadow: var(--box-shadow);
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   z-index: 100;
