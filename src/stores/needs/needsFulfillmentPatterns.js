@@ -296,7 +296,7 @@ export const STANDARD_DEGRADATION_RATES = {
   chew: 0.025,      // 1.5 points per minute - dental health
   enrichment: 0.02, // 1.2 points per minute - mental stimulation
   shelter: 0.015,   // 0.9 points per minute - security need
-  sleep: 0.01,      // 0.6 points per minute - rest cycles
+  sleep: 0.05,       // 3 points per minute - auto-fulfilled during guinea pig sleep
   nails: 0.005      // 0.3 points per minute - grooming need
 }
 
