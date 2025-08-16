@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { MESSAGE_DURATIONS, MESSAGE_PRIORITIES } from './needs/messageTimingConfig.js'
+import { useNeedsQueueStore } from './needs/needsQueue.js'
 
 export const useGuineaPigStore = defineStore('guineaPig', {
   state: () => ({
@@ -126,7 +127,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     currentMessage() {
       const messages = this.statusMessages[this.currentStatus] || []
-      return messages[Math.floor(Math.random() * messages.length)] || 'Guinea pig is sitting.'
+      return messages[Math.floor(Math.random() * messages.length)] || 'The guinea pig is sitting.'
     }
   },
   
@@ -328,12 +329,31 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Handle poop creation (called when guinea pig makes poop)
     handlePoopCreated() {
-      this.addPoopMessage('fresh')
+      const needsQueueStore = useNeedsQueueStore()
       
-      // Add a reaction message after a short delay
-      setTimeout(() => {
-        this.addPoopMessage('reaction')
-      }, MESSAGE_DURATIONS.POOP + 100) // Show reaction after poop message
+      // Get random messages for the chain
+      const freshMessage = this.poopMessages.fresh[Math.floor(Math.random() * this.poopMessages.fresh.length)]
+      const reactionMessage = this.poopMessages.reaction[Math.floor(Math.random() * this.poopMessages.reaction.length)]
+      
+      const messageChain = [
+        {
+          text: freshMessage,
+          emoji: '💩',
+          duration: MESSAGE_DURATIONS.POOP,
+          type: 'poop_creation'
+        },
+        {
+          text: reactionMessage,
+          emoji: '🐹',
+          duration: MESSAGE_DURATIONS.REACTION,
+          type: 'reaction'
+        }
+      ]
+      
+      // Add the complete chain as a single high-priority unit
+      needsQueueStore.addMessageChain(messageChain, 1, 'poop')
+      
+      console.log(`💩 [GUINEAPIG] POOP: Created poop with chain: "${freshMessage}" → "${reactionMessage}"`)
     },
     
     
