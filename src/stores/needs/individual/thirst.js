@@ -181,6 +181,17 @@ export const useThirstStore = defineStore('thirst', {
       this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
       const actualImprovement = this.currentValue - oldValue
 
+      // Consume water from cage water store when guinea pig drinks
+      try {
+        const { useWaterStore } = require('../cage/water.js')
+        const waterStore = useWaterStore()
+        if (waterStore && waterStore.consumeWater) {
+          waterStore.consumeWater(10) // Guinea pig consumes 10% of cage water when drinking
+        }
+      } catch (error) {
+        DEBUG_STORES() && console.warn(`💧 [THIRST] Could not consume cage water:`, error)
+      }
+
       // Show drinking reaction if improvement occurred
       if (actualImprovement > 0) {
         DEBUG_STORES() && console.log(`💧 [THIRST] FULFILL: Water bottle improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)

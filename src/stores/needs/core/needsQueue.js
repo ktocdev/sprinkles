@@ -4,6 +4,11 @@ import { useWellnessStore } from '../individual/wellness.js'
 import { useSleepStore } from '../individual/sleep.js'
 import { useThirstStore } from '../individual/thirst.js'
 import { useAutonomyStore } from './autonomy.js'
+// Cage need stores
+import { useBeddingStore } from '../cage/bedding.js'
+import { useWaterStore } from '../cage/water.js'
+import { useHabitatStore } from '../cage/habitat.js'
+import { useCleanlinessStore } from '../cage/cleanliness.js'
 import { useDebugStore } from '../../debug.js'
 import { useUserStore } from '../../user.js'
 import { useCageStore } from '../../cage.js'
@@ -30,7 +35,12 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       enrichment: 'enrichment',
       love: 'love',
       wellness: 'wellness',
-      autonomy: 'autonomy'
+      autonomy: 'autonomy',
+      // Cage-related needs
+      bedding: 'bedding',
+      water: 'water',
+      habitat: 'habitat',
+      cleanliness: 'cleanliness'
     },
     queue: [], // Ordered list of needs by urgency
     lastUpdate: Date.now(),
@@ -172,6 +182,15 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           return useThirstStore()
         case 'autonomy':
           return useAutonomyStore()
+        // Cage-related needs
+        case 'bedding':
+          return useBeddingStore()
+        case 'water':
+          return useWaterStore()
+        case 'habitat':
+          return useHabitatStore()
+        case 'cleanliness':
+          return useCleanlinessStore()
         // Add other need stores here as they're created
         // case 'shelter':
         //   return useShelterStore()
