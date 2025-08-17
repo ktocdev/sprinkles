@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
 import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { DEBUG_STORES } from './needsQueue.js'
 
 export const useLoveStore = defineStore('love', {
   state: () => ({
@@ -173,7 +174,7 @@ export const useLoveStore = defineStore('love', {
 
         // Show fulfillment reaction if improvement occurred
         if (actualImprovement > 0) {
-          console.log(`💕 [LOVE] FULFILL: ${method.name} improved love by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+          DEBUG_STORES && console.log(`💕 [LOVE] FULFILL: ${method.name} improved love by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true

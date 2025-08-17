@@ -1,6 +1,8 @@
 // Standard fulfillment patterns for all guinea pig needs
 // This file defines how each need type can be satisfied
 
+import { DEBUG_STORES } from './needsQueue.js'
+
 export const NEED_FULFILLMENT_PATTERNS = {
   hunger: {
     description: 'Fulfilled by eating food items',
@@ -473,7 +475,7 @@ export function findNearestItemForNeed(needType, guineaPigX, guineaPigY, cageSto
 
     return bestItem
   } catch (error) {
-    console.warn(`🔍 [ITEM_SEARCH] Could not find nearest item for ${needType}:`, error)
+    DEBUG_STORES && console.warn(`🔍 [ITEM_SEARCH] Could not find nearest item for ${needType}:`, error)
     return null
   }
 }

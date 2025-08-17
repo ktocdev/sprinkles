@@ -6,7 +6,7 @@
     
     <div class="gps-cage-controls-section__needs">
       <div class="gps-cage-controls-section__needs-header">
-        <h3 class="gps-cage-controls-section__needs-title">📊 Current Needs</h3>
+        <h4 class="gps-section-header">Current Needs</h4>
       </div>
       <NeedsList 
         :items="needsItems"
@@ -48,13 +48,6 @@ const { needsItems } = useNeedsList()
   margin-bottom: 0.75rem;
 }
 
-.gps-cage-controls-section__needs-title {
-  font-size: var(--font-size-base);
-  color: var(--color-accent);
-  margin: 0;
-  font-weight: var(--font-weight-semibold);
-  font-family: var(--font-family-header);
-}
 
 .gps-cage-controls-section__needs-board {
   width: 100%;

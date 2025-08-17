@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { useNeedsQueueStore } from './needsQueue.js'
+import { useNeedsQueueStore, DEBUG_STORES } from './needsQueue.js'
 
 export const useWellnessStore = defineStore('wellness', {
   state: () => ({
@@ -90,13 +90,13 @@ export const useWellnessStore = defineStore('wellness', {
       }
       
       if (validNeeds.length === 0) {
-        console.log('🌟 [WELLNESS] CALC: No valid needs found, using default 50%')
+        DEBUG_STORES && console.log('🌟 [WELLNESS] CALC: No valid needs found, using default 50%')
         return 50 // Default fallback
       }
       
       const average = validNeeds.reduce((sum, value) => sum + value, 0) / validNeeds.length
       const rounded = Math.round(average)
-      console.log(`🌟 [WELLNESS] CALC: Overall wellness: ${rounded}% (from ${validNeeds.length} needs: [${needDetails.join(', ')}])`)
+      DEBUG_STORES && console.log(`🌟 [WELLNESS] CALC: Overall wellness: ${rounded}% (from ${validNeeds.length} needs: [${needDetails.join(', ')}])`)
       return rounded
     },
 
@@ -175,7 +175,7 @@ export const useWellnessStore = defineStore('wellness', {
       let messageArray = this.urgencyMessages[level] || this.urgencyMessages.normal
       
       const selectedMessage = messageArray[Math.floor(Math.random() * messageArray.length)]
-      console.log(`🌟 [WELLNESS] MESSAGE: Selected "${selectedMessage}" (${level} level, ${wellness}%)`)
+      DEBUG_STORES && console.log(`🌟 [WELLNESS] MESSAGE: Selected "${selectedMessage}" (${level} level, ${wellness}%)`)
       return selectedMessage
     },
 
@@ -196,7 +196,7 @@ export const useWellnessStore = defineStore('wellness', {
         emoji = '😟' // needs help
       }
       
-      console.log(`🌟 [WELLNESS] EMOJI: Selected ${emoji} for ${wellness}% wellness`)
+      DEBUG_STORES && console.log(`🌟 [WELLNESS] EMOJI: Selected ${emoji} for ${wellness}% wellness`)
       return emoji
     },
 
@@ -226,7 +226,7 @@ export const useWellnessStore = defineStore('wellness', {
       this.ensureMessageConfig()
       this.validateInterface()
       this.initializePreviousStatus()
-      console.log(`🌟 [WELLNESS] INIT: Wellness store initialized with ${this.overallWellness}% wellness`)
+      DEBUG_STORES && console.log(`🌟 [WELLNESS] INIT: Wellness store initialized with ${this.overallWellness}% wellness`)
     }
   },
   

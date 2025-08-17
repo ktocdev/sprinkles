@@ -1,172 +1,26 @@
 <template>
   <div class="gps-cage-item-manager">
-    <div v-if="cageStore.items.length > 0" class="gps-cage-item-manager__actions">
-      <Button 
-        type="primary"
-        size="compact"
-        @click="showAddItemModal = true"
-        title="Add Item to Cage"
-      >
-        ➕ Add Item
-      </Button>
-      <Button 
-        type="secondary"
-        size="compact"
-        @click="placeItemsRandomly"
-        title="Place items randomly in cage"
-        :class="{ 'gps-button--disabled': !hasAnyItems }"
-      >
-        🎲 Random Place
-      </Button>
-      <Button 
-        type="warning"
-        size="compact"
-        @click="placeFoodRandomly"
-        title="Place random food items in cage"
-        :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
-      >
-        🥕 Feed Time
-      </Button>
-    </div>
+    <CageItemQuickActions 
+      :hasAnyFurnitureItems="hasAnyFurnitureItems"
+      :hasAnyFoodItems="hasAnyFoodItems"
+      :hasAnyChewItems="hasAnyChewItems"
+      :hasAnyToyItems="hasAnyToyItems"
+      @placeFurnitureRandomly="placeFurnitureRandomly"
+      @placeFoodRandomly="placeFoodRandomly"
+      @placeChewsRandomly="placeChewsRandomly"
+      @placeToyRandomly="placeToyRandomly"
+    />
 
     <!-- Item Lists -->
-    <div v-if="cageStore.items.length === 0" class="gps-cage-item-manager__no-cage-items">
-      <div class="gps-cage-item-manager__no-cage-items-content">
-        <h4>No items in cage yet</h4>
-        <p>Add some items to your cage to get started!</p>
-        <div class="gps-cage-item-manager__first-item-actions">
-          <Button 
-            type="primary"
-            size="compact"
-            @click="showAddItemModal = true"
-          >
-            ➕ Add Your First Item
-          </Button>
-          <Button 
-            type="secondary"
-            size="compact"
-            @click="placeItemsRandomly"
-            title="Place items randomly in cage"
-            :class="{ 'gps-button--disabled': !hasAnyItems }"
-          >
-            🎲 Random Place
-          </Button>
-          <Button 
-            type="warning"
-            size="compact"
-            @click="placeFoodRandomly"
-            title="Place random food items in cage"
-            :class="{ 'gps-button--disabled': !hasAnyFoodItems }"
-          >
-            🥕 Feed Time
-          </Button>
-        </div>
-      </div>
-    </div>
-    
-    <div v-else class="gps-cage-item-manager__sections">
-      <!-- Permanent Items -->
-      <div class="gps-cage-item-manager__section">
-        <h4 class="gps-cage-item-manager__section-title">🏠 Permanent Items</h4>
-        <div v-if="cageStore.permanentItems.length === 0" class="gps-cage-item-manager__empty">
-          No permanent items in cage
-        </div>
-        <div v-else class="gps-cage-item-manager__items">
-          <div 
-            v-for="item in cageStore.permanentItems" 
-            :key="item.id"
-            class="gps-cage-item-manager__item"
-          >
-            <div class="gps-cage-item-manager__item-info">
-              <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
-            </div>
-            <div class="gps-cage-item-manager__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="moveItem(item)"
-                title="Move Item"
-              >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="returnToInventory(item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
-              <Button 
-                type="danger"
-                size="compact"
-                @click="throwOutItem(item)"
-                title="Throw Out"
-              >
-                🗑️
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Consumable Items -->
-      <div class="gps-cage-item-manager__section">
-        <h4 class="gps-cage-item-manager__section-title">🍽️ Consumable Items</h4>
-        <div v-if="cageStore.consumableItems.length === 0" class="gps-cage-item-manager__empty">
-          No consumable items in cage
-        </div>
-        <div v-else class="gps-cage-item-manager__items">
-          <div 
-            v-for="item in cageStore.consumableItems" 
-            :key="item.id"
-            class="gps-cage-item-manager__item"
-          >
-            <div class="gps-cage-item-manager__item-info">
-              <span class="gps-cage-item-manager__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-manager__item-quantity">({{ item.quantity }})</span>
-              <span class="gps-cage-item-manager__item-position">({{ item.x }}, {{ item.y }})</span>
-            </div>
-            <div class="gps-cage-item-manager__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="consumeItem(item)"
-                :class="{ 'gps-button--disabled': isConsumptionDisabled }"
-                :title="getConsumptionDisabledReason"
-              >
-                🍽️
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="moveItem(item)"
-                title="Move Item"
-              >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="returnToInventory(item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
-              <Button 
-                type="danger"
-                size="compact"
-                @click="throwOutItem(item)"
-                title="Throw Out"
-              >
-                🗑️
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <CageItemTabs 
+      :allInventoryItems="allInventoryItems"
+      :isConsumptionDisabled="isConsumptionDisabled"
+      :getConsumptionDisabledReason="getConsumptionDisabledReason"
+      @moveItem="moveItem"
+      @returnToInventory="returnToInventory"
+      @consumeItem="consumeItem"
+      @addItemToCageFromInventory="addItemToCageFromInventory"
+    />
 
     <!-- Add Item Modal -->
     <Modal 
@@ -174,60 +28,16 @@
       title="Add Item to Cage"
       @close="showAddItemModal = false"
     >
-      <FormGroup label="Item">
-        <div v-if="!hasAnyItems" class="gps-cage-item-manager__no-items-message">
-          <p>No items available in your inventory.</p>
-          <p>Visit the Market to buy items first!</p>
-        </div>
-        <Dropdown
-          v-else
-          v-model="selectedItem"
-          :options="itemDropdownOptions"
-          placeholder="Select an item..."
-          :disabled="!hasAnyItems"
-          aria-label="Select item to add to cage"
-        />
-      </FormGroup>
-      
-      <FormGroup label="Position X">
-        <Input 
-          v-model.number="itemX" 
-          type="number" 
-          :min="1" 
-          :max="cageStore.size.width"
-          :placeholder="`Enter X position (1-${cageStore.size.width})`"
-          icon="📍"
-        />
-      </FormGroup>
-      
-      <FormGroup label="Position Y">
-        <Input 
-          v-model.number="itemY" 
-          type="number" 
-          :min="1" 
-          :max="cageStore.size.height"
-          :placeholder="`Enter Y position (1-${cageStore.size.height})`"
-          icon="📍"
-        />
-      </FormGroup>
-      
-      <template #actions>
-        <Button 
-          type="secondary"
-          size="compact"
-          @click="showAddItemModal = false"
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="primary"
-          size="compact"
-          @click="addItemToCage"
-          :class="{ 'gps-button--disabled': !hasAnyItems || !selectedItem || itemX === null || itemY === null }"
-        >
-          Add Item
-        </Button>
-      </template>
+      <AddItem
+        ref="addItemRef"
+        :hasAnyItems="hasAnyItems"
+        :itemDropdownOptions="itemDropdownOptions"
+        :cageWidth="cageStore.size.width"
+        :cageHeight="cageStore.size.height"
+        :isVisible="showAddItemModal"
+        @cancel="showAddItemModal = false"
+        @addItem="handleAddItem"
+      />
     </Modal>
 
     <!-- Move Item Modal -->
@@ -236,51 +46,20 @@
       :title="`Move ${formatItemName(itemToMove?.name)}`"
       @close="showMoveModal = false"
     >
-      <FormGroup label="New Position X">
-        <Input 
-          v-model.number="moveX" 
-          type="number" 
-          :min="1" 
-          :max="cageStore.size.width"
-          :placeholder="`Enter X position (1-${cageStore.size.width})`"
-          icon="📍"
-        />
-      </FormGroup>
-      
-      <FormGroup label="New Position Y">
-        <Input 
-          v-model.number="moveY" 
-          type="number" 
-          :min="1" 
-          :max="cageStore.size.height"
-          :placeholder="`Enter Y position (1-${cageStore.size.height})`"
-          icon="📍"
-        />
-      </FormGroup>
-      
-      <template #actions>
-        <Button 
-          type="secondary"
-          size="compact"
-          @click="showMoveModal = false"
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="primary"
-          size="compact"
-          @click="confirmMoveItem"
-          :class="{ 'gps-button--disabled': moveX === null || moveY === null }"
-        >
-          Move Item
-        </Button>
-      </template>
+      <MoveItem
+        :itemToMove="itemToMove"
+        :cageWidth="cageStore.size.width"
+        :cageHeight="cageStore.size.height"
+        :isVisible="showMoveModal"
+        @cancel="showMoveModal = false"
+        @moveItem="handleMoveItem"
+      />
     </Modal>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
@@ -291,6 +70,10 @@ import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
 import Input from '../shared/Input.vue'
 import FormGroup from '../shared/FormGroup.vue'
+import CageItemTabs from './CageItemTabs.vue'
+import CageItemQuickActions from './CageItemQuickActions.vue'
+import AddItem from './AddItem.vue'
+import MoveItem from './MoveItem.vue'
 
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
@@ -301,12 +84,11 @@ const guineaPigStore = useGuineaPigStore()
 // Modal states
 const showAddItemModal = ref(false)
 const showMoveModal = ref(false)
-const selectedItem = ref('')
-const itemX = ref(null)
-const itemY = ref(null)
 const itemToMove = ref(null)
-const moveX = ref(null)
-const moveY = ref(null)
+
+// Template refs
+const addItemRef = ref(null)
+
 
 // Computed properties
 const availableConsumables = computed(() => {
@@ -347,6 +129,71 @@ const availableFoodItems = computed(() => {
 const hasAnyFoodItems = computed(() => {
   return Object.keys(availableFoodItems.value).length > 0
 })
+
+const availableFurnitureItems = computed(() => {
+  const furnitureItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if ((itemDefinitions[item].type === 'furniture' || itemDefinitions[item].type === 'shelter' || itemDefinitions[item].type === 'enrichment' || itemDefinitions[item].type === 'bed') && inventoryStore.items[item] > 0) {
+      furnitureItems[item] = inventoryStore.items[item]
+    }
+  })
+  return furnitureItems
+})
+
+const hasAnyFurnitureItems = computed(() => {
+  return Object.keys(availableFurnitureItems.value).length > 0
+})
+
+const availableToyItems = computed(() => {
+  const toyItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if (itemDefinitions[item].type === 'toy' && inventoryStore.items[item] > 0) {
+      toyItems[item] = inventoryStore.items[item]
+    }
+  })
+  return toyItems
+})
+
+const hasAnyToyItems = computed(() => {
+  return Object.keys(availableToyItems.value).length > 0
+})
+
+const availableChewItems = computed(() => {
+  const chewItems = {}
+  Object.keys(itemDefinitions).forEach(item => {
+    if (itemDefinitions[item].type === 'chew' && inventoryStore.items[item] > 0) {
+      chewItems[item] = inventoryStore.items[item]
+    }
+  })
+  return chewItems
+})
+
+const hasAnyChewItems = computed(() => {
+  return Object.keys(availableChewItems.value).length > 0
+})
+
+// All inventory items (not in cage)
+const allInventoryItems = computed(() => {
+  const allItems = {}
+  
+  // Get all item names currently in the cage
+  const itemsInCage = new Set(cageStore.items.map(item => item.name))
+  
+  Object.keys(itemDefinitions).forEach(item => {
+    // Only include items that have inventory quantity AND are not currently in the cage
+    if (inventoryStore.items[item] > 0 && !itemsInCage.has(item)) {
+      allItems[item] = {
+        name: item,
+        quantity: inventoryStore.items[item],
+        isConsumable: itemDefinitions[item].isConsumable,
+        type: itemDefinitions[item].type,
+        ...itemDefinitions[item]
+      }
+    }
+  })
+  return allItems
+})
+
 
 // Check if consumption should be disabled (hunger is full or guinea pig is sleeping)
 // Use same rounding logic as NeedsNav to prevent button state mismatch
@@ -401,28 +248,29 @@ function formatItemName(itemName) {
   return itemName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
-function addItemToCage() {
-  if (!selectedItem.value || itemX.value === null || itemY.value === null) return
+function handleAddItem(data) {
+  const { selectedItem, x, y } = data
+  if (!selectedItem || x === null || y === null) return
   
-  const itemDef = itemDefinitions[selectedItem.value]
+  const itemDef = itemDefinitions[selectedItem]
   if (!itemDef) return
   
   // Convert from 1-based to 0-based coordinates
-  const x = itemX.value - 1
-  const y = itemY.value - 1
+  const posX = x - 1
+  const posY = y - 1
   
   // Check if item fits within grid bounds
   const itemWidth = itemDef.size.width
   const itemHeight = itemDef.size.height
   
-  if (x + itemWidth > cageStore.size.width || y + itemHeight > cageStore.size.height) {
-    alert(`This ${formatItemName(itemDef.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${itemX.value}, ${itemY.value}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
+  if (posX + itemWidth > cageStore.size.width || posY + itemHeight > cageStore.size.height) {
+    alert(`This ${formatItemName(itemDef.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${x}, ${y}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
     return
   }
   
   // Check if all required positions are available
-  for (let checkY = y; checkY < y + itemHeight; checkY++) {
-    for (let checkX = x; checkX < x + itemWidth; checkX++) {
+  for (let checkY = posY; checkY < posY + itemHeight; checkY++) {
+    for (let checkX = posX; checkX < posX + itemWidth; checkX++) {
       // Check if position is occupied by another item
       const isOccupiedByItem = cageStore.items.some(i => i.x === checkX && i.y === checkY)
       // Check if position is occupied by guinea pig
@@ -449,18 +297,15 @@ function addItemToCage() {
   }
   
   const success = cageStore.addItem({
-    name: selectedItem.value,
+    name: selectedItem,
     type: itemDef.type,
     isConsumable: itemDef.isConsumable,
     size: itemDef.size
-  }, x, y)
+  }, posX, posY)
   
   if (success) {
-    inventoryStore.removeItem(selectedItem.value, 1)
+    inventoryStore.removeItem(selectedItem, 1)
     showAddItemModal.value = false
-    selectedItem.value = ''
-    itemX.value = null
-    itemY.value = null
   } else {
     alert('Failed to add item! Please choose a different location.')
   }
@@ -468,18 +313,16 @@ function addItemToCage() {
 
 function moveItem(item) {
   itemToMove.value = item
-  // Convert from 0-based to 1-based for display
-  moveX.value = item.x + 1
-  moveY.value = item.y + 1
   showMoveModal.value = true
 }
 
-function confirmMoveItem() {
-  if (!itemToMove.value || moveX.value === null || moveY.value === null) return
+function handleMoveItem(data) {
+  const { x, y } = data
+  if (!itemToMove.value || x === null || y === null) return
   
   // Convert from 1-based to 0-based coordinates
-  const x = moveX.value - 1
-  const y = moveY.value - 1
+  const posX = x - 1
+  const posY = y - 1
   
   // Get item size (default to 1x1 if not specified)
   const itemSize = itemToMove.value.size || { width: 1, height: 1 }
@@ -487,14 +330,14 @@ function confirmMoveItem() {
   const itemHeight = itemSize.height
   
   // Check if item fits within grid bounds
-  if (x + itemWidth > cageStore.size.width || y + itemHeight > cageStore.size.height) {
-    alert(`This ${formatItemName(itemToMove.value.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${moveX.value}, ${moveY.value}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
+  if (posX + itemWidth > cageStore.size.width || posY + itemHeight > cageStore.size.height) {
+    alert(`This ${formatItemName(itemToMove.value.name)} (${itemWidth}x${itemHeight}) doesn't fit at position (${x}, ${y}). Please choose a position where the item fits within the ${cageStore.size.width}x${cageStore.size.height} grid.`)
     return
   }
   
   // Check if all required positions are available
-  for (let checkY = y; checkY < y + itemHeight; checkY++) {
-    for (let checkX = x; checkX < x + itemWidth; checkX++) {
+  for (let checkY = posY; checkY < posY + itemHeight; checkY++) {
+    for (let checkX = posX; checkX < posX + itemWidth; checkX++) {
       // Check if position is occupied by another item (excluding the item being moved)
       const isOccupiedByItem = cageStore.items.some(i => i.id !== itemToMove.value.id && i.x === checkX && i.y === checkY)
       // Check if position is occupied by guinea pig
@@ -520,13 +363,11 @@ function confirmMoveItem() {
     }
   }
   
-  const success = cageStore.moveItem(itemToMove.value.id, x, y)
+  const success = cageStore.moveItem(itemToMove.value.id, posX, posY)
   
   if (success) {
     showMoveModal.value = false
     itemToMove.value = null
-    moveX.value = null
-    moveY.value = null
   } else {
     alert('Failed to move item! Please choose a different location.')
   }
@@ -542,9 +383,7 @@ function consumeItem(item) {
     const isSleeping = guineaPigStore.currentStatus === 'sleeping'
     
     if (isSleeping) {
-      console.log('🚫 [CONSUME] Blocked: Guinea pig is sleeping!')
     } else if (isFull) {
-      console.log('🚫 [CONSUME] Blocked: Guinea pig is full!')
     }
     return
   }
@@ -560,12 +399,19 @@ function returnToInventory(item) {
   inventoryStore.addItem(item.name, 1)
 }
 
-function throwOutItem(item) {
-  const confirmed = confirm(`Are you sure you want to throw out ${formatItemName(item.name)}? This action cannot be undone.`)
-  if (confirmed) {
-    cageStore.removeItem(item.id)
-  }
+function addItemToCageFromInventory(itemName) {
+  // Open modal first, then set the selected item
+  showAddItemModal.value = true
+  
+  // Use nextTick to ensure the modal and AddItem component are fully rendered
+  // before calling the method
+  nextTick(() => {
+    if (addItemRef.value) {
+      addItemRef.value.setSelectedItem(itemName)
+    }
+  })
 }
+
 
 // Check if an item can fit at a specific position
 function canItemFitAtPosition(itemSize, x, y) {
@@ -613,27 +459,24 @@ function getAvailablePositionsForItem(itemSize) {
   return availablePositions
 }
 
-// Place items randomly in the cage
-function placeItemsRandomly() {
-  if (!hasAnyItems.value) {
-    alert('No items available in inventory! Visit the Market to buy items first.')
+// Place furniture items randomly in the cage
+function placeFurnitureRandomly() {
+  if (!hasAnyFurnitureItems.value) {
+    alert('No furniture items available in inventory! Visit the Market to buy furniture first.')
     return
   }
   
-  // Get a random selection of items to place (3-6 items)
-  const allAvailableItems = [
-    ...Object.keys(availableConsumables.value),
-    ...Object.keys(availablePermanents.value)
-  ]
+  // Get all available furniture items
+  const allAvailableFurnitureItems = Object.keys(availableFurnitureItems.value)
   
-  if (allAvailableItems.length === 0) {
-    alert('No items available in inventory!')
+  if (allAvailableFurnitureItems.length === 0) {
+    alert('No furniture items available in inventory!')
     return
   }
   
-  // Decide how many items to place (between 1 and min(6, available items))
-  const maxItems = Math.min(6, allAvailableItems.length)
-  const numItemsToPlace = Math.max(1, Math.min(maxItems, 3 + Math.floor(Math.random() * 4)))
+  // Decide how many furniture items to place (between 1 and min(4, available furniture items))
+  const maxItems = Math.min(4, allAvailableFurnitureItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 3)))
   
   let placedItems = 0
   let attempts = 0
@@ -642,8 +485,8 @@ function placeItemsRandomly() {
   while (placedItems < numItemsToPlace && attempts < maxAttempts) {
     attempts++
     
-    // Pick a random item
-    const randomItemName = allAvailableItems[Math.floor(Math.random() * allAvailableItems.length)]
+    // Pick a random furniture item
+    const randomItemName = allAvailableFurnitureItems[Math.floor(Math.random() * allAvailableFurnitureItems.length)]
     const itemDef = itemDefinitions[randomItemName]
     
     if (!itemDef) continue
@@ -674,9 +517,9 @@ function placeItemsRandomly() {
   }
   
   if (placedItems > 0) {
-    alert(`Successfully placed ${placedItems} item${placedItems === 1 ? '' : 's'} randomly in the cage!`)
+    alert(`Successfully placed ${placedItems} furniture item${placedItems === 1 ? '' : 's'} randomly in the cage! 🪑`)
   } else {
-    alert('Could not place any items. Try cleaning up the cage or check your inventory.')
+    alert('Could not place any furniture items. Try cleaning up the cage or check your furniture inventory.')
   }
 }
 
@@ -744,6 +587,134 @@ function placeFoodRandomly() {
   }
 }
 
+// Place chew items randomly in the cage
+function placeChewsRandomly() {
+  if (!hasAnyChewItems.value) {
+    alert('No chew items available in inventory! Visit the Market to buy chew toys first.')
+    return
+  }
+  
+  // Get all available chew items
+  const allAvailableChewItems = Object.keys(availableChewItems.value)
+  
+  if (allAvailableChewItems.length === 0) {
+    alert('No chew items available in inventory!')
+    return
+  }
+  
+  // Decide how many chew items to place (between 1 and min(3, available chew items))
+  const maxItems = Math.min(3, allAvailableChewItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 2)))
+  
+  let placedItems = 0
+  let attempts = 0
+  const maxAttempts = 100 // Prevent infinite loops
+  
+  while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+    attempts++
+    
+    // Pick a random chew item
+    const randomItemName = allAvailableChewItems[Math.floor(Math.random() * allAvailableChewItems.length)]
+    const itemDef = itemDefinitions[randomItemName]
+    
+    if (!itemDef) continue
+    
+    // Get available positions for this specific item size
+    const availablePositions = getAvailablePositionsForItem(itemDef.size)
+    
+    if (availablePositions.length === 0) {
+      // This item can't fit anywhere, try another item
+      continue
+    }
+    
+    // Pick a random available position that can fit this item
+    const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
+    
+    // Try to place the item
+    const success = cageStore.addItem({
+      name: randomItemName,
+      type: itemDef.type,
+      isConsumable: itemDef.isConsumable,
+      size: itemDef.size
+    }, randomPos.x, randomPos.y)
+    
+    if (success) {
+      inventoryStore.removeItem(randomItemName, 1)
+      placedItems++
+    }
+  }
+  
+  if (placedItems > 0) {
+    alert(`Successfully placed ${placedItems} chew item${placedItems === 1 ? '' : 's'} randomly in the cage! 🪵`)
+  } else {
+    alert('Could not place any chew items. Try cleaning up the cage or check your chew inventory.')
+  }
+}
+
+// Place toy items randomly in the cage
+function placeToyRandomly() {
+  if (!hasAnyToyItems.value) {
+    alert('No toy items available in inventory! Visit the Market to buy toys first.')
+    return
+  }
+  
+  // Get all available toy items
+  const allAvailableToyItems = Object.keys(availableToyItems.value)
+  
+  if (allAvailableToyItems.length === 0) {
+    alert('No toy items available in inventory!')
+    return
+  }
+  
+  // Decide how many toy items to place (between 1 and min(3, available toy items))
+  const maxItems = Math.min(3, allAvailableToyItems.length)
+  const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 2)))
+  
+  let placedItems = 0
+  let attempts = 0
+  const maxAttempts = 100 // Prevent infinite loops
+  
+  while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+    attempts++
+    
+    // Pick a random toy item
+    const randomItemName = allAvailableToyItems[Math.floor(Math.random() * allAvailableToyItems.length)]
+    const itemDef = itemDefinitions[randomItemName]
+    
+    if (!itemDef) continue
+    
+    // Get available positions for this specific item size
+    const availablePositions = getAvailablePositionsForItem(itemDef.size)
+    
+    if (availablePositions.length === 0) {
+      // This item can't fit anywhere, try another item
+      continue
+    }
+    
+    // Pick a random available position that can fit this item
+    const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
+    
+    // Try to place the item
+    const success = cageStore.addItem({
+      name: randomItemName,
+      type: itemDef.type,
+      isConsumable: itemDef.isConsumable,
+      size: itemDef.size
+    }, randomPos.x, randomPos.y)
+    
+    if (success) {
+      inventoryStore.removeItem(randomItemName, 1)
+      placedItems++
+    }
+  }
+  
+  if (placedItems > 0) {
+    alert(`Successfully placed ${placedItems} toy item${placedItems === 1 ? '' : 's'} randomly in the cage! 🧸`)
+  } else {
+    alert('Could not place any toy items. Try cleaning up the cage or check your toy inventory.')
+  }
+}
+
 </script>
 
 <style>
@@ -751,188 +722,5 @@ function placeFoodRandomly() {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-}
-
-.gps-cage-item-manager__actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-block-end: 1rem;
-  flex-wrap: wrap;
-}
-
-.gps-cage-item-manager__sections {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.gps-cage-item-manager__section {
-  background: var(--color-panel);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.gps-cage-item-manager__section-title {
-  font-size: var(--font-size-base);
-  color: var(--color-accent);
-  margin: 0 0 0.75rem 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-.gps-cage-item-manager__empty {
-  color: var(--color-text);
-  opacity: 0.6;
-  font-style: italic;
-  text-align: center;
-  padding: 0.75rem;
-  font-size: var(--font-size-sm);
-}
-
-.gps-cage-item-manager__items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.gps-cage-item-manager__item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background: var(--color-bg);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--color-border);
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.gps-cage-item-manager__item-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.gps-cage-item-manager__item-name {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
-}
-
-.gps-cage-item-manager__item-quantity {
-  color: var(--color-accent);
-  font-size: var(--font-size-xs);
-}
-
-.gps-cage-item-manager__item-position {
-  color: var(--color-text);
-  opacity: 0.6;
-  font-size: var(--font-size-xs);
-}
-
-.gps-cage-item-manager__item-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.gps-cage-item-manager__action-button {
-  background: none;
-  border: none;
-  padding: 0.2rem;
-  cursor: pointer;
-  border-radius: var(--border-radius);
-  transition: var(--transition);
-  font-size: 1em;
-}
-
-.gps-cage-item-manager__action-button:hover {
-  background: var(--color-accent);
-  color: var(--color-white);
-}
-
-.gps-cage-item-manager__action-button--danger:hover {
-  background: var(--color-danger);
-}
-
-.gps-cage-item-manager__no-items-message {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  padding: 0.75rem;
-  text-align: center;
-  color: var(--color-text);
-  opacity: 0.8;
-}
-
-.gps-cage-item-manager__no-items-message p {
-  margin: 0.4rem 0;
-  font-size: var(--font-size-xs);
-}
-
-.gps-cage-item-manager__no-items-message p:first-child {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-accent);
-}
-
-.gps-cage-item-manager__first-item-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.gps-cage-item-manager__no-cage-items {
-  background: var(--color-panel);
-  border-radius: var(--border-radius);
-  padding: 2rem 1.5rem;
-}
-
-.gps-cage-item-manager__no-cage-items-content h4 {
-  color: var(--color-accent);
-  font-size: var(--font-size-base);
-  margin: 0 0 0.75rem 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-.gps-cage-item-manager__no-cage-items-content p {
-  color: var(--color-text);
-  opacity: 0.8;
-  margin: 0 0 1.5rem 0;
-  font-size: var(--font-size-sm);
-}
-
-/* Tablet and above constraints */
-@media (min-width: 768px) {
-  .gps-cage-item-manager {
-    max-width: 500px;
-  }
-  
-  .gps-cage-item-manager__sections {
-    max-width: 100%;
-  }
-  
-  .gps-cage-item-manager__section {
-    max-width: 100%;
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 767px) {
-  .gps-cage-item-manager__actions {
-    justify-content: center;
-  }
-  
-  .gps-cage-item-manager__item {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-  
-  .gps-cage-item-manager__item-actions {
-    justify-content: center;
-  }
 }
 </style> 

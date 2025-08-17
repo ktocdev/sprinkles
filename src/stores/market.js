@@ -213,7 +213,7 @@ export const useMarketStore = defineStore('market', {
       
       const needType = item.needType
       if (needType === 'hunger') return '🥕'
-      if (needType === 'chew') return '🦷'
+      if (needType === 'chew') return '🪵'
       if (needType === 'enrichment') return '🎾'
       if (needType === 'shelter') return '🏠'
       return '📦'

@@ -5,6 +5,7 @@ import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
 import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
+import { DEBUG_STORES } from './needsQueue.js'
 
 export const useNEEDNAMEStore = defineStore('NEEDNAME', {
   state: () => ({
@@ -199,7 +200,7 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
 
         // Show fulfillment reaction if improvement occurred
         if (actualImprovement > 0) {
-          console.log(`📈 [${this.needType.toUpperCase()}] FULFILL: ${method.name} improved NEEDNAME by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+          DEBUG_STORES && console.log(`📈 [${this.needType.toUpperCase()}] FULFILL: ${method.name} improved NEEDNAME by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true

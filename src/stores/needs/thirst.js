@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { needStoreMixin } from './needStoreMixin.js'
 import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { DEBUG_STORES } from './needsQueue.js'
 
 export const useThirstStore = defineStore('thirst', {
   state: () => ({
@@ -184,7 +185,7 @@ export const useThirstStore = defineStore('thirst', {
 
         // Show drinking reaction if improvement occurred
         if (actualImprovement > 0) {
-          console.log(`💧 [THIRST] FULFILL: ${method.name} improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+          DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: ${method.name} improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true
@@ -192,7 +193,7 @@ export const useThirstStore = defineStore('thirst', {
           // Always show a general drinking reaction after any water consumption
           const drinkingReaction = this.getRandomReaction('drinking')
           if (drinkingReaction) {
-            console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
+            DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
             this.triggerDelayedReaction(drinkingReaction)
           }
           
