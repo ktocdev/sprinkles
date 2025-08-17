@@ -15,7 +15,7 @@
 export const REQUIRED_STATE = {
   // Core need properties
   currentValue: 100,          // Current need level (0-100)
-  degradationRate: 0.1,       // Points degraded per second
+  degradationRate: 0.1,       // Points degraded per second (from STANDARD_DEGRADATION_RATES)
   maxValue: 100,              // Maximum value
   minValue: 0,                // Minimum value
   urgency: 0,                 // Calculated urgency (set by needsQueue)
@@ -48,9 +48,30 @@ export const REQUIRED_STATE = {
     }
   },
 
+  // Color theming for UI (NEW - REQUIRED)
+  colors: {
+    primary: '#3498db',       // Main color representing this need
+    gradient: ['#85c1e9', '#3498db', '#2980b9'], // Light to dark progression
+    fulfilled: '#b3d9ff',    // Color when satisfied (90-100%)
+    normal: '#85c1e9',       // Color when normal (70-89%)
+    urgent: '#3498db',       // Color when urgent (50-69%)
+    critical: '#2980b9'      // Color when critical (0-49%)
+  },
+
   // Reaction messages for status changes
   reactions: {
-    // Improvement reactions
+    // General fulfillment reactions (NEW - for needs with consumption)
+    eating: [                 // For hunger - shown after eating any food
+      'Nom nom nom!',
+      'Delicious!',
+      'So tasty!'
+    ],
+    drinking: [               // For thirst - shown after drinking water
+      'Glug glug glug!',
+      'Refreshing!',
+      'Cool water!'
+    ],
+    // Status improvement reactions
     criticalToUrgent: [
       'Getting better!',
       'Improvement!'
@@ -63,7 +84,7 @@ export const REQUIRED_STATE = {
       'Perfect!',
       'All satisfied!'
     ],
-    // Degradation reactions
+    // Status degradation reactions
     fulfilledToNormal: [
       'Starting to decline...',
       'Could be better'
@@ -125,6 +146,66 @@ export const REQUIRED_ACTIONS = {
   handleStatusChangeReactions: 'function() - handle automatic status change reactions',
   validateInterface: 'function() - validate store follows standard interface',
   ensureMessageConfig: 'function() - ensure message config is properly structured'
+}
+
+// =============================================================================
+// AUTONOMY SYSTEM INTEGRATION
+// =============================================================================
+
+/**
+ * Autonomy System Integration
+ * 
+ * The autonomy system provides automatic guinea pig movement toward items
+ * that can fulfill needs. This is configured in needsFulfillmentPatterns.js
+ * and uses priority-based decision making.
+ */
+
+export const AUTONOMY_INTEGRATION = {
+  // Movement priorities (higher = more urgent, see autonomy.js)
+  movementPriorities: {
+    hunger: 100,        // Highest priority - food is critical
+    shelter: 90,        // Very high priority - security need
+    chew: 80,          // High priority - dental health
+    enrichment: 70,    // High priority - mental stimulation
+    sleep: 60,         // Medium priority - rest need
+    love: 50,          // Medium priority - social need (requires human)
+    thirst: 40         // Lower priority - water need
+    // Note: hygiene and nails excluded - require user interaction only
+  },
+
+  // Movement thresholds (when guinea pig starts seeking items)
+  movementThresholds: {
+    hunger: 70,        // Start seeking food at 70%
+    shelter: 60,       // Start seeking shelter at 60%
+    chew: 50,          // Start seeking chew items at 50%
+    enrichment: 45,    // Start seeking enrichment at 45%
+    sleep: 80,         // Start seeking sleep items at 80%
+    love: 40,          // Start seeking love at 40%
+    thirst: 30         // Start seeking water at 30% (less frequent)
+  },
+
+  // Item interaction patterns (defined in needsFulfillmentPatterns.js)
+  itemPatterns: {
+    // For needs with physical items on the board
+    normal: {
+      preferredItems: ['item1', 'item2'],    // Items guinea pig will seek
+      qualityRatings: { 'item1': 100 },      // Quality ratings for pathfinding
+      fulfillmentBonus: { 'item1': 20 }      // Points gained when reached
+    },
+    // For needs with fixed positions (like thirst)
+    fixedPosition: {
+      getWaterBottlePosition: 'function',    // Returns fixed position
+      fixedPosition: true                    // Flag for special handling
+    }
+  },
+
+  // Automatic consumption (when guinea pig reaches target)
+  autoConsumption: {
+    hunger: 'Automatically eats food item and removes from cage',
+    thirst: 'Automatically drinks from water bottle (bottle remains)',
+    sleep: 'Automatically changes status to sleeping',
+    other: 'Positions guinea pig at item for manual interaction'
+  }
 }
 
 // =============================================================================
