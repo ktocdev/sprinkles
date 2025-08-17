@@ -719,8 +719,7 @@ function placeToyRandomly() {
 
 <style>
 .gps-cage-item-manager {
+  max-width: 640px;
   width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
 }
 </style> 
