@@ -12,6 +12,14 @@
           💤 Send to Bed
         </Button>
       </FormGroup>
+
+      <FormGroup label="Enable Sleep Degradation">
+        <Toggle 
+          v-model="isSleepEnabled"
+          @change="toggleSleep"
+          aria-label="Toggle sleep degradation on and off"
+        />
+      </FormGroup>
       
       <FormGroup label="Sleep Degradation (per minute)">
         <Input
@@ -40,6 +48,16 @@
           hint="Current urgency level (0-100%)"
         />
       </FormGroup>
+      
+      <FormGroup label="Reset Sleep">
+        <Button 
+          type="primary"
+          @click="resetSleep"
+          hint="Reset sleep value to 100"
+        >
+          💤 Reset to 100
+        </Button>
+      </FormGroup>
     </div>
   </div>
 </template>
@@ -48,6 +66,7 @@
 import { ref, watch, onMounted } from 'vue'
 import Button from '../shared/Button.vue'
 import FormGroup from '../shared/FormGroup.vue'
+import Toggle from '../shared/Toggle.vue'
 import Input from '../shared/Input.vue'
 import { useSleepStore } from '../../stores/needs/individual/sleep'
 import { useGuineaPigStore } from '../../stores/guineaPig'
@@ -58,8 +77,17 @@ const guineaPigStore = useGuineaPigStore()
 const needsQueueStore = useNeedsQueueStore()
 
 // Sleep system controls
+const isSleepEnabled = ref(needsQueueStore.isActive)
 const sleepDegradationPerMinute = ref((sleepStore.degradationRate * 60).toFixed(0))
 const sleepUrgency = ref(Math.round(sleepStore.urgency))
+
+function toggleSleep(enabled) {
+  if (enabled) {
+    needsQueueStore.startNeedsSystem()
+  } else {
+    needsQueueStore.stopNeedsSystem()
+  }
+}
 
 function updateSleepDegradation() {
   // Convert per-minute rate back to per-second rate
@@ -88,10 +116,27 @@ async function sendToBed() {
   }, 100)
 }
 
+function resetSleep() {
+  sleepStore.reset()
+  // Also update the needs queue to reflect the reset
+  needsQueueStore.updateQueue()
+  // Small delay to ensure the reset takes effect
+  setTimeout(() => {
+    needsQueueStore.updateQueue()
+  }, 100)
+}
+
 // Initialize sleep controls on mount
 onMounted(() => {
+  // Set initial sleep controls
+  isSleepEnabled.value = needsQueueStore.isActive
   sleepDegradationPerMinute.value = (sleepStore.degradationRate * 60).toFixed(0)
   sleepUrgency.value = Math.round(sleepStore.urgency)
+})
+
+// Watch for changes in needs system state
+watch(() => needsQueueStore.isActive, (newState) => {
+  isSleepEnabled.value = newState
 })
 
 // Watch for changes in sleep urgency

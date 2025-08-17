@@ -87,13 +87,24 @@ export const useCageStore = defineStore('cage', {
       return state.items.filter(item => !item.isConsumable)
     },
     habitatValue(state) {
+      let score = 0
+      
+      // Count items by type
       const permanentItems = state.items.filter(item => !item.isConsumable)
-      // Calculate habitat value based on number of permanent items
-      // Each permanent item contributes to habitat quality
-      // Chew items are consumable and don't count toward habitat
-      const baseValue = permanentItems.length * 15 // 15 points per permanent item
-      const maxValue = 100 // Maximum habitat value
-      return Math.min(baseValue, maxValue)
+      const foodItems = state.items.filter(item => item.type === 'food')
+      const chewItems = state.items.filter(item => item.type === 'chew')
+      
+      // Permanent items contribute the most to habitat quality
+      score += permanentItems.length * 15 // 15 points per permanent item
+      
+      // Food items contribute to habitat (variety and enrichment)
+      score += foodItems.length * 5 // 5 points per food item
+      
+      // Chew items contribute to habitat (enrichment and activity)
+      score += chewItems.length * 3 // 3 points per chew item
+      
+      // Cap at maximum value
+      return Math.min(score, 100)
     }
   },
   actions: {

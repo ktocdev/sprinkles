@@ -233,6 +233,10 @@ export const useThirstStore = defineStore('thirst', {
       return methods.length > 0 ? methods[0] : null
     },
     
+    setDegradationPerSecond(rate) {
+      this.degradationRate = rate
+    },
+    
     // Include all mixin methods
     ...needStoreMixin,
     
