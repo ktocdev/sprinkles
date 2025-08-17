@@ -276,8 +276,8 @@ export function validateNeedStore(needStore) {
 
 export const EXAMPLE_NEED_STORE = `
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { STANDARD_DEGRADATION_RATES } from '../core/needsFulfillmentPatterns.js'
 
 export const useExampleStore = defineStore('example', {
   state: () => ({

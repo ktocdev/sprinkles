@@ -58,8 +58,8 @@ import Button from '../shared/Button.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import Toggle from '../shared/Toggle.vue'
 import Input from '../shared/Input.vue'
-import { useHungerStore } from '../../stores/needs/hunger'
-import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
+import { useHungerStore } from '../../stores/needs/individual/hunger'
+import { useNeedsQueueStore } from '../../stores/needs/core/needsQueue'
 
 const hungerStore = useHungerStore()
 const needsQueueStore = useNeedsQueueStore()

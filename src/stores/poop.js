@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { useCageStore } from './cage.js'
 import { useStatisticsStore } from './statistics.js'
-import { useNeedsQueueStore, DEBUG_STORES } from './needs/needsQueue.js'
-import { MESSAGE_DURATIONS } from './needs/messageTimingConfig.js'
+import { useNeedsQueueStore, DEBUG_STORES } from './needs/core/needsQueue.js'
+import { MESSAGE_DURATIONS } from './needs/shared/messageTimingConfig.js'
 
 export const usePoopStore = defineStore('poop', {
   state: () => ({

@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { useNeedsQueueStore } from '../stores/needs/needsQueue'
+import { useNeedsQueueStore } from '../stores/needs/core/needsQueue'
 
 /**
  * Composable for formatting needs data for NeedsList component

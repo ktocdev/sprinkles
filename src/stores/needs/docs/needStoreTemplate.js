@@ -2,11 +2,11 @@
 // Copy this file and replace all instances of 'NEEDNAME' with your actual need name
 
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
-import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
-import { DEBUG_STORES } from './needsQueue.js'
-import { getMessageIntervals } from './messageFrequencyConfig.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from '../core/needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../shared/messageTimingConfig.js'
+import { DEBUG_STORES } from '../core/needsQueue.js'
+import { getMessageIntervals } from '../shared/messageFrequencyConfig.js'
 
 export const useNEEDNAMEStore = defineStore('NEEDNAME', {
   state: () => ({

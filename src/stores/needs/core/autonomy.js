@@ -382,7 +382,7 @@ export const useAutonomyStore = defineStore('autonomy', {
     // Helper methods to get other stores (async imports to avoid circular dependencies)
     async getGuineaPigStore() {
       try {
-        const { useGuineaPigStore } = await import('../guineaPig.js')
+        const { useGuineaPigStore } = await import('../../guineaPig.js')
         return useGuineaPigStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get guinea pig store:`, error)
@@ -392,7 +392,7 @@ export const useAutonomyStore = defineStore('autonomy', {
     
     async getCageStore() {
       try {
-        const { useCageStore } = await import('../cage.js')
+        const { useCageStore } = await import('../../cage.js')
         return useCageStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get cage store:`, error)
@@ -402,7 +402,7 @@ export const useAutonomyStore = defineStore('autonomy', {
     
     async getHungerStore() {
       try {
-        const { useHungerStore } = await import('./hunger.js')
+        const { useHungerStore } = await import('../individual/hunger.js')
         return useHungerStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get hunger store:`, error)
@@ -412,7 +412,7 @@ export const useAutonomyStore = defineStore('autonomy', {
     
     async getThirstStore() {
       try {
-        const { useThirstStore } = await import('./thirst.js')
+        const { useThirstStore } = await import('../individual/thirst.js')
         return useThirstStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get thirst store:`, error)

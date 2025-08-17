@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { MESSAGE_DURATIONS, MESSAGE_PRIORITIES } from './needs/messageTimingConfig.js'
-import { useNeedsQueueStore, DEBUG_STORES } from './needs/needsQueue.js'
+import { MESSAGE_DURATIONS, MESSAGE_PRIORITIES } from './needs/shared/messageTimingConfig.js'
+import { useNeedsQueueStore, DEBUG_STORES } from './needs/core/needsQueue.js'
 
 export const useGuineaPigStore = defineStore('guineaPig', {
   state: () => ({
@@ -494,7 +494,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
 
       try {
         // Import autonomy store dynamically to avoid circular dependency
-        const { useAutonomyStore } = await import('./needs/autonomy.js')
+        const { useAutonomyStore } = await import('./needs/core/autonomy.js')
         const autonomyStore = useAutonomyStore()
         
         // Let autonomy store make the decision
@@ -544,7 +544,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     // Simplified sleep transition check - now works with autonomy store
     async shouldAllowSleepTransition() {
       try {
-        const { useSleepStore } = await import('./needs/sleep.js')
+        const { useSleepStore } = await import('./needs/individual/sleep.js')
         const sleepStore = useSleepStore()
         
         const sleepLevel = sleepStore.currentValue

@@ -1,7 +1,7 @@
 // Shared methods for need stores to handle status improvements and reactions
-import { validateNeedStore } from './needStoreInterface.js'
+import { validateNeedStore } from '../docs/needStoreInterface.js'
 import { MESSAGE_DURATIONS, ensureMinimumDuration } from './messageTimingConfig.js'
-import { DEBUG_STORES } from './needsQueue.js'
+import { DEBUG_STORES } from '../core/needsQueue.js'
 
 export const needStoreMixin = {
   // Check for status improvements and return reaction if any

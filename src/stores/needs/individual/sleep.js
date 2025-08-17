@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { STANDARD_DEGRADATION_RATES, getPreferredItemsForNeed, isPreferredItemForNeed, getItemQualityForNeed, getFulfillmentBonusForItem, getGroundPenaltyForNeed, findNearestItemForNeed } from './needsFulfillmentPatterns.js'
-import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
-import { useNeedsQueueStore, DEBUG_STORES } from './needsQueue.js'
-import { useGuineaPigStore } from '../guineaPig.js'
-import { useCageStore } from '../cage.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { STANDARD_DEGRADATION_RATES, getPreferredItemsForNeed, isPreferredItemForNeed, getItemQualityForNeed, getFulfillmentBonusForItem, getGroundPenaltyForNeed, findNearestItemForNeed } from '../core/needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../shared/messageTimingConfig.js'
+import { useNeedsQueueStore, DEBUG_STORES } from '../core/needsQueue.js'
+import { useGuineaPigStore } from '../../guineaPig.js'
+import { useCageStore } from '../../cage.js'
 
 export const useSleepStore = defineStore('sleep', {
   state: () => ({

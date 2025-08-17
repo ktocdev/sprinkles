@@ -1,8 +1,8 @@
 // Love need store - fulfilled by human interaction (petting, talking, singing)
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
-import { DEBUG_STORES } from './needsQueue.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from '../core/needsFulfillmentPatterns.js'
+import { DEBUG_STORES } from '../core/needsQueue.js'
 
 export const useLoveStore = defineStore('love', {
   state: () => ({

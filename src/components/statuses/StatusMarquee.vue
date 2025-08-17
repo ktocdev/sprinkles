@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue'
-import { useNeedsQueueStore, DEBUG_STORES } from '../../stores/needs/needsQueue'
+import { useNeedsQueueStore, DEBUG_STORES } from '../../stores/needs/core/needsQueue'
 
 const needsQueueStore = useNeedsQueueStore()
 

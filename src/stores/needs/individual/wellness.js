@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { useNeedsQueueStore, DEBUG_STORES } from './needsQueue.js'
+import { useNeedsQueueStore, DEBUG_STORES } from '../core/needsQueue.js'
 
 export const useWellnessStore = defineStore('wellness', {
   state: () => ({
