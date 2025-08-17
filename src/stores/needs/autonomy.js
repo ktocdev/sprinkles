@@ -63,7 +63,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         // Check if guinea pig is paused or sleeping
         const guineaPigStore = await this.getGuineaPigStore()
         if (!guineaPigStore || guineaPigStore.isPaused || guineaPigStore.currentStatus === 'sleeping') {
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] DECISION: Skipping - guinea pig paused or sleeping`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DECISION: Skipping - guinea pig paused or sleeping`)
           return false
         }
         
@@ -84,7 +84,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         // Find best item for this urgent need
         const targetItem = await this.findBestItemForNeed(urgentNeed.needType)
         if (!targetItem) {
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] DECISION: No suitable items found for ${urgentNeed.needType}`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DECISION: No suitable items found for ${urgentNeed.needType}`)
           return false
         }
         
@@ -95,7 +95,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         return await this.executeAutonomousMovement()
         
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] DECISION: Error making autonomous decision:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] DECISION: Error making autonomous decision:`, error)
         return false
       }
     },
@@ -138,12 +138,12 @@ export const useAutonomyStore = defineStore('autonomy', {
         }
         
         if (mostUrgentNeed) {
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] URGENT_NEED: ${mostUrgentNeed.needType} at ${mostUrgentNeed.currentValue}% (priority: ${mostUrgentNeed.priority.toFixed(1)})`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] URGENT_NEED: ${mostUrgentNeed.needType} at ${mostUrgentNeed.currentValue}% (priority: ${mostUrgentNeed.priority.toFixed(1)})`)
         }
         
         return mostUrgentNeed
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] URGENT_NEED: Error finding urgent need:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] URGENT_NEED: Error finding urgent need:`, error)
         return null
       }
     },
@@ -162,12 +162,12 @@ export const useAutonomyStore = defineStore('autonomy', {
         )
         
         if (bestItem) {
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] TARGET: Found ${bestItem.name} for ${needType} at (${bestItem.x}, ${bestItem.y}) distance ${bestItem.distance}, quality ${bestItem.quality}`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] TARGET: Found ${bestItem.name} for ${needType} at (${bestItem.x}, ${bestItem.y}) distance ${bestItem.distance}, quality ${bestItem.quality}`)
         }
         
         return bestItem
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] TARGET: Error finding item for ${needType}:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] TARGET: Error finding item for ${needType}:`, error)
         return null
       }
     },
@@ -182,14 +182,14 @@ export const useAutonomyStore = defineStore('autonomy', {
       }
       this.isActivelyMoving = true
       
-      DEBUG_STORES && console.log(`🤖 [AUTONOMY] TARGET_SET: Moving toward ${targetItem.name} for ${needType} at (${targetItem.x}, ${targetItem.y})`)
+      DEBUG_STORES() && console.log(`🤖 [AUTONOMY] TARGET_SET: Moving toward ${targetItem.name} for ${needType} at (${targetItem.x}, ${targetItem.y})`)
     },
     
     // Clear current movement target
     clearCurrentTarget() {
       this.currentTarget = null
       this.isActivelyMoving = false
-      DEBUG_STORES && console.log(`🤖 [AUTONOMY] TARGET_CLEAR: Cleared movement target`)
+      DEBUG_STORES() && console.log(`🤖 [AUTONOMY] TARGET_CLEAR: Cleared movement target`)
     },
     
     // Execute autonomous movement toward current target
@@ -209,7 +209,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         
         // Check if already at target
         if (currentX === targetX && currentY === targetY) {
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Transitioning based on need type...`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Transitioning based on need type...`)
           await this.handleReachedTarget()
           return true
         }
@@ -237,11 +237,11 @@ export const useAutonomyStore = defineStore('autonomy', {
         // Move guinea pig to new position
         if (newX !== currentX || newY !== currentY) {
           cageStore.setGuineaPigPos(newX, newY)
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] MOVEMENT: Moving toward ${this.currentTarget.item.name} from (${currentX}, ${currentY}) to (${newX}, ${newY})`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Moving toward ${this.currentTarget.item.name} from (${currentX}, ${currentY}) to (${newX}, ${newY})`)
           
           // Check if we've reached the target
           if (newX === targetX && newY === targetY) {
-            DEBUG_STORES && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Handling arrival...`)
+            DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Handling arrival...`)
             setTimeout(async () => {
               await this.handleReachedTarget()
             }, 1000) // Small delay to let movement settle
@@ -252,7 +252,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         
         return false
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] MOVEMENT: Error executing movement:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] MOVEMENT: Error executing movement:`, error)
         return false
       }
     },
@@ -272,7 +272,7 @@ export const useAutonomyStore = defineStore('autonomy', {
       
       const threshold = this.movementThresholds[this.currentTarget.needType]
       if (needData.currentValue > threshold) {
-        DEBUG_STORES && console.log(`🤖 [AUTONOMY] CONTINUE: ${this.currentTarget.needType} no longer urgent (${needData.currentValue}% > ${threshold}%), stopping movement`)
+        DEBUG_STORES() && console.log(`🤖 [AUTONOMY] CONTINUE: ${this.currentTarget.needType} no longer urgent (${needData.currentValue}% > ${threshold}%), stopping movement`)
         this.clearCurrentTarget()
         return false
       }
@@ -295,22 +295,64 @@ export const useAutonomyStore = defineStore('autonomy', {
             await guineaPigStore.changeStatus('sleeping')
           }
         } else if (needType === 'hunger') {
-          // For hunger, the guinea pig could automatically eat if we implement that
-          // For now, just clear the target and let the user manually feed
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] REACHED: At food source, ready for feeding`)
+          // Automatically consume the food item
+          const hungerStore = await this.getHungerStore()
+          const foodItemName = this.currentTarget.item.name
+          
+          if (hungerStore && foodItemName) {
+            DEBUG_STORES() && console.log(`🤖 [AUTONOMY] REACHED: At ${foodItemName}, attempting to eat...`)
+            
+            // Try to fulfill hunger with this food item
+            const result = hungerStore.fulfill(foodItemName)
+            
+            if (result.success) {
+              DEBUG_STORES() && console.log(`🤖 [AUTONOMY] EATING: Successfully ate ${foodItemName}, hunger improved by ${result.improvement}`)
+              
+              // Remove the food item from the cage since it's been consumed
+              const cageStore = await this.getCageStore()
+              if (cageStore) {
+                // Find and remove the food item at the current position
+                const itemIndex = cageStore.items.findIndex(item => 
+                  item.x === this.currentTarget.x && 
+                  item.y === this.currentTarget.y && 
+                  item.name === foodItemName
+                )
+                
+                if (itemIndex !== -1) {
+                  cageStore.items.splice(itemIndex, 1)
+                  DEBUG_STORES() && console.log(`🤖 [AUTONOMY] EATING: Removed ${foodItemName} from cage`)
+                }
+              }
+            } else {
+              DEBUG_STORES() && console.log(`🤖 [AUTONOMY] EATING: Failed to eat ${foodItemName}: ${result.message}`)
+            }
+          }
         } else if (needType === 'thirst') {
-          // For thirst, could automatically drink if we implement that
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] REACHED: At water source, ready for drinking`)
+          // Automatically drink from the water bottle
+          const thirstStore = await this.getThirstStore()
+          
+          if (thirstStore) {
+            DEBUG_STORES() && console.log(`🤖 [AUTONOMY] REACHED: At water bottle, attempting to drink...`)
+            
+            // Try to fulfill thirst from water bottle
+            const result = thirstStore.fulfill('water_bottle_fixed')
+            
+            if (result.success) {
+              DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DRINKING: Successfully drank water, thirst improved by ${result.improvement}`)
+            } else {
+              DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DRINKING: Failed to drink water: ${result.message}`)
+            }
+          }
         } else {
           // For other needs, just position the guinea pig at the item
-          DEBUG_STORES && console.log(`🤖 [AUTONOMY] REACHED: At ${this.currentTarget.item.name} for ${needType}`)
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] REACHED: At ${this.currentTarget.item.name} for ${needType}`)
         }
         
         // Clear the target since we've reached it
         this.clearCurrentTarget()
         
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] REACHED: Error handling reached target:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] REACHED: Error handling reached target:`, error)
         this.clearCurrentTarget()
       }
     },
@@ -318,14 +360,14 @@ export const useAutonomyStore = defineStore('autonomy', {
     // Force stop autonomous movement
     stopAutonomousMovement() {
       this.clearCurrentTarget()
-      DEBUG_STORES && console.log(`🤖 [AUTONOMY] STOP: Autonomous movement stopped`)
+      DEBUG_STORES() && console.log(`🤖 [AUTONOMY] STOP: Autonomous movement stopped`)
     },
     
     // Update movement priorities (for customization)
     updateNeedPriority(needType, priority) {
       if (this.needPriorities.hasOwnProperty(needType)) {
         this.needPriorities[needType] = priority
-        DEBUG_STORES && console.log(`🤖 [AUTONOMY] PRIORITY: Updated ${needType} priority to ${priority}`)
+        DEBUG_STORES() && console.log(`🤖 [AUTONOMY] PRIORITY: Updated ${needType} priority to ${priority}`)
       }
     },
     
@@ -333,7 +375,7 @@ export const useAutonomyStore = defineStore('autonomy', {
     updateMovementThreshold(needType, threshold) {
       if (this.movementThresholds.hasOwnProperty(needType)) {
         this.movementThresholds[needType] = threshold
-        DEBUG_STORES && console.log(`🤖 [AUTONOMY] THRESHOLD: Updated ${needType} threshold to ${threshold}%`)
+        DEBUG_STORES() && console.log(`🤖 [AUTONOMY] THRESHOLD: Updated ${needType} threshold to ${threshold}%`)
       }
     },
     
@@ -343,7 +385,7 @@ export const useAutonomyStore = defineStore('autonomy', {
         const { useGuineaPigStore } = await import('../guineaPig.js')
         return useGuineaPigStore()
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] STORE: Could not get guinea pig store:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get guinea pig store:`, error)
         return null
       }
     },
@@ -353,7 +395,27 @@ export const useAutonomyStore = defineStore('autonomy', {
         const { useCageStore } = await import('../cage.js')
         return useCageStore()
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [AUTONOMY] STORE: Could not get cage store:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get cage store:`, error)
+        return null
+      }
+    },
+    
+    async getHungerStore() {
+      try {
+        const { useHungerStore } = await import('./hunger.js')
+        return useHungerStore()
+      } catch (error) {
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get hunger store:`, error)
+        return null
+      }
+    },
+    
+    async getThirstStore() {
+      try {
+        const { useThirstStore } = await import('./thirst.js')
+        return useThirstStore()
+      } catch (error) {
+        DEBUG_STORES() && console.warn(`🤖 [AUTONOMY] STORE: Could not get thirst store:`, error)
         return null
       }
     },

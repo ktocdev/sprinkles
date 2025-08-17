@@ -221,7 +221,7 @@ export const usePoopStore = defineStore('poop', {
       // Add the complete chain as a single high-priority unit
       needsQueueStore.addMessageChain(messageChain, 1, 'hygiene')
       
-      DEBUG_STORES && console.log(`💩 [POOP] STEPPED: Guinea pig stepped on old poop, hygiene impact: ${this.hygieneImpact}`)
+      DEBUG_STORES() && console.log(`💩 [POOP] STEPPED: Guinea pig stepped on old poop, hygiene impact: ${this.hygieneImpact}`)
       
       return {
         success: true,

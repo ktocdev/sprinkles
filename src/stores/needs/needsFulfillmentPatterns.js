@@ -541,7 +541,7 @@ export function findNearestItemForNeed(needType, guineaPigX, guineaPigY, cageSto
 
     return bestItem
   } catch (error) {
-    DEBUG_STORES && console.warn(`🔍 [ITEM_SEARCH] Could not find nearest item for ${needType}:`, error)
+    DEBUG_STORES() && console.warn(`🔍 [ITEM_SEARCH] Could not find nearest item for ${needType}:`, error)
     return null
   }
 }

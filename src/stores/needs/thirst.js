@@ -183,7 +183,7 @@ export const useThirstStore = defineStore('thirst', {
 
       // Show drinking reaction if improvement occurred
       if (actualImprovement > 0) {
-        DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Water bottle improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        DEBUG_STORES() && console.log(`💧 [THIRST] FULFILL: Water bottle improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions
         this.recentlyFulfilled = true
@@ -191,7 +191,7 @@ export const useThirstStore = defineStore('thirst', {
         // Always show a general drinking reaction after any water consumption
         const drinkingReaction = this.getRandomReaction('drinking')
         if (drinkingReaction) {
-          DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
+          DEBUG_STORES() && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
           this.triggerDelayedReaction(drinkingReaction)
         }
         

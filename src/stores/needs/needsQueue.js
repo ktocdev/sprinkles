@@ -4,14 +4,18 @@ import { useWellnessStore } from './wellness.js'
 import { useSleepStore } from './sleep.js'
 import { useThirstStore } from './thirst.js'
 import { useAutonomyStore } from './autonomy.js'
+import { useDebugStore } from '../debug.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { useMarketStore } from '../market.js'
 import { useGuineaPigStore } from '../guineaPig.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, MESSAGE_PRIORITIES, ensureMinimumDuration } from './messageTimingConfig.js'
 
-// Global debug flag - set to false to disable all store console logs
-export const DEBUG_STORES = true
+// Global debug flag - now reactive via debug store
+export function DEBUG_STORES() {
+  const debugStore = useDebugStore()
+  return debugStore.DEBUG_STORES
+}
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
@@ -127,13 +131,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       try {
         const guineaPigStore = useGuineaPigStore()
         if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
-          DEBUG_STORES && console.log(`💤 [NEEDSQUEUE] FALLBACK: Skipping wellness message - guinea pig is sleeping`)
+          DEBUG_STORES() && console.log(`💤 [NEEDSQUEUE] FALLBACK: Skipping wellness message - guinea pig is sleeping`)
         } else {
           const wellnessStore = this.getNeedStore('wellness')
           if (wellnessStore) {
             const wellnessText = wellnessStore.getWellnessMessage()
             const wellnessEmoji = wellnessStore.getWellnessEmoji()
-            DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
+            DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] FALLBACK: Using wellness message "${wellnessText}" ${wellnessEmoji}`)
             return {
               text: wellnessText,
               emoji: wellnessEmoji
@@ -488,7 +492,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (!isHighPriorityMessage && this.currentMessage && this.lastMessageStartTime > 0) {
         const timeDisplayed = now - this.lastMessageStartTime
         if (timeDisplayed < this.minimumDisplayTime) {
-          DEBUG_STORES && console.log(`⏰ [NEEDSQUEUE] TIMING: Skipping "${text}" - current message needs ${this.minimumDisplayTime - timeDisplayed}ms more`)
+          DEBUG_STORES() && console.log(`⏰ [NEEDSQUEUE] TIMING: Skipping "${text}" - current message needs ${this.minimumDisplayTime - timeDisplayed}ms more`)
           return null
         }
       }
@@ -500,7 +504,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
                            (this.currentMessage && this.currentMessage.text === text)
         
         if (isDuplicate) {
-          DEBUG_STORES && console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping duplicate ambient message "${text}"`)
+          DEBUG_STORES() && console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping duplicate ambient message "${text}"`)
           return null
         }
         
@@ -511,7 +515,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           // For other ambient messages, don't add if there are higher priority messages
           const hasHigherPriorityMessages = this.messageQueue.some(msg => msg.priority < 7)
           if (hasHigherPriorityMessages) {
-            DEBUG_STORES && console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping ambient message "${text}" - higher priority messages present`)
+            DEBUG_STORES() && console.log(`🚫 [NEEDSQUEUE] AMBIENT: Skipping ambient message "${text}" - higher priority messages present`)
             return null
           }
           
@@ -543,7 +547,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       }
       
       this.messageQueue.splice(insertIndex, 0, message)
-      DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] MESSAGE: Added "${text}" (${type}, priority ${priority}) at index ${insertIndex}`)
+      DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] MESSAGE: Added "${text}" (${type}, priority ${priority}) at index ${insertIndex}`)
       
       // Log current queue status
       this.logQueueStatus()
@@ -558,7 +562,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         
         if (!isSameSequence) {
           // High priority messages should interrupt current message and start immediately
-          DEBUG_STORES && console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
+          DEBUG_STORES() && console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Interrupting for high priority message: "${text}"`)
           
           if (this.isProcessingQueue && this._messageTimer) {
             // Clear current message timer to force immediate processing of high priority message
@@ -566,13 +570,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
             this._messageTimer = null
             this.currentMessage = null
             this.isProcessingQueue = false
-            DEBUG_STORES && console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
+            DEBUG_STORES() && console.log(`🚨 [NEEDSQUEUE] HIGH_PRIORITY: Cleared current message to make room for: "${text}"`)
           }
           
           // Start processing the high priority message immediately
           this.processNextMessage()
         } else {
-          DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] SEQUENCE: Not interrupting - same sequence ID: ${sequenceId}`)
+          DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] SEQUENCE: Not interrupting - same sequence ID: ${sequenceId}`)
           // Don't call processNextMessage for same sequence - let natural flow handle it
         }
       }
@@ -627,11 +631,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       }
 
       this.messageQueue.splice(insertIndex, 0, chainMessage)
-      DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] CHAIN: Added chain with ${messageChain.length} messages (priority ${priority}) at index ${insertIndex}`)
+      DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] CHAIN: Added chain with ${messageChain.length} messages (priority ${priority}) at index ${insertIndex}`)
 
       // Log chain details
       messageChain.forEach((msg, index) => {
-        DEBUG_STORES && console.log(`  ${index + 1}. "${msg.text}" ${msg.emoji} (${msg.duration}ms)`)
+        DEBUG_STORES() && console.log(`  ${index + 1}. "${msg.text}" ${msg.emoji} (${msg.duration}ms)`)
       })
 
       // Start processing if not already active
@@ -670,7 +674,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       this.currentMessage = message
       this.lastMessageStartTime = Date.now()
       
-      DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${message.text}" for ${message.duration}ms`)
+      DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] MESSAGE: Displaying "${message.text}" for ${message.duration}ms`)
       this.logQueueStatus()
       
       // Clear any existing timer
@@ -680,7 +684,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Set timer to process next message
       this._messageTimer = setTimeout(() => {
-        DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${message.text}"`)
+        DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] MESSAGE: Finished displaying "${message.text}"`)
         this.finishCurrentMessage()
       }, message.duration)
     },
@@ -705,7 +709,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     processChainStep(chainMessage) {
       const currentStep = chainMessage.messages[chainMessage.currentIndex]
       if (!currentStep) {
-        DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] CHAIN: Chain completed`)
+        DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] CHAIN: Chain completed`)
         this.finishCurrentMessage()
         return
       }
@@ -722,7 +726,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       this.lastMessageStartTime = Date.now()
       
-      DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] CHAIN: Step ${chainMessage.currentIndex + 1}/${chainMessage.messages.length}: "${currentStep.text}" for ${currentStep.duration}ms`)
+      DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] CHAIN: Step ${chainMessage.currentIndex + 1}/${chainMessage.messages.length}: "${currentStep.text}" for ${currentStep.duration}ms`)
       this.logQueueStatus()
       
       // Clear any existing timer
@@ -732,18 +736,18 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       // Set timer for this step
       this._messageTimer = setTimeout(() => {
-        DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] CHAIN: Finished step ${chainMessage.currentIndex + 1}: "${currentStep.text}"`)
+        DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] CHAIN: Finished step ${chainMessage.currentIndex + 1}: "${currentStep.text}"`)
         
         // Move to next step in chain
         chainMessage.currentIndex++
         
         if (chainMessage.currentIndex < chainMessage.messages.length) {
           // More steps in chain - process next step immediately
-          DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] CHAIN: Moving to step ${chainMessage.currentIndex + 1}`)
+          DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] CHAIN: Moving to step ${chainMessage.currentIndex + 1}`)
           this.processChainStep(chainMessage)
         } else {
           // Chain completed - move to next message in queue
-          DEBUG_STORES && console.log(`📢 [NEEDSQUEUE] CHAIN: All steps completed`)
+          DEBUG_STORES() && console.log(`📢 [NEEDSQUEUE] CHAIN: All steps completed`)
           this.finishCurrentMessage()
         }
       }, currentStep.duration)
@@ -753,13 +757,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     finishCurrentMessage() {
       // Process next message immediately if available (seamless transition)
       if (this.messageQueue.length > 0) {
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] QUEUE: Seamlessly transitioning to next message...`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] QUEUE: Seamlessly transitioning to next message...`)
         this.processNextMessage() // No delay, immediate transition
       } else {
         // Only clear current message when no next message is available
         this.currentMessage = null
         this.isProcessingQueue = false
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] QUEUE: Queue is now empty`)
       }
     },
 
@@ -774,7 +778,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       const removed = initialLength - this.messageQueue.length
       if (removed > 0) {
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared ${removed} messages of type "${type}"${needType ? ` for need "${needType}"` : ''}`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared ${removed} messages of type "${type}"${needType ? ` for need "${needType}"` : ''}`)
       }
     },
 
@@ -789,7 +793,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         this._messageTimer = null
       }
       
-      DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared all messages`)
+      DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] MESSAGE: Cleared all messages`)
     },
 
     // Efficiently check urgency messages for all needs in a single batch
@@ -798,7 +802,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       try {
         const guineaPigStore = useGuineaPigStore()
         if (guineaPigStore && guineaPigStore.currentStatus === 'sleeping') {
-          DEBUG_STORES && console.log(`💤 [NEEDSQUEUE] URGENCY: Skipping all urgency messages - guinea pig is sleeping`)
+          DEBUG_STORES() && console.log(`💤 [NEEDSQUEUE] URGENCY: Skipping all urgency messages - guinea pig is sleeping`)
           return
         }
       } catch (error) {
@@ -853,7 +857,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       }
       
       if (readyNeeds.length > 0) {
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] URGENCY_BATCH: Processed ${readyNeeds.length} urgency messages this cycle`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] URGENCY_BATCH: Processed ${readyNeeds.length} urgency messages this cycle`)
       }
     },
 
@@ -874,7 +878,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       if (messages.length === 0) {
         const needConfig = this.needConfigs[needName] || {}
         if (needConfig.enableDebugLogs) {
-          DEBUG_STORES && console.log(`🌟 [${needName.toUpperCase()}] URGENCY: No messages available for ${urgencyLevel} level`)
+          DEBUG_STORES() && console.log(`🌟 [${needName.toUpperCase()}] URGENCY: No messages available for ${urgencyLevel} level`)
         }
         return
       }
@@ -892,9 +896,9 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Log based on configuration
       const needConfig = this.needConfigs[needName] || {}
       if (needConfig.enableDebugLogs) {
-        DEBUG_STORES && console.log(`🌟 [${needName.toUpperCase()}] URGENCY: Added urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
+        DEBUG_STORES() && console.log(`🌟 [${needName.toUpperCase()}] URGENCY: Added urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
       } else {
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] URGENCY: Added ${needName} urgency message "${message}" ${emoji} (${urgencyLevel} level)`)
       }
     },
 
@@ -962,13 +966,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       
       if (isGamePaused || store.recentlyFulfilled) {
         // Clear pending reactions when paused to avoid stale reactions
-        DEBUG_STORES && console.log(`🎭 [NEEDSQUEUE] REACTION: Clearing ${pendingReactions.length} pending reactions for ${needName} (game paused)`)
+        DEBUG_STORES() && console.log(`🎭 [NEEDSQUEUE] REACTION: Clearing ${pendingReactions.length} pending reactions for ${needName} (game paused)`)
         return
       }
       
       // Process each pending reaction
       pendingReactions.forEach(reaction => {
-        DEBUG_STORES && console.log(`🎭 [NEEDSQUEUE] REACTION: Processing pending reaction for ${needName}: "${reaction.message}" ${reaction.emoji}`)
+        DEBUG_STORES() && console.log(`🎭 [NEEDSQUEUE] REACTION: Processing pending reaction for ${needName}: "${reaction.message}" ${reaction.emoji}`)
         
         // Add reaction with highest priority (1) and type 'reaction'
         this.addMessage(
@@ -985,11 +989,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     // Log current queue status to console
     logQueueStatus() {
       if (this.messageQueue.length === 0) {
-        DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] QUEUE: Empty queue`)
+        DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] QUEUE: Empty queue`)
         return
       }
       
-      DEBUG_STORES && console.log(`📋 [NEEDSQUEUE] QUEUE: ${this.messageQueue.length} messages in queue:`)
+      DEBUG_STORES() && console.log(`📋 [NEEDSQUEUE] QUEUE: ${this.messageQueue.length} messages in queue:`)
       this.messageQueue.slice(0, 5).forEach((msg, index) => {
         let displayText = 'No text'
         let displayEmoji = '❓'
@@ -1008,11 +1012,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           displayDuration = msg.duration || 0
         }
         
-        DEBUG_STORES && console.log(`  ${index + 1}. [P${msg.priority}] ${msg.type}: "${displayText}" ${displayEmoji} (${displayDuration}ms)`)
+        DEBUG_STORES() && console.log(`  ${index + 1}. [P${msg.priority}] ${msg.type}: "${displayText}" ${displayEmoji} (${displayDuration}ms)`)
       })
       
       if (this.messageQueue.length > 5) {
-        DEBUG_STORES && console.log(`  ... and ${this.messageQueue.length - 5} more messages`)
+        DEBUG_STORES() && console.log(`  ... and ${this.messageQueue.length - 5} more messages`)
       }
     },
 
@@ -1035,13 +1039,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         const isGamePaused = !userStore.name || cageStore.paused
         
         if (isGamePaused) {
-          DEBUG_STORES && console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Clearing ${pendingMessages.length} pending status messages (game paused)`)
+          DEBUG_STORES() && console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Clearing ${pendingMessages.length} pending status messages (game paused)`)
           return
         }
         
         // Process each pending status message
         pendingMessages.forEach(msg => {
-          DEBUG_STORES && console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Processing status message: "${msg.text}" ${msg.emoji}`)
+          DEBUG_STORES() && console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Processing status message: "${msg.text}" ${msg.emoji}`)
           
           this.addMessage(
             msg.text,

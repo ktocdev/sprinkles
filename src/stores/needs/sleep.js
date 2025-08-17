@@ -164,14 +164,14 @@ export const useSleepStore = defineStore('sleep', {
         if (bonus) {
           improvement = bonus
           sleepLocation = itemName
-          DEBUG_STORES && console.log(`💤 [SLEEP] ITEM_BONUS: Using ${itemName} for ${improvement} sleep points (bonus: ${bonus - 15})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] ITEM_BONUS: Using ${itemName} for ${improvement} sleep points (bonus: ${bonus - 15})`)
         }
       } else {
         // Check for ground penalty
         const groundPenalty = this.getGroundSleepPenalty()
         if (groundPenalty) {
           improvement = groundPenalty
-          DEBUG_STORES && console.log(`💤 [SLEEP] GROUND_PENALTY: Sleeping on ground for only ${improvement} sleep points (penalty: ${15 - groundPenalty})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] GROUND_PENALTY: Sleeping on ground for only ${improvement} sleep points (penalty: ${15 - groundPenalty})`)
         }
       }
 
@@ -179,7 +179,7 @@ export const useSleepStore = defineStore('sleep', {
       const actualImprovement = this.currentValue - oldValue
 
       if (actualImprovement > 0) {
-        DEBUG_STORES && console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping on ${sleepLocation}, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping on ${sleepLocation}, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
@@ -190,7 +190,7 @@ export const useSleepStore = defineStore('sleep', {
       
       // Clear the flag after a short delay
       setTimeout(() => {
-        DEBUG_STORES && console.log(`💤 [SLEEP] AUTO_FULFILL: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] AUTO_FULFILL: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
       }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG)
 
@@ -234,7 +234,7 @@ export const useSleepStore = defineStore('sleep', {
           }
         }
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] AUTO_FULFILL: Could not check guinea pig status:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] AUTO_FULFILL: Could not check guinea pig status:`, error)
       }
     },
 
@@ -253,14 +253,14 @@ export const useSleepStore = defineStore('sleep', {
         )
         
         if (itemAtPosition) {
-          DEBUG_STORES && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
           return itemAtPosition.name
         }
         
-        DEBUG_STORES && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ground at (${gpX}, ${gpY})`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ground at (${gpX}, ${gpY})`)
         return null // Sleeping on ground
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] LOCATION: Could not detect sleeping location:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] LOCATION: Could not detect sleeping location:`, error)
         return null
       }
     },
@@ -283,7 +283,7 @@ export const useSleepStore = defineStore('sleep', {
         const cageStore = useCageStore()
         return getPreferredItemsForNeed('sleep', cageStore)
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] ITEMS: Could not get preferred sleep items:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] ITEMS: Could not get preferred sleep items:`, error)
         return []
       }
     },

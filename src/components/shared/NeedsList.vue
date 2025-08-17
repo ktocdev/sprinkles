@@ -1,9 +1,9 @@
 <template>
   <div class="gps-needs-list">
-    <div class="gps-needs-list__header">
-      <h4 class="gps-section-header">Current Needs</h4>
-    </div>
     <div class="gps-needs-list__content">
+      <div class="gps-needs-list__header">
+        <h4 class="gps-section-header">Current Needs</h4>
+      </div>
       <ul class="gps-needs-list__list" v-if="items.length > 0">
         <li 
           v-for="(item, index) in formattedItems" 
@@ -165,7 +165,11 @@ function getStatusColor(status) {
 }
 
 .gps-needs-list__header {
-  margin-bottom: 0.75rem;
+  padding: 1rem 1rem 0;
+}
+
+.gps-needs-list__header .gps-section-header {
+  margin-block-end: 0;
 }
 
 .gps-needs-list__content {

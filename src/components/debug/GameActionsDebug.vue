@@ -26,6 +26,19 @@
           Reset inventory to default values, restoring all items including large beds and houses.
         </p>
       </div>
+      
+      <div class="gps-panel-action-item">
+        <Button 
+          :type="debugStore.storeLogging ? 'danger' : 'success'"
+          @click="toggleDebugLogging"
+          class="gps-panel-action-button"
+        >
+          {{ debugStore.storeLogging ? '🔇 Disable Console' : '🔊 Enable Console' }}
+        </Button>
+        <p class="gps-panel-action-description">
+          {{ debugStore.storeLogging ? 'Turn off all debug console messages from stores (🤖, 🐹, 💤, etc.)' : 'Turn on all debug console messages from stores for troubleshooting' }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -34,10 +47,12 @@
 import Button from '../shared/Button.vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore } from '../../stores/inventory'
+import { useDebugStore } from '../../stores/debug'
 
-// Only need specific stores for individual functions
+// Store instances
 const cageStore = useCageStore()
 const inventoryStore = useInventoryStore()
+const debugStore = useDebugStore()
 
 function clearCage() {
   cageStore.$reset()
@@ -48,6 +63,10 @@ function resetInventory() {
   if (window.confirm('Are you sure you want to reset the inventory to default values? This will restore all items including large beds and houses.')) {
     inventoryStore.resetToDefaults()
   }
+}
+
+function toggleDebugLogging() {
+  debugStore.toggleStoreLogging()
 }
 </script>
 

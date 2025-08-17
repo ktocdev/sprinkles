@@ -329,7 +329,7 @@ export const useCageStore = defineStore('cage', {
           
           // Call the proper fulfill function which handles everything
           const fulfillResult = hungerStore.fulfill(item.name)
-          DEBUG_STORES && console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
+          DEBUG_STORES() && console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
           
           // Update needs queue to reflect the change immediately
           needsQueueStore.updateQueue()
@@ -365,7 +365,7 @@ export const useCageStore = defineStore('cage', {
         guineaPigStore.pauseStatusSystem()
       })
       
-      DEBUG_STORES && console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
+      DEBUG_STORES() && console.log('🛑 [CAGE] PAUSE: Game paused, all timers paused')
     },
 
     // Resume the game
@@ -382,7 +382,7 @@ export const useCageStore = defineStore('cage', {
         guineaPigStore.resumeStatusSystem()
       })
       
-      DEBUG_STORES && console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
+      DEBUG_STORES() && console.log('▶️ [CAGE] RESUME: Game resumed, all timers resumed')
     },
 
     // Toggle pause state

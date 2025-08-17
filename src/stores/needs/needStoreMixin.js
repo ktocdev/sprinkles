@@ -90,7 +90,7 @@ export const needStoreMixin = {
       timestamp: Date.now()
     })
     
-    DEBUG_STORES && console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Queued reaction: "${reaction.message}" ${reaction.emoji}`)
+    DEBUG_STORES() && console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Queued reaction: "${reaction.message}" ${reaction.emoji}`)
   },
 
   // Trigger a delayed reaction with configurable timing
@@ -107,7 +107,7 @@ export const needStoreMixin = {
       this.triggerReaction(reaction)
     }, delay)
     
-    DEBUG_STORES && console.log(`🎭 [${this.needType.toUpperCase()}] DELAYED_REACTION: Scheduled reaction: "${reaction.message}" ${reaction.emoji} after ${delay}ms delay, duration: ${duration}ms`)
+    DEBUG_STORES() && console.log(`🎭 [${this.needType.toUpperCase()}] DELAYED_REACTION: Scheduled reaction: "${reaction.message}" ${reaction.emoji} after ${delay}ms delay, duration: ${duration}ms`)
   },
 
   // Get and clear pending reactions (called by needsQueue)
@@ -154,7 +154,7 @@ export const needStoreMixin = {
         validation.errors.forEach(error => console.warn(`  - ${error}`))
         return false
       } else {
-        DEBUG_STORES && console.log(`✅ Need store "${this.needType}" follows standard interface`)
+        DEBUG_STORES() && console.log(`✅ Need store "${this.needType}" follows standard interface`)
         return true
       }
     }

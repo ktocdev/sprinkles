@@ -174,7 +174,7 @@ export const useLoveStore = defineStore('love', {
 
         // Show fulfillment reaction if improvement occurred
         if (actualImprovement > 0) {
-          DEBUG_STORES && console.log(`💕 [LOVE] FULFILL: ${method.name} improved love by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+          DEBUG_STORES() && console.log(`💕 [LOVE] FULFILL: ${method.name} improved love by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true

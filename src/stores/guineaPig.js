@@ -148,7 +148,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       if (newStatus === 'sleeping') {
         const shouldAllowSleep = await this.shouldAllowSleepTransition()
         if (!shouldAllowSleep.allowed) {
-          DEBUG_STORES && console.log(`💤 [GUINEAPIG] SLEEP_BLOCK: ${shouldAllowSleep.reason}`)
+          DEBUG_STORES() && console.log(`💤 [GUINEAPIG] SLEEP_BLOCK: ${shouldAllowSleep.reason}`)
           // Force movement to seek better sleep location
           newStatus = 'moving'
         }
@@ -159,7 +159,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       this.currentStatus = newStatus
       this.lastStatusChange = Date.now()
       
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] STATUS: Changed from ${oldStatus} to ${newStatus}`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] STATUS: Changed from ${oldStatus} to ${newStatus}`)
       
       // Generate transition message
       this.addTransitionMessage(oldStatus, newStatus)
@@ -178,7 +178,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     addTransitionMessage(fromStatus, toStatus) {
       // Don't add messages if paused
       if (this.isPaused) {
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping transition message - system is paused`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping transition message - system is paused`)
         return
       }
       
@@ -198,7 +198,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         }
         
         this.pendingStatusMessages.push(transitionMessage)
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] TRANSITION: Added transition message: "${message}"`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] TRANSITION: Added transition message: "${message}"`)
       }
     },
     
@@ -220,7 +220,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     scheduleNextTransition() {
       // Don't schedule transitions if paused
       if (this.isPaused) {
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] SCHEDULE: Skipping transition scheduling - system is paused`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] SCHEDULE: Skipping transition scheduling - system is paused`)
         return
       }
       
@@ -234,14 +234,14 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         this.performRandomTransition()
       }, delay)
       
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] SCHEDULE: Next transition in ${Math.round(delay/1000)}s`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] SCHEDULE: Next transition in ${Math.round(delay/1000)}s`)
     },
     
     // Perform a random status transition with intelligent sleep behavior
     async performRandomTransition() {
       // Don't perform transitions if paused
       if (this.isPaused) {
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping random transition - system is paused`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] TRANSITION: Skipping random transition - system is paused`)
         return
       }
       
@@ -302,7 +302,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Initialize the guinea pig status system
     initialize() {
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] INIT: Initializing guinea pig status system`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] INIT: Initializing guinea pig status system`)
       
       // Ensure we have a valid status
       if (!['sitting', 'moving', 'sleeping'].includes(this.currentStatus)) {
@@ -320,7 +320,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     addPoopMessage(type) {
       // Don't add poop messages if guinea pig is sleeping
       if (this.currentStatus === 'sleeping') {
-        DEBUG_STORES && console.log(`💤 [GUINEAPIG] POOP: Skipping ${type} poop message - guinea pig is sleeping`)
+        DEBUG_STORES() && console.log(`💤 [GUINEAPIG] POOP: Skipping ${type} poop message - guinea pig is sleeping`)
         return
       }
       
@@ -347,14 +347,14 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }
       
       this.pendingStatusMessages.push(poopMessage)
-      DEBUG_STORES && console.log(`💩 [GUINEAPIG] POOP: Added ${type} poop message: "${message}"`)
+      DEBUG_STORES() && console.log(`💩 [GUINEAPIG] POOP: Added ${type} poop message: "${message}"`)
     },
     
     // Handle poop creation (called when guinea pig makes poop)
     handlePoopCreated() {
       // Don't show poop messages if guinea pig is sleeping
       if (this.currentStatus === 'sleeping') {
-        DEBUG_STORES && console.log(`💤 [GUINEAPIG] POOP: Skipping poop messages - guinea pig is sleeping`)
+        DEBUG_STORES() && console.log(`💤 [GUINEAPIG] POOP: Skipping poop messages - guinea pig is sleeping`)
         return
       }
       
@@ -382,7 +382,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       // Add the complete chain as a single high-priority unit
       needsQueueStore.addMessageChain(messageChain, 1, 'poop')
       
-      DEBUG_STORES && console.log(`💩 [GUINEAPIG] POOP: Created poop with chain: "${freshMessage}" → "${reactionMessage}"`)
+      DEBUG_STORES() && console.log(`💩 [GUINEAPIG] POOP: Created poop with chain: "${freshMessage}" → "${reactionMessage}"`)
     },
     
     
@@ -398,13 +398,13 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         this.canMove = false
         this.movementBlockedUntil = now + blockDuration
         
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] MOVEMENT: Blocking movement for ${blockDuration}ms while ${status}`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] MOVEMENT: Blocking movement for ${blockDuration}ms while ${status}`)
       } else if (status === 'moving') {
         // Allow movement when moving
         this.canMove = true
         this.movementBlockedUntil = 0
         
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] MOVEMENT: Allowing movement while ${status}`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] MOVEMENT: Allowing movement while ${status}`)
       }
     },
     
@@ -416,7 +416,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       if (!this.canMove && now >= this.movementBlockedUntil) {
         this.canMove = true
         this.movementBlockedUntil = 0
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] MOVEMENT: Movement block expired, allowing movement`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] MOVEMENT: Movement block expired, allowing movement`)
       }
       
       this.lastMovementCheck = now
@@ -427,7 +427,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     forceAllowMovement() {
       this.canMove = true
       this.movementBlockedUntil = 0
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] MOVEMENT: Force allowing movement (override)`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] MOVEMENT: Force allowing movement (override)`)
     },
     
     // Get movement status for debugging
@@ -444,14 +444,14 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     
     // Pause the guinea pig status system
     pauseStatusSystem() {
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] PAUSE: Pausing guinea pig status system`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] PAUSE: Pausing guinea pig status system`)
       this.isPaused = true
       this.clearStatusTimer() // Clear any pending transitions
     },
     
     // Resume the guinea pig status system
     resumeStatusSystem() {
-      DEBUG_STORES && console.log(`🐹 [GUINEAPIG] RESUME: Resuming guinea pig status system`)
+      DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] RESUME: Resuming guinea pig status system`)
       this.isPaused = false
       this.scheduleNextTransition() // Resume automatic transitions
     },
@@ -470,7 +470,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         })
       } catch (error) {
         // Fallback - continue with current state
-        DEBUG_STORES && console.warn(`🐹 [GUINEAPIG] PAUSE: Could not check cage pause state:`, error)
+        DEBUG_STORES() && console.warn(`🐹 [GUINEAPIG] PAUSE: Could not check cage pause state:`, error)
       }
     },
 
@@ -488,7 +488,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
     async handleProactiveAutonomousBehavior() {
       // Don't perform autonomous behavior if system is paused
       if (this.isPaused) {
-        DEBUG_STORES && console.log(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Skipping autonomous behavior - system is paused`)
+        DEBUG_STORES() && console.log(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Skipping autonomous behavior - system is paused`)
         return false
       }
 
@@ -501,13 +501,13 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         const autonomyResult = await autonomyStore.makeAutonomousDecision()
         
         if (autonomyResult) {
-          DEBUG_STORES && console.log(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Autonomy store handled behavior`)
+          DEBUG_STORES() && console.log(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Autonomy store handled behavior`)
           return true // Autonomy behavior handled
         }
         
         return false // No autonomous behavior needed
       } catch (error) {
-        DEBUG_STORES && console.warn(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Error with autonomous behavior:`, error)
+        DEBUG_STORES() && console.warn(`🤖 [GUINEAPIG] PROACTIVE_AUTONOMY: Error with autonomous behavior:`, error)
         return false
       }
     },
@@ -529,14 +529,14 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         )
         
         if (itemAtPosition) {
-          DEBUG_STORES && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig positioned on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
+          DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig positioned on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
           return itemAtPosition.name
         }
         
-        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig on ground at (${gpX}, ${gpY})`)
+        DEBUG_STORES() && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig on ground at (${gpX}, ${gpY})`)
         return null // On ground
       } catch (error) {
-        DEBUG_STORES && console.warn(`🐹 [GUINEAPIG] POSITION: Could not detect current position:`, error)
+        DEBUG_STORES() && console.warn(`🐹 [GUINEAPIG] POSITION: Could not detect current position:`, error)
         return null
       }
     },
@@ -573,7 +573,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         }
         
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [GUINEAPIG] SLEEP_TRANSITION: Could not check sleep transition rules:`, error)
+        DEBUG_STORES() && console.warn(`💤 [GUINEAPIG] SLEEP_TRANSITION: Could not check sleep transition rules:`, error)
         return { allowed: true, reason: 'Default allow due to error' }
       }
     }

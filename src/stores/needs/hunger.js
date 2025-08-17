@@ -211,7 +211,7 @@ export const useHungerStore = defineStore('hunger', {
         
         // Add reaction to chain if available
         if (eatingReaction) {
-          DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+          DEBUG_STORES() && console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
           messageChain.push({
             text: eatingReaction.message,
             emoji: '🐹',
@@ -223,7 +223,7 @@ export const useHungerStore = defineStore('hunger', {
         // Add the complete chain as a single high-priority unit
         needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
         
-        DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        DEBUG_STORES() && console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
@@ -231,7 +231,7 @@ export const useHungerStore = defineStore('hunger', {
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
       setTimeout(() => {
-        DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
+        DEBUG_STORES() && console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
       }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG) // Configurable delay to avoid conflicts
 

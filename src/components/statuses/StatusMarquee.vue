@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue'
-import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
+import { useNeedsQueueStore, DEBUG_STORES } from '../../stores/needs/needsQueue'
 
 const needsQueueStore = useNeedsQueueStore()
 
@@ -62,7 +62,7 @@ function animateNewMessage() {
 
 // Initialize with current message if it exists
 onMounted(() => {
-  console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
+  DEBUG_STORES() && console.log('📢 [STATUSMARQUEE] Mounted, needsQueue will handle all messages')
   
   if (currentStatus.value && currentStatus.value.text) {
     recentMessages.value = [{
