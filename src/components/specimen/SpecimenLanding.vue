@@ -194,30 +194,6 @@
       </div>
 
 
-      <!-- AnchorPopover Specimen - Hidden -->
-      <!-- 
-      <div class="gps-specimen-landing__card gps-panel-section">
-        <div class="gps-specimen-landing__card-header">
-          <div class="gps-specimen-landing__card-icon">⚓</div>
-          <h3 class="gps-specimen-landing__card-title">AnchorPopover Component</h3>
-        </div>
-        <p class="gps-specimen-landing__card-description">
-          Fixed-position navigation component with flyout menu using Button and SubNav for consistent interaction patterns.
-        </p>
-        <div class="gps-specimen-landing__card-features">
-          <span class="gps-specimen-landing__feature">Fixed position</span>
-          <span class="gps-specimen-landing__feature">Flyout menu</span>
-          <span class="gps-specimen-landing__feature">Slot-based content</span>
-        </div>
-        <Button 
-          type="primary" 
-          @click="$emit('showAnchorPopoverSpecimen')"
-          class="gps-specimen-landing__card-button"
-        >
-          View AnchorPopover Specimen
-        </Button>
-      </div>
-      -->
 
       <!-- Tabs Specimen -->
       <div class="gps-specimen-landing__card gps-panel-section">
@@ -269,7 +245,6 @@ const emit = defineEmits([
   'showFormGroupSpecimen',
   'showToggleSpecimen',
   'showDetailsSpecimen',
-  'showAnchorPopoverSpecimen',
   'showTabsSpecimen'
 ])
 </script>
