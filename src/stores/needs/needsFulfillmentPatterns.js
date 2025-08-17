@@ -292,14 +292,14 @@ export function needRequiresExternalStore(needType) {
 // Standard degradation rates (points per second)
 export const STANDARD_DEGRADATION_RATES = {
   hunger: 0.1,      // 6 points per minute - most urgent
-  thirst: 0.08,     // 4.8 points per minute - very urgent  
+  thirst: 0.03,     // 1.8 points per minute - slower degradation
   love: 0.05,       // 3 points per minute - social need
-  hygiene: 0.03,    // 1.8 points per minute - slower
-  chew: 0.025,      // 1.5 points per minute - dental health
-  enrichment: 0.02, // 1.2 points per minute - mental stimulation
-  shelter: 0.015,   // 0.9 points per minute - security need
-  sleep: 0.05,       // 3 points per minute - auto-fulfilled during guinea pig sleep
-  nails: 0.005      // 0.3 points per minute - grooming need
+  hygiene: 0.025,   // 1.5 points per minute - user interaction only
+  chew: 0.04,       // 2.4 points per minute - dental health
+  enrichment: 0.035, // 2.1 points per minute - mental stimulation
+  shelter: 0.06,    // 3.6 points per minute - security need
+  sleep: 0.05,      // 3 points per minute - auto-fulfilled during guinea pig sleep
+  nails: 0.002      // 0.12 points per minute - slowest degradation, user interaction only
 }
 
 // Standard urgency thresholds
@@ -397,6 +397,58 @@ export const ITEM_INTERACTION_PATTERNS = {
       'small_chew_stick': 60,  // Dual purpose (chew + play)
       'chew_cube': 65          // Dual purpose (chew + play)
     }
+  },
+
+  hunger: {
+    description: 'Food items that provide nutrition and satisfy appetite',
+    preferredItems: [
+      'hay',
+      'pellets', 
+      'carrots',
+      'lettuce',
+      'blueberries',
+      'cucumbers'
+    ],
+    qualityRatings: {
+      'pellets': 100,          // Best nutritional value (30 hunger improvement)
+      'carrots': 90,           // Excellent nutrition (25 hunger improvement)
+      'lettuce': 80,           // Good nutrition (20 hunger improvement)
+      'cucumbers': 70,         // Good nutrition (18 hunger improvement)
+      'hay': 60,               // Basic nutrition (15 hunger improvement)
+      'blueberries': 50        // Lower nutrition but high enrichment (12 hunger improvement)
+    },
+    fulfillmentBonus: {
+      // These match the hungerImprovement values from the food store
+      'pellets': 30,           // +30 hunger points when reached
+      'carrots': 25,           // +25 hunger points when reached  
+      'lettuce': 20,           // +20 hunger points when reached
+      'cucumbers': 18,         // +18 hunger points when reached
+      'hay': 15,               // +15 hunger points when reached
+      'blueberries': 12        // +12 hunger points when reached
+    }
+  },
+
+  thirst: {
+    description: 'Fixed water bottle location for hydration',
+    preferredItems: [
+      'water_bottle_fixed'
+    ],
+    qualityRatings: {
+      'water_bottle_fixed': 100  // Only water source available
+    },
+    fulfillmentBonus: {
+      'water_bottle_fixed': 20   // +20 thirst points when reached
+    },
+    // Special handling: water bottle is at fixed position (top-right corner)
+    fixedPosition: true,
+    getWaterBottlePosition: (cageStore) => {
+      return {
+        x: cageStore.size.width - 1,
+        y: 0,
+        name: 'water_bottle_fixed',
+        quality: 100
+      }
+    }
   }
 }
 
@@ -406,7 +458,16 @@ export const ITEM_INTERACTION_PATTERNS = {
 // Get all preferred items for a specific need from the cage
 export function getPreferredItemsForNeed(needType, cageStore) {
   const pattern = ITEM_INTERACTION_PATTERNS[needType]
-  if (!pattern || !cageStore?.items) return []
+  if (!pattern) return []
+
+  // Special handling for thirst - fixed water bottle position
+  if (needType === 'thirst' && pattern.fixedPosition && pattern.getWaterBottlePosition) {
+    const waterBottle = pattern.getWaterBottlePosition(cageStore)
+    return [waterBottle]
+  }
+
+  // Normal handling for other needs
+  if (!cageStore?.items) return []
 
   // Filter cage items for this need's preferred items
   const preferredItems = cageStore.items.filter(item => {
@@ -461,7 +522,12 @@ export function findNearestItemForNeed(needType, guineaPigX, guineaPigY, cageSto
       }
     })
 
-    // Sort by priority: prefer higher quality items, but consider distance
+    // For thirst, there's only one water bottle, so just return it with distance
+    if (needType === 'thirst') {
+      return itemsWithDistance[0] || null
+    }
+
+    // For other needs, sort by priority: prefer higher quality items, but consider distance
     // Quality is weighted more heavily than distance for better outcomes
     const bestItem = itemsWithDistance.reduce((best, current) => {
       if (!best) return current

@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { useHungerStore } from './hunger.js'
 import { useWellnessStore } from './wellness.js'
 import { useSleepStore } from './sleep.js'
+import { useThirstStore } from './thirst.js'
+import { useAutonomyStore } from './autonomy.js'
 import { useUserStore } from '../user.js'
 import { useCageStore } from '../cage.js'
 import { useMarketStore } from '../market.js'
@@ -23,7 +25,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       hygiene: 'hygiene',
       enrichment: 'enrichment',
       love: 'love',
-      wellness: 'wellness'
+      wellness: 'wellness',
+      autonomy: 'autonomy'
     },
     queue: [], // Ordered list of needs by urgency
     lastUpdate: Date.now(),
@@ -161,9 +164,11 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
           return useWellnessStore()
         case 'sleep':
           return useSleepStore()
+        case 'thirst':
+          return useThirstStore()
+        case 'autonomy':
+          return useAutonomyStore()
         // Add other need stores here as they're created
-        // case 'thirst':
-        //   return useThirstStore()
         // case 'shelter':
         //   return useShelterStore()
         // etc.
@@ -192,8 +197,10 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         return
       }
 
-      // Degrade all needs
+      // Degrade all needs (skip autonomy as it's not a traditional need)
       for (const [needName, storeName] of Object.entries(this.needs)) {
+        if (needName === 'autonomy') continue // Skip autonomy store
+        
         const store = this.getNeedStore(storeName)
         if (store && store.degrade) {
           // Calculate degradation based on time passed (in seconds)
@@ -211,6 +218,8 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
 
       // Calculate urgency for each need and check for reactions
       for (const [needName, storeName] of Object.entries(this.needs)) {
+        if (needName === 'autonomy') continue // Skip autonomy store from normal queue processing
+        
         const store = this.getNeedStore(storeName)
         if (store) {
           // Calculate urgency based on current value and degradation rate
@@ -240,6 +249,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
             percentage: store.percentage
           })
         }
+      }
+      
+      // Handle autonomy store separately (for autonomous movement decisions)
+      const autonomyStore = this.getNeedStore('autonomy')
+      if (autonomyStore && autonomyStore.makeAutonomousDecision) {
+        // Let autonomy store make decisions on its own schedule
+        autonomyStore.makeAutonomousDecision()
       }
 
       // Sort by urgency (highest first)

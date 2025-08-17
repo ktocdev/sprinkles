@@ -306,31 +306,6 @@ export const useSleepStore = defineStore('sleep', {
     // Get ground sleep penalty
     getGroundSleepPenalty() {
       return getGroundPenaltyForNeed('sleep')
-    },
-
-    // Find the nearest and best sleep item for the guinea pig
-    findNearestSleepItem(guineaPigX = null, guineaPigY = null) {
-      try {
-        const cageStore = useCageStore()
-        
-        // Get guinea pig position if not provided
-        if (guineaPigX === null || guineaPigY === null) {
-          if (!cageStore.guineaPigPos) return null
-          guineaPigX = cageStore.guineaPigPos.x
-          guineaPigY = cageStore.guineaPigPos.y
-        }
-
-        const bestItem = findNearestItemForNeed('sleep', guineaPigX, guineaPigY, cageStore)
-        
-        if (bestItem) {
-          DEBUG_STORES && console.log(`💤 [SLEEP] NEAREST: Found ${bestItem.name} at (${bestItem.x}, ${bestItem.y}) distance ${bestItem.distance}, quality ${bestItem.quality}`)
-        }
-        
-        return bestItem
-      } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] NEAREST: Could not find nearest sleep item:`, error)
-        return null
-      }
     }
   },
 

@@ -145,19 +145,17 @@ export const useThirstStore = defineStore('thirst', {
       return this.currentValue < this.maxValue
     },
     
-    // Fulfillment methods using predefined patterns
+    // Fulfillment methods - only water bottle available
     fulfillmentMethods() {
-      const patterns = NEED_FULFILLMENT_PATTERNS.thirst
-      if (patterns && patterns.methods) {
-        return Object.entries(patterns.methods).map(([key, method]) => ({
-          name: key,
-          displayName: method.name,
-          improvement: method.improvement,
-          emoji: method.emoji,
-          description: method.description
-        }))
-      }
-      return []
+      return [
+        {
+          name: 'water_bottle_fixed',
+          displayName: 'Water Bottle',
+          improvement: 20,
+          emoji: '💧',
+          description: 'Drink from the water bottle in the top-right corner'
+        }
+      ]
     }
   },
 
@@ -168,50 +166,47 @@ export const useThirstStore = defineStore('thirst', {
       this.currentValue = Math.max(this.minValue, this.currentValue - degradeAmount)
     },
 
-    // Thirst fulfillment
+    // Thirst fulfillment - only water bottle method available
     fulfill(methodName) {
-      const patterns = NEED_FULFILLMENT_PATTERNS.thirst
-      if (patterns && patterns.methods && patterns.methods[methodName]) {
-        const method = patterns.methods[methodName]
-        const improvement = method.improvement
-        
-        if (this.currentValue >= this.maxValue) {
-          return { success: false, message: 'Thirst is already satisfied' }
-        }
-
-        const oldValue = this.currentValue
-        this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
-        const actualImprovement = this.currentValue - oldValue
-
-        // Show drinking reaction if improvement occurred
-        if (actualImprovement > 0) {
-          DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: ${method.name} improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
-          
-          // Set flag to prevent duplicate reactions
-          this.recentlyFulfilled = true
-          
-          // Always show a general drinking reaction after any water consumption
-          const drinkingReaction = this.getRandomReaction('drinking')
-          if (drinkingReaction) {
-            DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
-            this.triggerDelayedReaction(drinkingReaction)
-          }
-          
-          // Clear the flag after a short delay
-          setTimeout(() => {
-            this.recentlyFulfilled = false
-          }, 500)
-        }
-
-        return {
-          success: true,
-          message: `Thirst improved by ${actualImprovement} points using ${method.name}`,
-          improvement: actualImprovement,
-          method: methodName
-        }
+      if (methodName !== 'water_bottle_fixed') {
+        return { success: false, message: 'Invalid water source - only water bottle available' }
       }
       
-      return { success: false, message: 'Invalid water source' }
+      if (this.currentValue >= this.maxValue) {
+        return { success: false, message: 'Thirst is already satisfied' }
+      }
+
+      const improvement = 20 // Fixed improvement from water bottle
+      const oldValue = this.currentValue
+      this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
+      const actualImprovement = this.currentValue - oldValue
+
+      // Show drinking reaction if improvement occurred
+      if (actualImprovement > 0) {
+        DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Water bottle improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        
+        // Set flag to prevent duplicate reactions
+        this.recentlyFulfilled = true
+        
+        // Always show a general drinking reaction after any water consumption
+        const drinkingReaction = this.getRandomReaction('drinking')
+        if (drinkingReaction) {
+          DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
+          this.triggerDelayedReaction(drinkingReaction)
+        }
+        
+        // Clear the flag after a short delay
+        setTimeout(() => {
+          this.recentlyFulfilled = false
+        }, 500)
+      }
+
+      return {
+        success: true,
+        message: `Thirst improved by ${actualImprovement} points from water bottle`,
+        improvement: actualImprovement,
+        method: methodName
+      }
     },
     
     reset() {
