@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { STANDARD_DEGRADATION_RATES, getPreferredItemsForNeed, isPreferredItemForNeed, getItemQualityForNeed, getFulfillmentBonusForItem, getGroundPenaltyForNeed, findNearestItemForNeed } from './needsFulfillmentPatterns.js'
-import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
-import { useNeedsQueueStore, DEBUG_STORES } from './needsQueue.js'
-import { useGuineaPigStore } from '../guineaPig.js'
-import { useCageStore } from '../cage.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { STANDARD_DEGRADATION_RATES, getPreferredItemsForNeed, isPreferredItemForNeed, getItemQualityForNeed, getFulfillmentBonusForItem, getGroundPenaltyForNeed, findNearestItemForNeed } from '../core/needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../shared/messageTimingConfig.js'
+import { useNeedsQueueStore, DEBUG_STORES } from '../core/needsQueue.js'
+import { useGuineaPigStore } from '../../guineaPig.js'
+import { useCageStore } from '../../cage.js'
 
 export const useSleepStore = defineStore('sleep', {
   state: () => ({
@@ -164,14 +164,14 @@ export const useSleepStore = defineStore('sleep', {
         if (bonus) {
           improvement = bonus
           sleepLocation = itemName
-          DEBUG_STORES && console.log(`💤 [SLEEP] ITEM_BONUS: Using ${itemName} for ${improvement} sleep points (bonus: ${bonus - 15})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] ITEM_BONUS: Using ${itemName} for ${improvement} sleep points (bonus: ${bonus - 15})`)
         }
       } else {
         // Check for ground penalty
         const groundPenalty = this.getGroundSleepPenalty()
         if (groundPenalty) {
           improvement = groundPenalty
-          DEBUG_STORES && console.log(`💤 [SLEEP] GROUND_PENALTY: Sleeping on ground for only ${improvement} sleep points (penalty: ${15 - groundPenalty})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] GROUND_PENALTY: Sleeping on ground for only ${improvement} sleep points (penalty: ${15 - groundPenalty})`)
         }
       }
 
@@ -179,7 +179,7 @@ export const useSleepStore = defineStore('sleep', {
       const actualImprovement = this.currentValue - oldValue
 
       if (actualImprovement > 0) {
-        DEBUG_STORES && console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping on ${sleepLocation}, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] AUTO_FULFILL: Guinea pig sleeping on ${sleepLocation}, sleep improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
@@ -190,7 +190,7 @@ export const useSleepStore = defineStore('sleep', {
       
       // Clear the flag after a short delay
       setTimeout(() => {
-        DEBUG_STORES && console.log(`💤 [SLEEP] AUTO_FULFILL: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] AUTO_FULFILL: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
       }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG)
 
@@ -234,7 +234,7 @@ export const useSleepStore = defineStore('sleep', {
           }
         }
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] AUTO_FULFILL: Could not check guinea pig status:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] AUTO_FULFILL: Could not check guinea pig status:`, error)
       }
     },
 
@@ -253,14 +253,14 @@ export const useSleepStore = defineStore('sleep', {
         )
         
         if (itemAtPosition) {
-          DEBUG_STORES && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
+          DEBUG_STORES() && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
           return itemAtPosition.name
         }
         
-        DEBUG_STORES && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ground at (${gpX}, ${gpY})`)
+        DEBUG_STORES() && console.log(`💤 [SLEEP] LOCATION: Guinea pig sleeping on ground at (${gpX}, ${gpY})`)
         return null // Sleeping on ground
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] LOCATION: Could not detect sleeping location:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] LOCATION: Could not detect sleeping location:`, error)
         return null
       }
     },
@@ -283,7 +283,7 @@ export const useSleepStore = defineStore('sleep', {
         const cageStore = useCageStore()
         return getPreferredItemsForNeed('sleep', cageStore)
       } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] ITEMS: Could not get preferred sleep items:`, error)
+        DEBUG_STORES() && console.warn(`💤 [SLEEP] ITEMS: Could not get preferred sleep items:`, error)
         return []
       }
     },
@@ -306,31 +306,6 @@ export const useSleepStore = defineStore('sleep', {
     // Get ground sleep penalty
     getGroundSleepPenalty() {
       return getGroundPenaltyForNeed('sleep')
-    },
-
-    // Find the nearest and best sleep item for the guinea pig
-    findNearestSleepItem(guineaPigX = null, guineaPigY = null) {
-      try {
-        const cageStore = useCageStore()
-        
-        // Get guinea pig position if not provided
-        if (guineaPigX === null || guineaPigY === null) {
-          if (!cageStore.guineaPigPos) return null
-          guineaPigX = cageStore.guineaPigPos.x
-          guineaPigY = cageStore.guineaPigPos.y
-        }
-
-        const bestItem = findNearestItemForNeed('sleep', guineaPigX, guineaPigY, cageStore)
-        
-        if (bestItem) {
-          DEBUG_STORES && console.log(`💤 [SLEEP] NEAREST: Found ${bestItem.name} at (${bestItem.x}, ${bestItem.y}) distance ${bestItem.distance}, quality ${bestItem.quality}`)
-        }
-        
-        return bestItem
-      } catch (error) {
-        DEBUG_STORES && console.warn(`💤 [SLEEP] NEAREST: Could not find nearest sleep item:`, error)
-        return null
-      }
     }
   },
 

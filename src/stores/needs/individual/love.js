@@ -1,112 +1,101 @@
-// Thirst need store - example implementation using the standard template
+// Love need store - fulfilled by human interaction (petting, talking, singing)
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
-import { DEBUG_STORES } from './needsQueue.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from '../core/needsFulfillmentPatterns.js'
+import { DEBUG_STORES } from '../core/needsQueue.js'
 
-export const useThirstStore = defineStore('thirst', {
+export const useLoveStore = defineStore('love', {
   state: () => ({
     // Core need properties
     currentValue: 100,
-    degradationRate: STANDARD_DEGRADATION_RATES.thirst || 0.08,
+    degradationRate: STANDARD_DEGRADATION_RATES.love || 0.05,
     maxValue: 100,
     minValue: 0,
     urgency: 0,
-    needType: 'thirst',
+    needType: 'love',
     previousStatus: null,
     recentlyFulfilled: false,
     
     // Status messages for different urgency levels
     urgencyMessages: {
       normal: [
-        'Getting a bit thirsty...',
-        'Could use some water...',
-        'Time for a drink?'
+        'Could use some attention...',
+        'Feeling a bit lonely...',
+        'Time for some love?'
       ],
       urgent: [
-        'I\'m getting really thirsty!',
-        'Need water soon!',
-        'Where\'s the water?',
-        'Getting quite parched...'
+        'I need some affection!',
+        'Please pet me!',
+        'Feeling quite lonely!',
+        'Want some cuddles...'
       ],
       critical: [
-        'I\'m SO THIRSTY!',
-        'NEED WATER NOW!',
-        'Critical dehydration!',
-        'Water emergency!'
+        'I\'m SO LONELY!',
+        'NEED ATTENTION NOW!',
+        'Please don\'t ignore me!',
+        'Desperate for affection!'
       ]
     },
     
     // Message configuration
     messageConfig: {
-      emoji: '💧',
+      emoji: '💕',
       intervals: {
-        normal: 10000,    // 10 seconds
-        urgent: 6000,     // 6 seconds  
-        critical: 4000    // 4 seconds
+        normal: 15000,    // 15 seconds
+        urgent: 10000,    // 10 seconds  
+        critical: 6000    // 6 seconds
       }
     },
     
     // Reaction messages for status changes
     reactions: {
-      // General drinking reactions (shown after ANY water consumption)
-      drinking: [
-        'Glug glug glug!',
-        'Refreshing!',
-        'Cool water!',
-        'Slurp slurp!',
-        'So refreshing!',
-        'Water tastes great!',
-        'Gulp gulp gulp!',
-        'Perfect hydration!',
-        'Water makes me happy!',
-        'Thank you for the water!'
-      ],
-      
       // Improvement reactions
       criticalToUrgent: [
-        'Getting some hydration!',
-        'Water is helping!',
-        'Thirst improving!'
+        'Getting some love!',
+        'Feeling better already!',
+        'Thank you for the attention!'
       ],
       urgentToNormal: [
-        'Much more hydrated!',
-        'Good water level!',
-        'Thirst satisfied!'
+        'So much better now!',
+        'Happy guinea pig sounds!',
+        'Love is wonderful!',
+        'Feeling loved and appreciated!'
       ],
       normalToFulfilled: [
-        'Perfect hydration!',
-        'All hydrated now!',
-        'Water levels excellent!'
+        'Perfect love and attention!',
+        'Completely content and loved!',
+        'Best human ever!',
+        'Purr purr purr...',
+        'Life is amazing!'
       ],
       // Degradation reactions
       fulfilledToNormal: [
-        'Starting to get thirsty...',
-        'Could use water soon',
-        'Hydration declining'
+        'Starting to miss the attention...',
+        'Could use some love soon',
+        'Affection levels declining'
       ],
       normalToUrgent: [
-        'Getting quite thirsty!',
-        'Really need water now!',
-        'Thirst becoming urgent!'
+        'Really missing human contact!',
+        'Please pay attention to me!',
+        'Love levels getting low!'
       ],
       urgentToCritical: [
-        'CRITICAL THIRST!',
-        'DEHYDRATION EMERGENCY!',
-        'NEED WATER IMMEDIATELY!'
+        'FEELING ABANDONED!',
+        'LOVE EMERGENCY!',
+        'NEED HUMAN INTERACTION!'
       ]
     },
     
-    // Blue/cyan color theming for thirst
+    // Pink/rose color theming for love
     colors: {
-      primary: '#00bcd4', // Cyan color for water/thirst
-      gradient: ['#87ceeb', '#00bcd4'], // Light blue to cyan
+      primary: '#e91e63', // Deep pink/rose color for love
+      gradient: ['#f8bbd9', '#e91e63'], // Light pink to deep pink
       
       // Status-specific colors
-      fulfilled: '#b2ebf2', // Light cyan when hydrated (maintains cyan theme)
-      normal: '#87ceeb',    // Light blue when normal
-      urgent: '#00bcd4',    // Cyan when urgent
-      critical: '#0097a7'   // Darker cyan when critical
+      fulfilled: '#fce4ec', // Light pink when love is fulfilled (maintains pink theme)
+      normal: '#f8bbd9',    // Light pink when normal
+      urgent: '#e91e63',    // Deep pink when urgent
+      critical: '#c2185b'   // Darker pink/magenta when critical
     }
   }),
 
@@ -145,9 +134,9 @@ export const useThirstStore = defineStore('thirst', {
       return this.currentValue < this.maxValue
     },
     
-    // Fulfillment methods using predefined patterns
+    // Fulfillment methods for love/interaction
     fulfillmentMethods() {
-      const patterns = NEED_FULFILLMENT_PATTERNS.thirst
+      const patterns = NEED_FULFILLMENT_PATTERNS.love
       if (patterns && patterns.methods) {
         return Object.entries(patterns.methods).map(([key, method]) => ({
           name: key,
@@ -168,33 +157,43 @@ export const useThirstStore = defineStore('thirst', {
       this.currentValue = Math.max(this.minValue, this.currentValue - degradeAmount)
     },
 
-    // Thirst fulfillment
+    // Love fulfillment through human interaction
     fulfill(methodName) {
-      const patterns = NEED_FULFILLMENT_PATTERNS.thirst
+      const patterns = NEED_FULFILLMENT_PATTERNS.love
       if (patterns && patterns.methods && patterns.methods[methodName]) {
         const method = patterns.methods[methodName]
         const improvement = method.improvement
         
         if (this.currentValue >= this.maxValue) {
-          return { success: false, message: 'Thirst is already satisfied' }
+          return { success: false, message: 'Love levels are already maxed out!' }
         }
 
         const oldValue = this.currentValue
         this.currentValue = Math.min(this.maxValue, this.currentValue + improvement)
         const actualImprovement = this.currentValue - oldValue
 
-        // Show drinking reaction if improvement occurred
+        // Show fulfillment reaction if improvement occurred
         if (actualImprovement > 0) {
-          DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: ${method.name} improved thirst by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+          DEBUG_STORES() && console.log(`💕 [LOVE] FULFILL: ${method.name} improved love by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
           
           // Set flag to prevent duplicate reactions
           this.recentlyFulfilled = true
           
-          // Always show a general drinking reaction after any water consumption
-          const drinkingReaction = this.getRandomReaction('drinking')
-          if (drinkingReaction) {
-            DEBUG_STORES && console.log(`💧 [THIRST] FULFILL: Selected drinking reaction: "${drinkingReaction.message}" 💧`)
-            this.triggerDelayedReaction(drinkingReaction)
+          // Get appropriate reaction based on current status
+          const currentStatus = this.needStatus
+          let reactionType = 'normalToFulfilled' // default
+          
+          if (currentStatus === 'critical') {
+            reactionType = 'criticalToUrgent'
+          } else if (currentStatus === 'urgent') {
+            reactionType = 'urgentToNormal'  
+          } else if (currentStatus === 'normal' || currentStatus === 'fulfilled') {
+            reactionType = 'normalToFulfilled'
+          }
+          
+          const reaction = this.getRandomReaction(reactionType)
+          if (reaction) {
+            this.triggerDelayedReaction(reaction)
           }
           
           // Clear the flag after a short delay
@@ -205,13 +204,13 @@ export const useThirstStore = defineStore('thirst', {
 
         return {
           success: true,
-          message: `Thirst improved by ${actualImprovement} points using ${method.name}`,
+          message: `Love improved by ${actualImprovement} points through ${method.name}`,
           improvement: actualImprovement,
           method: methodName
         }
       }
       
-      return { success: false, message: 'Invalid water source' }
+      return { success: false, message: 'Invalid interaction method' }
     },
     
     reset() {

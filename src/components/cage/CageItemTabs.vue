@@ -129,7 +129,7 @@
 import { ref, computed } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
-import { useHungerStore } from '../../stores/needs/hunger'
+import { useHungerStore } from '../../stores/needs/individual/hunger'
 import { useGuineaPigStore } from '../../stores/guineaPig'
 import Button from '../shared/Button.vue'
 import Tabs from '../shared/Tabs.vue'

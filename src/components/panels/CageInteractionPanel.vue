@@ -54,6 +54,9 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { useCageStore } from '../../stores/cage'
+import { useWaterStore } from '../../stores/needs/cage/water'
+import { useBeddingStore } from '../../stores/needs/cage/bedding'
+import { useCleanlinessStore } from '../../stores/needs/cage/cleanliness'
 import Panel from '../shared/Panel.vue'
 import Button from '../shared/Button.vue'
 
@@ -67,20 +70,29 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const cageStore = useCageStore()
+const waterStore = useWaterStore()
+const beddingStore = useBeddingStore()
+const cleanlinessStore = useCleanlinessStore()
 
 function handleRefreshWater() {
-  cageStore.refreshWater()
-  emit('close')
+  const result = waterStore.fulfill('refresh_water')
+  if (result.success) {
+    emit('close')
+  }
 }
 
 function handleRefreshBedding() {
-  cageStore.refreshBedding()
-  emit('close')
+  const result = beddingStore.fulfill('refresh_bedding')
+  if (result.success) {
+    emit('close')
+  }
 }
 
 function handleCleanPoop() {
-  cageStore.cleanCage()
-  emit('close')
+  const result = cleanlinessStore.fulfill('clean_cage')
+  if (result.success) {
+    emit('close')
+  }
 }
 </script>
 

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { useCageStore } from './cage.js'
 import { useStatisticsStore } from './statistics.js'
-import { useNeedsQueueStore, DEBUG_STORES } from './needs/needsQueue.js'
-import { MESSAGE_DURATIONS } from './needs/messageTimingConfig.js'
+import { useNeedsQueueStore, DEBUG_STORES } from './needs/core/needsQueue.js'
+import { MESSAGE_DURATIONS } from './needs/shared/messageTimingConfig.js'
 
 export const usePoopStore = defineStore('poop', {
   state: () => ({
@@ -221,7 +221,7 @@ export const usePoopStore = defineStore('poop', {
       // Add the complete chain as a single high-priority unit
       needsQueueStore.addMessageChain(messageChain, 1, 'hygiene')
       
-      DEBUG_STORES && console.log(`💩 [POOP] STEPPED: Guinea pig stepped on old poop, hygiene impact: ${this.hygieneImpact}`)
+      DEBUG_STORES() && console.log(`💩 [POOP] STEPPED: Guinea pig stepped on old poop, hygiene impact: ${this.hygieneImpact}`)
       
       return {
         success: true,

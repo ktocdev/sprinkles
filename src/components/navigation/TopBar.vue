@@ -3,7 +3,7 @@ import { defineEmits } from 'vue'
 import Button from '../shared/Button.vue'
 import { getActivePinia } from 'pinia'
 import { useCageStore } from '../../stores/cage'
-import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
+import { useNeedsQueueStore } from '../../stores/needs/core/needsQueue'
 
 const cageStore = useCageStore()
 const needsQueueStore = useNeedsQueueStore()

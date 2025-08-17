@@ -2,10 +2,11 @@
 // Copy this file and replace all instances of 'NEEDNAME' with your actual need name
 
 import { defineStore } from 'pinia'
-import { needStoreMixin } from './needStoreMixin.js'
-import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
-import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
-import { DEBUG_STORES } from './needsQueue.js'
+import { needStoreMixin } from '../shared/needStoreMixin.js'
+import { NEED_FULFILLMENT_PATTERNS, STANDARD_DEGRADATION_RATES } from '../core/needsFulfillmentPatterns.js'
+import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../shared/messageTimingConfig.js'
+import { DEBUG_STORES } from '../core/needsQueue.js'
+import { getMessageIntervals } from '../shared/messageFrequencyConfig.js'
 
 export const useNEEDNAMEStore = defineStore('NEEDNAME', {
   state: () => ({
@@ -41,11 +42,7 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
     // Message configuration (REQUIRED)
     messageConfig: {
       emoji: '❓', // Replace with appropriate emoji for this need
-      intervals: {
-        normal: 12000,    // 12 seconds
-        urgent: 8000,     // 8 seconds  
-        critical: 5000    // 5 seconds
-      }
+      intervals: getMessageIntervals('NEEDNAME') // Use centralized frequency settings
     },
     
     // Color theming for this need (REQUIRED)
@@ -82,7 +79,14 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
     
     // Reaction messages for status changes (REQUIRED)
     reactions: {
-      // Improvement reactions
+      // General fulfillment reactions (for consumable needs like hunger/thirst)
+      consuming: [               // Replace 'consuming' with appropriate action (eating, drinking, etc.)
+        'NEEDNAME action 1!',
+        'NEEDNAME action 2!',
+        'NEEDNAME satisfaction!'
+      ],
+      
+      // Status improvement reactions
       criticalToUrgent: [
         'NEEDNAME is getting better!',
         'Some improvement in NEEDNAME!',
@@ -98,7 +102,7 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
         'NEEDNAME completely satisfied!',
         'Excellent NEEDNAME level!'
       ],
-      // Degradation reactions
+      // Status degradation reactions
       fulfilledToNormal: [
         'NEEDNAME starting to decline...',
         'Could use more NEEDNAME soon',
@@ -295,8 +299,14 @@ IMPLEMENTATION CHECKLIST:
 8. □ Update fulfillmentMethods getter to match your fulfill() implementation
 9. □ Add the new need to needsQueue.js needs object
 10. □ Update needsQueue.js getNeedStore() method to include your store
-11. □ Test the implementation
-12. □ Add any custom methods specific to your need type
+11. □ Configure autonomy system integration (for needs requiring physical movement):
+    - Add movement priority to autonomy.js needPriorities (0-100, higher = more urgent)
+    - Set movement threshold in autonomy.js movementThresholds (when guinea pig starts seeking)
+    - Define preferred items in needsFulfillmentPatterns.js for autonomous pathfinding
+    - Implement automatic consumption in autonomy.js handleReachedTarget() if needed
+    - Test autonomous movement and item interaction behavior
+12. □ Test the implementation
+13. □ Add any custom methods specific to your need type
 
 EXAMPLE USAGE:
 - Copy this file to useThirstStore.js
@@ -304,4 +314,31 @@ EXAMPLE USAGE:
 - Set emoji to '💧'
 - Customize messages to be about water/drinking
 - Implement water-based fulfillment methods
+- Configure autonomy integration:
+  * Set needPriorities.thirst = 40 (lower than food/shelter)
+  * Set movementThresholds.thirst = 30 (seek water at 30%)
+  * Define fixed water bottle position in needsFulfillmentPatterns.js
+  * Add auto-drinking logic in autonomy.js handleReachedTarget()
+
+REAL EXAMPLES FROM CURRENT IMPLEMENTATION:
+
+1. HUNGER STORE (hunger.js):
+   - Uses external food store for fulfillment methods
+   - Integrates with inventory and statistics stores
+   - Shows eating reactions after food consumption
+   - Has autonomy integration for automatic food seeking and consumption
+   - Colors: Magenta to orange to gold gradient ['#ff69b4', '#ff8c00', '#ffd700']
+
+2. AUTONOMY INTEGRATION (autonomy.js):
+   - Priority-based decision making (hunger=100, shelter=90, thirst=40)
+   - Movement thresholds determine when guinea pig seeks items
+   - Manhattan pathfinding algorithm for movement
+   - Automatic consumption for hunger (removes food) and thirst (drinks water)
+   - Real-time debugging with reactive DEBUG_STORES() function
+
+3. CONSUMPTION PATTERNS:
+   - Hunger: Eats food item → removes from cage → improves hunger
+   - Thirst: Drinks from fixed water bottle → bottle remains → improves thirst
+   - Sleep: Moves to bed item → changes status to 'sleeping'
+   - Other needs: Positions guinea pig at item for manual interaction
 */

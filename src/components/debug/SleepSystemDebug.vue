@@ -49,9 +49,9 @@ import { ref, watch, onMounted } from 'vue'
 import Button from '../shared/Button.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import Input from '../shared/Input.vue'
-import { useSleepStore } from '../../stores/needs/sleep'
+import { useSleepStore } from '../../stores/needs/individual/sleep'
 import { useGuineaPigStore } from '../../stores/guineaPig'
-import { useNeedsQueueStore } from '../../stores/needs/needsQueue'
+import { useNeedsQueueStore } from '../../stores/needs/core/needsQueue'
 
 const sleepStore = useSleepStore()
 const guineaPigStore = useGuineaPigStore()
