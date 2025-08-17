@@ -151,61 +151,63 @@ export const useHabitatStore = defineStore('habitat', {
       }]
     },
     
-    // Get habitat analysis
+    // Get habitat analysis - matches cage store habitatValue calculation
     habitatAnalysis() {
       const cageStore = this.getCageStore()
       if (!cageStore) return { score: 0, breakdown: [] }
       
-      const items = cageStore.items.filter(item => !item.isConsumable)
+      const permanentItems = cageStore.items.filter(item => !item.isConsumable)
+      const foodItems = cageStore.items.filter(item => item.type === 'food')
+      const chewItems = cageStore.items.filter(item => item.type === 'chew')
+      
       const breakdown = []
       let score = 0
       
-      // Check for essential items
-      const hasBed = items.some(item => item.type === 'bed')
-      const hasToy = items.some(item => item.type === 'toy')
-      const hasHideout = items.some(item => item.type === 'hideout')
-      const foodCount = cageStore.items.filter(item => item.type === 'food').length
-      
-      if (hasBed) {
-        score += 20
-        breakdown.push('✓ Sleeping area (20 pts)')
+      // Permanent items (15 points each)
+      if (permanentItems.length > 0) {
+        const permanentScore = permanentItems.length * 15
+        score += permanentScore
+        breakdown.push(`✓ Permanent items (${permanentItems.length} × 15 = ${permanentScore} pts)`)
+        
+        // Break down by type
+        const beds = permanentItems.filter(item => item.type === 'bed').length
+        const toys = permanentItems.filter(item => item.type === 'toy').length
+        const shelters = permanentItems.filter(item => item.type === 'shelter').length
+        const others = permanentItems.length - beds - toys - shelters
+        
+        if (beds > 0) breakdown.push(`  • ${beds} bed${beds > 1 ? 's' : ''}`)
+        if (toys > 0) breakdown.push(`  • ${toys} toy${toys > 1 ? 's' : ''}`)
+        if (shelters > 0) breakdown.push(`  • ${shelters} shelter${shelters > 1 ? 's' : ''}`)
+        if (others > 0) breakdown.push(`  • ${others} other item${others > 1 ? 's' : ''}`)
       } else {
-        breakdown.push('✗ Missing sleeping area (0/20 pts)')
+        breakdown.push('✗ No permanent items (0 pts)')
       }
       
-      if (hasToy) {
-        score += 15
-        breakdown.push('✓ Entertainment/toy (15 pts)')
+      // Food items (5 points each)
+      if (foodItems.length > 0) {
+        const foodScore = foodItems.length * 5
+        score += foodScore
+        breakdown.push(`✓ Food variety (${foodItems.length} × 5 = ${foodScore} pts)`)
       } else {
-        breakdown.push('✗ Missing entertainment (0/15 pts)')
+        breakdown.push('✗ No food items (0 pts)')
       }
       
-      if (hasHideout) {
-        score += 10
-        breakdown.push('✓ Shelter/hideout (10 pts)')
+      // Chew items (3 points each)
+      if (chewItems.length > 0) {
+        const chewScore = chewItems.length * 3
+        score += chewScore
+        breakdown.push(`✓ Chew enrichment (${chewItems.length} × 3 = ${chewScore} pts)`)
       } else {
-        breakdown.push('✗ Missing shelter (0/10 pts)')
-      }
-      
-      if (foodCount >= 3) {
-        score += 15
-        breakdown.push(`✓ Food variety (${foodCount} items, 15 pts)`)
-      } else {
-        breakdown.push(`✗ Limited food variety (${foodCount}/3, 0/15 pts)`)
-      }
-      
-      // Bonus for additional items
-      const bonusItems = Math.max(0, items.length - 4)
-      if (bonusItems > 0) {
-        const bonusScore = bonusItems * 5
-        score += bonusScore
-        breakdown.push(`✓ Extra items bonus (+${bonusItems} items, ${bonusScore} pts)`)
+        breakdown.push('✗ No chew items (0 pts)')
       }
       
       return {
         score: Math.min(score, 100),
         breakdown,
-        bareMinimum: score >= 60
+        permanentItems: permanentItems.length,
+        foodItems: foodItems.length,
+        chewItems: chewItems.length,
+        totalItems: permanentItems.length + foodItems.length + chewItems.length
       }
     }
   },
@@ -228,7 +230,7 @@ export const useHabitatStore = defineStore('habitat', {
     
     // Track when habitat changes due to item changes
     onItemAdded(item) {
-      if (item && !item.isConsumable) {
+      if (item) {
         const improvement = this.calculateItemValue(item)
         DEBUG_STORES() && console.log(`🏠 [HABITAT] ITEM_ADDED: ${item.name} added, habitat now ${this.currentValue}%`)
         
@@ -243,20 +245,28 @@ export const useHabitatStore = defineStore('habitat', {
     },
     
     onItemRemoved(item) {
-      if (item && !item.isConsumable) {
-        DEBUG_STORES() && console.log(`🏠 [HABITAT] ITEM_REMOVED: ${item.name} removed, habitat now ${this.currentValue}%`)
+      if (item) {
+        const value = this.calculateItemValue(item)
+        if (value > 0) {
+          DEBUG_STORES() && console.log(`🏠 [HABITAT] ITEM_REMOVED: ${item.name} removed, habitat now ${this.currentValue}%`)
+        }
       }
     },
     
     // Calculate value contribution of an item
     calculateItemValue(item) {
-      if (!item || item.isConsumable) return 0
+      if (!item) return 0
       
-      switch (item.type) {
-        case 'bed': return 20
-        case 'toy': return 15
-        case 'hideout': return 10
-        default: return 5 // Generic items
+      // Match the cage store's habitatValue calculation
+      if (item.isConsumable) {
+        switch (item.type) {
+          case 'food': return 5  // Food items: 5 points each
+          case 'chew': return 3  // Chew items: 3 points each
+          default: return 0
+        }
+      } else {
+        // Permanent items: 15 points each
+        return 15
       }
     },
     

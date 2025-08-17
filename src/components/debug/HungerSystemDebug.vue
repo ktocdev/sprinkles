@@ -3,6 +3,16 @@
     <h3 class="gps-panel-section-title">🍽️ Hunger System</h3>
     
     <div class="gps-panel-controls">
+      <FormGroup label="Simulate Feeding Behavior">
+        <Button 
+          type="primary"
+          @click="feedTime"
+          hint="Trigger feeding behavior (simulates 70% hunger need)"
+        >
+          🍽️ Feed Time
+        </Button>
+      </FormGroup>
+
       <FormGroup label="Enable Hunger Degradation">
         <Toggle 
           v-model="isHungerEnabled"
@@ -88,6 +98,35 @@ function resetHunger() {
   // Also update the needs queue to reflect the reset
   needsQueueStore.updateQueue()
   // Small delay to ensure the reset takes effect
+  setTimeout(() => {
+    needsQueueStore.updateQueue()
+  }, 100)
+}
+
+async function feedTime() {
+  // Set hunger to 70% to trigger feeding behavior
+  hungerStore.currentValue = 70
+  
+  // Update the needs queue to reflect the change
+  needsQueueStore.updateQueue()
+  
+  // Try to trigger feeding with hay (common food item)
+  try {
+    const result = hungerStore.fulfill('hay')
+    if (result.success) {
+      console.log('🍽️ [DEBUG] Feeding triggered - guinea pig ate food:', result.message)
+    } else {
+      console.warn('🍽️ [DEBUG] Failed to eat food:', result.message)
+      // If hay failed, just increase hunger directly as fallback
+      const oldValue = hungerStore.currentValue
+      hungerStore.currentValue = Math.min(100, hungerStore.currentValue + 25)
+      console.log('🍽️ [DEBUG] Direct hunger increase:', `${oldValue} -> ${hungerStore.currentValue}`)
+    }
+  } catch (error) {
+    console.warn('🍽️ [DEBUG] Failed to trigger feeding behavior:', error)
+  }
+  
+  // Update queue again after a short delay to ensure changes propagate
   setTimeout(() => {
     needsQueueStore.updateQueue()
   }, 100)

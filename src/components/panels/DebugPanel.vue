@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import Panel from '../shared/Panel.vue'
 import Details from '../shared/Details.vue'
 import HungerSystemDebug from '../debug/HungerSystemDebug.vue'
+import ThirstSystemDebug from '../debug/ThirstSystemDebug.vue'
 import SleepSystemDebug from '../debug/SleepSystemDebug.vue'
 import PoopSystemDebug from '../debug/PoopSystemDebug.vue'
 import GameActionsDebug from '../debug/GameActionsDebug.vue'
@@ -42,6 +43,16 @@ defineExpose({
         </template>
         <template #content>
           <HungerSystemDebug />
+        </template>
+      </Details>
+
+      <!-- Thirst System Section -->
+      <Details>
+        <template #summary>
+          💧 Thirst System
+        </template>
+        <template #content>
+          <ThirstSystemDebug />
         </template>
       </Details>
 
