@@ -27,7 +27,7 @@
     </div>
 
     <!-- Tab content -->
-    <div class="gps-tabs__content">
+    <div class="gps-tabs__content gps-scrollbar">
       <div
         v-for="(tab, index) in tabs"
         :key="tab.id || tab.label"
@@ -214,6 +214,8 @@ const handleTabKeydown = (event, index) => {
 
 .gps-tabs__content {
   width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .gps-tabs__panel {
@@ -282,6 +284,10 @@ const handleTabKeydown = (event, index) => {
   .gps-tabs__tab-label {
     font-size: var(--font-size-s);
   }
+  
+  .gps-tabs__content {
+    max-height: 300px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -293,6 +299,10 @@ const handleTabKeydown = (event, index) => {
   .gps-tabs__tab {
     padding: 0.5rem;
     min-width: fit-content;
+  }
+  
+  .gps-tabs__content {
+    max-height: 250px;
   }
 }
 </style>

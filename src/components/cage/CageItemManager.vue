@@ -26,16 +26,16 @@
     <Modal 
       :isVisible="showAddItemModal"
       title="Add Item to Cage"
-      @close="showAddItemModal = false; preSelectedItem = ''"
+      @close="showAddItemModal = false"
     >
       <AddItem
+        ref="addItemRef"
         :hasAnyItems="hasAnyItems"
         :itemDropdownOptions="itemDropdownOptions"
         :cageWidth="cageStore.size.width"
         :cageHeight="cageStore.size.height"
         :isVisible="showAddItemModal"
-        :preSelectedItem="preSelectedItem"
-        @cancel="showAddItemModal = false; preSelectedItem = ''"
+        @cancel="showAddItemModal = false"
         @addItem="handleAddItem"
       />
     </Modal>
@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useCageStore } from '../../stores/cage'
 import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
@@ -85,7 +85,9 @@ const guineaPigStore = useGuineaPigStore()
 const showAddItemModal = ref(false)
 const showMoveModal = ref(false)
 const itemToMove = ref(null)
-const preSelectedItem = ref('')
+
+// Template refs
+const addItemRef = ref(null)
 
 
 // Computed properties
@@ -173,8 +175,13 @@ const hasAnyChewItems = computed(() => {
 // All inventory items (not in cage)
 const allInventoryItems = computed(() => {
   const allItems = {}
+  
+  // Get all item names currently in the cage
+  const itemsInCage = new Set(cageStore.items.map(item => item.name))
+  
   Object.keys(itemDefinitions).forEach(item => {
-    if (inventoryStore.items[item] > 0) {
+    // Only include items that have inventory quantity AND are not currently in the cage
+    if (inventoryStore.items[item] > 0 && !itemsInCage.has(item)) {
       allItems[item] = {
         name: item,
         quantity: inventoryStore.items[item],
@@ -299,7 +306,6 @@ function handleAddItem(data) {
   if (success) {
     inventoryStore.removeItem(selectedItem, 1)
     showAddItemModal.value = false
-    preSelectedItem.value = ''
   } else {
     alert('Failed to add item! Please choose a different location.')
   }
@@ -377,9 +383,7 @@ function consumeItem(item) {
     const isSleeping = guineaPigStore.currentStatus === 'sleeping'
     
     if (isSleeping) {
-      console.log('🚫 [CONSUME] Blocked: Guinea pig is sleeping!')
     } else if (isFull) {
-      console.log('🚫 [CONSUME] Blocked: Guinea pig is full!')
     }
     return
   }
@@ -396,9 +400,16 @@ function returnToInventory(item) {
 }
 
 function addItemToCageFromInventory(itemName) {
-  // Set the pre-selected item and show the add item modal
-  preSelectedItem.value = itemName
+  // Open modal first, then set the selected item
   showAddItemModal.value = true
+  
+  // Use nextTick to ensure the modal and AddItem component are fully rendered
+  // before calling the method
+  nextTick(() => {
+    if (addItemRef.value) {
+      addItemRef.value.setSelectedItem(itemName)
+    }
+  })
 }
 
 
@@ -712,9 +723,4 @@ function placeToyRandomly() {
   max-width: 100%;
   overflow-x: hidden;
 }
-
-
-
-
-
 </style> 

@@ -3,6 +3,7 @@ import { useFoodStore } from '../food.js'
 import { useInventoryStore } from '../inventory.js'
 import { useStatisticsStore } from '../statistics.js'
 import { useCageStore } from '../cage.js'
+import { DEBUG_STORES } from './needsQueue.js'
 import { needStoreMixin } from './needStoreMixin.js'
 import { STANDARD_DEGRADATION_RATES } from './needsFulfillmentPatterns.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from './messageTimingConfig.js'
@@ -210,7 +211,7 @@ export const useHungerStore = defineStore('hunger', {
         
         // Add reaction to chain if available
         if (eatingReaction) {
-          console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
+          DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Selected eating reaction: "${eatingReaction.message}" 🐹`)
           messageChain.push({
             text: eatingReaction.message,
             emoji: '🐹',
@@ -222,7 +223,7 @@ export const useHungerStore = defineStore('hunger', {
         // Add the complete chain as a single high-priority unit
         needsQueueStore.addMessageChain(messageChain, 1, 'hunger')
         
-        console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
+        DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Guinea pig consumed food, hunger improved by ${actualImprovement} (${oldValue} -> ${this.currentValue})`)
         
         // Set flag to prevent duplicate reactions from automatic degradation checks
         this.recentlyFulfilled = true
@@ -230,7 +231,7 @@ export const useHungerStore = defineStore('hunger', {
       
       // Clear the flag after a short delay so needsQueue can handle future automatic changes
       setTimeout(() => {
-        console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
+        DEBUG_STORES && console.log(`🍽️ [HUNGER] FEED: Clearing recentlyFulfilled flag after ${MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG}ms delay`)
         this.recentlyFulfilled = false
       }, MESSAGE_DELAYS.CLEAR_FULFILLED_FLAG) // Configurable delay to avoid conflicts
 

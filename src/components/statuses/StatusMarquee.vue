@@ -101,7 +101,7 @@ onMounted(() => {
   border: 2px solid var(--color-accent-light);
   border-radius: var(--border-radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-block-end: .5rem;
+  margin-block-end: 1rem;
   position: relative;
   width: 100%;
   height: 60px;

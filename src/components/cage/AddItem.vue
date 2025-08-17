@@ -84,10 +84,6 @@ const props = defineProps({
   isVisible: {
     type: Boolean,
     default: false
-  },
-  preSelectedItem: {
-    type: String,
-    default: ''
   }
 })
 
@@ -100,10 +96,20 @@ const itemY = ref(null)
 // Reset form when modal becomes visible
 watch(() => props.isVisible, (newValue) => {
   if (newValue) {
-    selectedItem.value = props.preSelectedItem || ''
+    selectedItem.value = ''
     itemX.value = null
     itemY.value = null
   }
+})
+
+// Method to set selected item directly (called from parent)
+function setSelectedItem(itemName) {
+  selectedItem.value = itemName || ''
+}
+
+// Expose method to parent component
+defineExpose({
+  setSelectedItem
 })
 
 function handleAddItem() {

@@ -1,125 +1,128 @@
 <template>
-  <Tabs :tabs="tabs" v-model="activeTab" variant="default">
-    <!-- Permanent Items Tab -->
-    <template #permanent>
-      <div class="gps-cage-item-tabs__section">
-        <div v-if="cageStore.permanentItems.length === 0" class="gps-cage-item-tabs__empty">
-          No permanent items in cage
-        </div>
-        <div v-else class="gps-cage-item-tabs__items">
-          <div 
-            v-for="item in cageStore.permanentItems" 
-            :key="item.id"
-            class="gps-cage-item-tabs__item"
-          >
-            <div class="gps-cage-item-tabs__item-info">
-              <span class="gps-cage-item-tabs__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-tabs__item-position">({{ item.x }}, {{ item.y }})</span>
-            </div>
-            <div class="gps-cage-item-tabs__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="$emit('moveItem', item)"
-                title="Move Item"
-              >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="$emit('returnToInventory', item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
+  <div class="gps-cage-item-tabs">
+    <h4 class="gps-section-header">Manage Items</h4>
+    <Tabs :tabs="tabs" v-model="activeTab" variant="default">
+      <!-- Permanent Items Tab -->
+      <template #permanent>
+        <div class="gps-cage-item-tabs__section">
+          <div v-if="cageStore.permanentItems.length === 0" class="gps-cage-item-tabs__empty">
+            No permanent items in cage
+          </div>
+          <div v-else class="gps-cage-item-tabs__items">
+            <div 
+              v-for="item in cageStore.permanentItems" 
+              :key="item.id"
+              class="gps-cage-item-tabs__item"
+            >
+              <div class="gps-cage-item-tabs__item-info">
+                <span class="gps-cage-item-tabs__item-name">{{ formatItemName(item.name) }}</span>
+                <span class="gps-cage-item-tabs__item-position">({{ item.x }}, {{ item.y }})</span>
+              </div>
+              <div class="gps-cage-item-tabs__item-actions">
+                <Button 
+                  type="flat"
+                  size="compact"
+                  @click="$emit('moveItem', item)"
+                  title="Move Item"
+                >
+                  📍
+                </Button>
+                <Button 
+                  type="flat"
+                  size="compact"
+                  @click="$emit('returnToInventory', item)"
+                  title="Return to Inventory"
+                >
+                  📦
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <!-- Consumable Items Tab -->
-    <template #consumable>
-      <div class="gps-cage-item-tabs__section">
-        <div v-if="cageStore.consumableItems.length === 0" class="gps-cage-item-tabs__empty">
-          No consumable items in cage
-        </div>
-        <div v-else class="gps-cage-item-tabs__items">
-          <div 
-            v-for="item in cageStore.consumableItems" 
-            :key="item.id"
-            class="gps-cage-item-tabs__item"
-          >
-            <div class="gps-cage-item-tabs__item-info">
-              <span class="gps-cage-item-tabs__item-name">{{ formatItemName(item.name) }}</span>
-              <span class="gps-cage-item-tabs__item-quantity">({{ item.quantity }})</span>
-              <span class="gps-cage-item-tabs__item-position">({{ item.x }}, {{ item.y }})</span>
-            </div>
-            <div class="gps-cage-item-tabs__item-actions">
-              <Button 
-                type="flat"
-                size="compact"
-                @click="$emit('consumeItem', item)"
-                :class="{ 'gps-button--disabled': isConsumptionDisabled }"
-                :title="getConsumptionDisabledReason"
-              >
-                🍽️
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="$emit('moveItem', item)"
-                title="Move Item"
-              >
-                📍
-              </Button>
-              <Button 
-                type="flat"
-                size="compact"
-                @click="$emit('returnToInventory', item)"
-                title="Return to Inventory"
-              >
-                📦
-              </Button>
+      <!-- Consumable Items Tab -->
+      <template #consumable>
+        <div class="gps-cage-item-tabs__section">
+          <div v-if="cageStore.consumableItems.length === 0" class="gps-cage-item-tabs__empty">
+            No consumable items in cage
+          </div>
+          <div v-else class="gps-cage-item-tabs__items">
+            <div 
+              v-for="item in cageStore.consumableItems" 
+              :key="item.id"
+              class="gps-cage-item-tabs__item"
+            >
+              <div class="gps-cage-item-tabs__item-info">
+                <span class="gps-cage-item-tabs__item-name">{{ formatItemName(item.name) }}</span>
+                <span class="gps-cage-item-tabs__item-quantity">({{ item.quantity }})</span>
+                <span class="gps-cage-item-tabs__item-position">({{ item.x }}, {{ item.y }})</span>
+              </div>
+              <div class="gps-cage-item-tabs__item-actions">
+                <Button 
+                  type="flat"
+                  size="compact"
+                  @click="$emit('consumeItem', item)"
+                  :class="{ 'gps-button--disabled': isConsumptionDisabled }"
+                  :title="getConsumptionDisabledReason"
+                >
+                  🍽️
+                </Button>
+                <Button 
+                  type="flat"
+                  size="compact"
+                  @click="$emit('moveItem', item)"
+                  title="Move Item"
+                >
+                  📍
+                </Button>
+                <Button 
+                  type="flat"
+                  size="compact"
+                  @click="$emit('returnToInventory', item)"
+                  title="Return to Inventory"
+                >
+                  📦
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <!-- Inventory Tab -->
-    <template #inventory>
-      <div class="gps-cage-item-tabs__section">
-        <div v-if="Object.keys(allInventoryItems).length === 0" class="gps-cage-item-tabs__empty">
-          No items in inventory
-        </div>
-        <div v-else class="gps-cage-item-tabs__items">
-          <div 
-            v-for="(item, itemName) in allInventoryItems" 
-            :key="itemName"
-            class="gps-cage-item-tabs__item"
-          >
-            <div class="gps-cage-item-tabs__item-info">
-              <span class="gps-cage-item-tabs__item-name">{{ formatItemName(itemName) }}</span>
-              <span class="gps-cage-item-tabs__item-quantity">({{ item.quantity }})</span>
-              <span class="gps-cage-item-tabs__item-type">{{ item.isConsumable ? 'Consumable' : 'Permanent' }}</span>
-            </div>
-            <div class="gps-cage-item-tabs__item-actions">
-              <Button 
-                type="primary"
-                size="compact"
-                @click="$emit('addItemToCageFromInventory', itemName)"
-                title="Add to Cage"
-              >
-                ➕ Add
-              </Button>
+      <!-- Inventory Tab -->
+      <template #inventory>
+        <div class="gps-cage-item-tabs__section">
+          <div v-if="Object.keys(allInventoryItems).length === 0" class="gps-cage-item-tabs__empty">
+            No items in inventory
+          </div>
+          <div v-else class="gps-cage-item-tabs__items">
+            <div 
+              v-for="(item, itemName) in allInventoryItems" 
+              :key="itemName"
+              class="gps-cage-item-tabs__item"
+            >
+              <div class="gps-cage-item-tabs__item-info">
+                <span class="gps-cage-item-tabs__item-name">{{ formatItemName(itemName) }}</span>
+                <span class="gps-cage-item-tabs__item-quantity">({{ item.quantity }})</span>
+                <span class="gps-cage-item-tabs__item-type">{{ item.isConsumable ? 'Consumable' : 'Permanent' }}</span>
+              </div>
+              <div class="gps-cage-item-tabs__item-actions">
+                <Button 
+                  type="primary"
+                  size="compact"
+                  @click="$emit('addItemToCageFromInventory', itemName)"
+                  title="Add to Cage"
+                >
+                  ➕ Add
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
-  </Tabs>
+      </template>
+    </Tabs>
+  </div>
 </template>
 
 <script setup>
@@ -188,6 +191,14 @@ function formatItemName(itemName) {
 </script>
 
 <style>
+.gps-cage-item-tabs {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+
 .gps-cage-item-tabs__section {
   background: var(--color-panel);
   border-radius: var(--border-radius);

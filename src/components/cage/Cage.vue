@@ -203,8 +203,7 @@ onUnmounted(() => {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 8px; /* Space for scrollbar */
-  /* Custom scrollbar styling */
+  padding-bottom: 1rem; /* Space for scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--color-accent) var(--color-bg);
 }

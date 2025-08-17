@@ -35,6 +35,14 @@ h1 {
   font-family: var(--font-family-header);
 }
 
+.gps-section-header {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+  margin: 0 0 1rem 0;
+  font-family: var(--font-family-header);
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -47,9 +55,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s, background 0.2s, color 0.2s;
 }
+
 button:hover {
   border-color: var(--color-accent);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;

@@ -1,6 +1,6 @@
 <template>
   <div class="gps-cage-item-quick-actions">
-    <h4 class="gps-cage-item-quick-actions__header">Quick Add Items</h4>
+    <h4 class="gps-section-header">Quick Add Items</h4>
     <div class="gps-cage-item-quick-actions__buttons">
       <Button 
         type="secondary"
@@ -79,13 +79,6 @@ const emit = defineEmits([
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   padding: 1rem;
-}
-
-.gps-cage-item-quick-actions__header {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-accent);
-  margin: 0 0 0.75rem 0;
 }
 
 .gps-cage-item-quick-actions__buttons {

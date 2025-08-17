@@ -1,6 +1,7 @@
 // Shared methods for need stores to handle status improvements and reactions
 import { validateNeedStore } from './needStoreInterface.js'
 import { MESSAGE_DURATIONS, ensureMinimumDuration } from './messageTimingConfig.js'
+import { DEBUG_STORES } from './needsQueue.js'
 
 export const needStoreMixin = {
   // Check for status improvements and return reaction if any
@@ -89,7 +90,7 @@ export const needStoreMixin = {
       timestamp: Date.now()
     })
     
-    console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Queued reaction: "${reaction.message}" ${reaction.emoji}`)
+    DEBUG_STORES && console.log(`🎭 [${this.needType.toUpperCase()}] REACTION: Queued reaction: "${reaction.message}" ${reaction.emoji}`)
   },
 
   // Trigger a delayed reaction with configurable timing
@@ -106,7 +107,7 @@ export const needStoreMixin = {
       this.triggerReaction(reaction)
     }, delay)
     
-    console.log(`🎭 [${this.needType.toUpperCase()}] DELAYED_REACTION: Scheduled reaction: "${reaction.message}" ${reaction.emoji} after ${delay}ms delay, duration: ${duration}ms`)
+    DEBUG_STORES && console.log(`🎭 [${this.needType.toUpperCase()}] DELAYED_REACTION: Scheduled reaction: "${reaction.message}" ${reaction.emoji} after ${delay}ms delay, duration: ${duration}ms`)
   },
 
   // Get and clear pending reactions (called by needsQueue)
@@ -153,7 +154,7 @@ export const needStoreMixin = {
         validation.errors.forEach(error => console.warn(`  - ${error}`))
         return false
       } else {
-        console.log(`✅ Need store "${this.needType}" follows standard interface`)
+        DEBUG_STORES && console.log(`✅ Need store "${this.needType}" follows standard interface`)
         return true
       }
     }
