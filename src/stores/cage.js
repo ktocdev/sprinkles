@@ -331,7 +331,7 @@ export const useCageStore = defineStore('cage', {
           const fulfillResult = hungerStore.fulfill(item.name)
           DEBUG_STORES && console.log(`🍽️ [CAGE] CONSUME: Fulfillment result:`, fulfillResult)
           
-          // Update needs queue to reflect the change in NeedsNav immediately
+          // Update needs queue to reflect the change immediately
           needsQueueStore.updateQueue()
         }
       }

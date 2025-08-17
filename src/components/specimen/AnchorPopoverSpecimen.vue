@@ -174,7 +174,7 @@ const emit = defineEmits(['backToLanding'])
   width: auto;
 }
 
-/* Override SubNav positioning to open to the left like NeedsNav */
+/* Override SubNav positioning to open to the left */
 .gps-specimen__anchor-demo .gps-anchor-popover .gps-subnav {
   position: absolute;
   top: 0;
