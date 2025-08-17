@@ -195,6 +195,7 @@ function handleGameReset() {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 655px;
   width: fit-content;
 }
 
