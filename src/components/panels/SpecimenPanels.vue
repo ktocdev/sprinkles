@@ -10,7 +10,6 @@ import InputSpecimen from '../specimen/InputSpecimen.vue'
 import FormGroupSpecimen from '../specimen/FormGroupSpecimen.vue'
 import ToggleSpecimen from '../specimen/ToggleSpecimen.vue'
 import DetailsSpecimen from '../specimen/DetailsSpecimen.vue'
-import AnchorPopoverSpecimen from '../specimen/AnchorPopoverSpecimen.vue'
 import TabsSpecimen from '../specimen/TabsSpecimen.vue'
 
 // Configuration for all specimens
@@ -67,12 +66,6 @@ const specimens = [
     key: 'details',
     title: 'Details Component Specimen',
     component: DetailsSpecimen,
-    props: {}
-  },
-  {
-    key: 'AnchorPopover',
-    title: 'AnchorPopover Component Specimen',
-    component: AnchorPopoverSpecimen,
     props: {}
   },
   {

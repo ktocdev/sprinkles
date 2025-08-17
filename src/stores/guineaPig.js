@@ -138,7 +138,6 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       }
     },
     
-    
     // Change status and trigger messaging
     async changeStatus(newStatus) {
       if (newStatus === this.currentStatus) {
@@ -246,6 +245,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         return
       }
       
+      // First, check if we need to proactively handle sleep behavior
+      const sleepHandled = await this.handleProactiveSleepBehavior()
+      if (sleepHandled) {
+        return // Sleep behavior took over, skip normal random transition
+      }
+      
       const currentStatus = this.currentStatus
       let possibleTransitions = []
       
@@ -253,37 +258,14 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       const shouldSeekSleep = await this.shouldSeekSleep()
       const hasPreferredSleepItems = await this.hasPreferredSleepItems()
       
-      // Define possible transitions from each state with intelligent sleep logic
+      // Define possible transitions from each state (simplified since proactive sleep handles complex logic)
       switch (currentStatus) {
         case 'sitting':
           possibleTransitions = ['moving', 'sleeping']
-          
-          // If sleep is urgently needed and no preferred items, wait until urgent (69%)
-          if (shouldSeekSleep.urgent && !hasPreferredSleepItems) {
-            DEBUG_STORES && console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: Sleep urgent (${shouldSeekSleep.sleepLevel}%) but no preferred items, waiting`)
-            possibleTransitions = ['moving'] // Only allow movement to seek items
-          }
           break
           
         case 'moving':
           possibleTransitions = ['sitting', 'sleeping']
-          
-          // If sleep is needed, try to find preferred items first
-          if (shouldSeekSleep.needed) {
-            if (hasPreferredSleepItems) {
-              // Move toward preferred sleep item
-              const targetItem = await this.findBestSleepDestination()
-              if (targetItem) {
-                DEBUG_STORES && console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: Moving toward ${targetItem.name} at (${targetItem.x}, ${targetItem.y})`)
-                await this.moveTowardSleepItem(targetItem)
-                return // Skip normal transition to handle movement
-              }
-            } else if (shouldSeekSleep.urgent) {
-              // No preferred items but urgent need - prepare to sleep on ground
-              DEBUG_STORES && console.log(`💤 [GUINEAPIG] SLEEP_LOGIC: No preferred items available, will sleep on ground`)
-              possibleTransitions = ['sleeping'] // Force sleep transition
-            }
-          }
           break
           
         case 'sleeping':
@@ -502,6 +484,58 @@ export const useGuineaPigStore = defineStore('guineaPig', {
 
     // Intelligent sleep behavior helper methods
 
+    // Proactively handle sleep behavior before random transitions
+    async handleProactiveSleepBehavior() {
+      // Don't perform sleep behavior if system is paused
+      if (this.isPaused) {
+        DEBUG_STORES && console.log(`💤 [GUINEAPIG] PROACTIVE_SLEEP: Skipping sleep behavior - system is paused`)
+        return false
+      }
+
+      const shouldSeekSleep = await this.shouldSeekSleep()
+      const hasPreferredSleepItems = await this.hasPreferredSleepItems()
+      
+      DEBUG_STORES && console.log(`💤 [GUINEAPIG] PROACTIVE_SLEEP: Sleep ${shouldSeekSleep.sleepLevel}%, needed: ${shouldSeekSleep.needed}, urgent: ${shouldSeekSleep.urgent}, hasPreferredItems: ${hasPreferredSleepItems}`)
+      
+      // If sleep is needed (≤80%) and we have preferred items, immediately seek them
+      if (shouldSeekSleep.needed && hasPreferredSleepItems) {
+        const targetItem = await this.findBestSleepDestination()
+        if (targetItem) {
+          DEBUG_STORES && console.log(`💤 [GUINEAPIG] PROACTIVE_SLEEP: Forcing movement toward ${targetItem.name} at (${targetItem.x}, ${targetItem.y}) - sleep at ${shouldSeekSleep.sleepLevel}%`)
+          
+          // Force transition to moving if not already moving
+          if (this.currentStatus !== 'moving') {
+            await this.changeStatus('moving')
+          }
+          
+          // Move toward the sleep item
+          const moved = await this.moveTowardSleepItem(targetItem)
+          
+          // Only consider sleep behavior "handled" if we reached the target or are sleeping
+          const cageStore = await import('./cage.js').then(m => m.useCageStore())
+          const currentPos = cageStore.guineaPigPos
+          const reachedTarget = currentPos && currentPos.x === targetItem.x && currentPos.y === targetItem.y
+          const isSleeping = this.currentStatus === 'sleeping'
+          
+          // Return true only if we've completed the sleep objective, false if still moving toward target
+          return reachedTarget || isSleeping
+        }
+      }
+      
+      // If sleep is urgent (≤69%) and no preferred items, force ground sleep
+      if (shouldSeekSleep.urgent && !hasPreferredSleepItems) {
+        DEBUG_STORES && console.log(`💤 [GUINEAPIG] PROACTIVE_SLEEP: Forcing ground sleep - sleep at ${shouldSeekSleep.sleepLevel}% with no preferred items`)
+        
+        // Force transition to sleeping
+        if (this.currentStatus !== 'sleeping') {
+          await this.changeStatus('sleeping')
+        }
+        return true // Sleep behavior handled
+      }
+      
+      return false // No proactive sleep behavior needed
+    },
+
     // Check if guinea pig should seek sleep based on sleep need level
     async shouldSeekSleep() {
       try {
@@ -513,7 +547,7 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         const sleepStatus = sleepStore.needStatus
         
         return {
-          needed: sleepLevel < 80, // Start considering sleep at 80%
+          needed: sleepLevel <= 80, // Start considering sleep at 80% or below
           urgent: sleepLevel <= 69, // Urgent at 69% (when ground sleep kicks in)
           critical: sleepLevel < 50, // Critical below 50%
           sleepLevel: sleepLevel,
@@ -563,6 +597,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
 
     // Move guinea pig toward a preferred sleep item
     async moveTowardSleepItem(targetItem) {
+      // Don't move if system is paused
+      if (this.isPaused) {
+        DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Skipping movement - system is paused`)
+        return false
+      }
+
       try {
         const { useCageStore } = await import('./cage.js')
         const cageStore = useCageStore()
@@ -573,6 +613,18 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         const currentY = cageStore.guineaPigPos.y
         const targetX = targetItem.x
         const targetY = targetItem.y
+        
+        DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Current pos (${currentX}, ${currentY}), target ${targetItem.name} at (${targetX}, ${targetY})`)
+        
+        // Check if already at target
+        if (currentX === targetX && currentY === targetY) {
+          DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Already at ${targetItem.name}! Transitioning to sleep...`)
+          // Immediately transition to sleeping since we're already on the item
+          setTimeout(async () => {
+            await this.changeStatus('sleeping')
+          }, 500) // Short delay
+          return true
+        }
         
         // Calculate direction to move (one step at a time)
         let newX = currentX
@@ -591,12 +643,12 @@ export const useGuineaPigStore = defineStore('guineaPig', {
         
         // Move guinea pig to new position
         if (newX !== currentX || newY !== currentY) {
-          cageStore.moveGuineaPig(newX, newY)
+          cageStore.setGuineaPigPos(newX, newY)
           DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Moving toward ${targetItem.name} from (${currentX}, ${currentY}) to (${newX}, ${newY})`)
           
           // Check if we've reached the target
           if (newX === targetX && newY === targetY) {
-            DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Reached sleep item ${targetItem.name}!`)
+            DEBUG_STORES && console.log(`💤 [GUINEAPIG] MOVEMENT: Reached sleep item ${targetItem.name}! Transitioning to sleep...`)
             // Transition to sleeping when we reach the item
             setTimeout(async () => {
               await this.changeStatus('sleeping')
@@ -643,58 +695,70 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       return filteredWeights
     },
 
-    // Check if sleep transition should be allowed based on guinea pig rules
+    // Check if sleep transition should be allowed (simplified to align with proactive behavior)
     async shouldAllowSleepTransition() {
       try {
         const { useSleepStore } = await import('./needs/sleep.js')
-        const { useCageStore } = await import('./cage.js')
         const sleepStore = useSleepStore()
-        const cageStore = useCageStore()
-        
-        if (!cageStore.guineaPigPos) {
-          return { allowed: false, reason: 'No guinea pig position available' }
-        }
         
         const sleepLevel = sleepStore.currentValue
         const hasPreferredItems = await this.hasPreferredSleepItems()
         
-        // If sleep is above 69% and no preferred items, don't sleep on ground
-        if (sleepLevel > 69 && !hasPreferredItems) {
+        // Allow sleep if:
+        // 1. Sleep is urgent (≤69%) - proactive behavior should have handled preferred items already
+        // 2. Sleep is critical (≤50%) - always allow
+        // 3. Guinea pig is on a preferred item
+        if (sleepLevel <= 69 || sleepLevel <= 50) {
           return { 
-            allowed: false, 
-            reason: `Sleep level ${sleepLevel.toFixed(1)}% too high for ground sleeping (needs <= 69%)` 
+            allowed: true, 
+            reason: sleepLevel <= 50 ? 'Critical sleep level' : 'Urgent sleep level'
           }
         }
         
-        // If there are preferred items available, check if guinea pig is on one
-        if (hasPreferredItems) {
-          const currentItem = sleepStore.detectSleepingLocation()
-          if (!currentItem) {
-            // Preferred items exist but guinea pig isn't on one
-            const nearestItem = await this.findBestSleepDestination()
-            if (nearestItem) {
-              return { 
-                allowed: false, 
-                reason: `Preferred item ${nearestItem.name} available at (${nearestItem.x}, ${nearestItem.y}) - should move there first` 
-              }
-            }
-          }
+        // For higher sleep levels, only allow if on a preferred item
+        const currentItem = await this.detectCurrentItemPosition()
+        if (currentItem && sleepStore.isPreferredSleepItem(currentItem)) {
+          return { allowed: true, reason: `On preferred sleep item: ${currentItem}` }
         }
         
-        // Allow sleep if: 
-        // 1. On a preferred item, OR
-        // 2. No preferred items and sleep <= 69%, OR  
-        // 3. Sleep is critical (< 50%)
+        // Otherwise, sleep level too high for ground sleeping
         return { 
-          allowed: true, 
-          reason: sleepLevel <= 50 ? 'Critical sleep level' : 
-                  hasPreferredItems ? 'On preferred sleep item' : 
-                  'Ground sleep allowed (urgent level)'
+          allowed: false, 
+          reason: `Sleep level ${sleepLevel.toFixed(1)}% too high for ground sleeping` 
         }
         
       } catch (error) {
         DEBUG_STORES && console.warn(`💤 [GUINEAPIG] SLEEP_TRANSITION: Could not check sleep transition rules:`, error)
         return { allowed: true, reason: 'Default allow due to error' }
+      }
+    },
+
+    // Detect what item the guinea pig is currently positioned on (works regardless of status)
+    async detectCurrentItemPosition() {
+      try {
+        const { useCageStore } = await import('./cage.js')
+        const cageStore = useCageStore()
+        
+        if (!cageStore.guineaPigPos) return null
+        
+        const gpX = cageStore.guineaPigPos.x
+        const gpY = cageStore.guineaPigPos.y
+        
+        // Find any item at the guinea pig's current position
+        const itemAtPosition = cageStore.items.find(item => 
+          item.x === gpX && item.y === gpY
+        )
+        
+        if (itemAtPosition) {
+          DEBUG_STORES && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig positioned on ${itemAtPosition.name} at (${gpX}, ${gpY})`)
+          return itemAtPosition.name
+        }
+        
+        DEBUG_STORES && console.log(`🐹 [GUINEAPIG] POSITION: Guinea pig on ground at (${gpX}, ${gpY})`)
+        return null // On ground
+      } catch (error) {
+        DEBUG_STORES && console.warn(`🐹 [GUINEAPIG] POSITION: Could not detect current position:`, error)
+        return null
       }
     }
   },

@@ -196,7 +196,7 @@ const allInventoryItems = computed(() => {
 
 
 // Check if consumption should be disabled (hunger is full or guinea pig is sleeping)
-// Use same rounding logic as NeedsNav to prevent button state mismatch
+// Use same rounding logic to prevent button state mismatch
 const isConsumptionDisabled = computed(() => {
   const roundedValue = Math.round(hungerStore.currentValue)
   const isFull = roundedValue >= hungerStore.maxValue

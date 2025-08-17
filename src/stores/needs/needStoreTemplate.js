@@ -73,7 +73,7 @@ export const useNEEDNAMEStore = defineStore('NEEDNAME', {
       // 🍽️ Hunger: Magenta to orange to gold ['#ff69b4', '#ff8c00', '#ffd700'] fulfilled: '#ffb3dd'
       // 💧 Thirst: Blue/cyan tones ['#87ceeb', '#00bcd4'] fulfilled: '#b2ebf2'
       // 💕 Love: Pink/rose tones ['#f8bbd9', '#e91e63'] fulfilled: '#fce4ec'
-      // 💤 Sleep: Deep blue tones ['#85c1e9', '#2980b9', '#1f4e79'] fulfilled: '#b3d9ff'
+      // 💤 Sleep: Deep blue tones ['#036e92ff', '#043c61ff', '#03033dff'] fulfilled: '#b3d9ff'
       // 🌟 Wellness: Rainbow pattern (special case)
       // 🏠 Shelter: Brown/earth tones ['#d4b896', '#8b7355'] fulfilled: '#f5deb3'
       // 🎯 Enrichment: Purple/violet tones ['#bb8fce', '#8e44ad'] fulfilled: '#e1bee7'

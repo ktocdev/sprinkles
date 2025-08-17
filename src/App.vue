@@ -12,7 +12,6 @@ import NeedsList from './components/shared/NeedsList.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
 import AppPanels from './components/panels/AppPanels.vue'
-/* import NeedsNav from './components/navigation/NeedsNav.vue' */
 import { useNeedsList } from './composables/useNeedsList'
 
 const userStore = useUserStore()
@@ -116,8 +115,6 @@ function handleGameReset() {
   <div class="gps-app">
     <TopBar v-if="userStore.name" @openGuineaPigInfo="openGuineaPigInfo" @gameReset="handleGameReset" />
     
-    <!-- Needs Navigation (desktop: horizontal, mobile: fixed right) -->
-    <!-- <NeedsNav v-if="userStore.name" /> -->
 
     <div class="gps-app__main-layout">
       <IconSidebar 

@@ -9,7 +9,7 @@ import { useGuineaPigStore } from '../guineaPig.js'
 import { MESSAGE_DURATIONS, MESSAGE_DELAYS, MESSAGE_PRIORITIES, ensureMinimumDuration } from './messageTimingConfig.js'
 
 // Global debug flag - set to false to disable all store console logs
-export const DEBUG_STORES = false
+export const DEBUG_STORES = true
 
 export const useNeedsQueueStore = defineStore('needsQueue', {
   state: () => ({
