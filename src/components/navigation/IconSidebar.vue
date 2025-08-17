@@ -11,14 +11,6 @@
         </IconSidebarButton>
 
         <IconSidebarButton 
-          :active="showCageStatus"
-          @click="$emit('toggleCageStatus')"
-          title="Show Cage Status"
-        >
-          🏠
-        </IconSidebarButton>
-
-        <IconSidebarButton 
           :active="showCageInteractions"
           @click="$emit('toggleCageInteractions')"
           title="Cage Interactions"
@@ -53,33 +45,25 @@
     </div>
   </nav>
 
-  <IconSidebarSubNavs 
-    :showCageStatus="showCageStatus"
-    @closeCageStatus="$emit('closeCageStatus')"
-  />
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { useUserStore } from '../../stores/user'
 import IconSidebarButton from './IconSidebarButton.vue'
-import IconSidebarSubNavs from './IconSidebarSubNavs.vue'
 
 const props = defineProps({
   showStatistics: Boolean,
-  showCageStatus: Boolean,
   showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
 const emit = defineEmits([
   'toggleStatistics',
-  'toggleCageStatus',
   'toggleCageInteractions',
   'toggleMarket',
   'toggleDebug',
-  'toggleDesign',
-  'closeCageStatus'
+  'toggleDesign'
 ])
 
 const userStore = useUserStore()

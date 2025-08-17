@@ -93,24 +93,4 @@ function getStatusFromValue(value) {
   border-radius: var(--border-radius);
   border: 1px solid var(--color-border);
 }
-
-/* StatusList styling is handled by the StatusList component */
-/* These styles override the default StatusList styles for NeedsList-specific appearance */
-
-/* Keep existing item and list styling by using the same class names that StatusList uses */
-.gps-needs-list .gps-status-list__item {
-  /* Any NeedsList-specific item overrides can go here if needed */
-}
-
-.gps-needs-list .gps-status-list__item-text {
-  /* Any NeedsList-specific text styling can go here if needed */
-}
-
-.gps-needs-list .gps-status-list__item-status-bar {
-  /* Any NeedsList-specific status bar styling can go here if needed */
-}
-
-.gps-needs-list .gps-status-list__item-badge {
-  /* Any NeedsList-specific badge styling can go here if needed */
-}
 </style>

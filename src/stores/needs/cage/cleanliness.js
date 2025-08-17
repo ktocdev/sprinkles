@@ -6,6 +6,8 @@ import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../sha
 import { DEBUG_STORES } from '../core/needsQueue.js'
 import { useNeedsQueueStore } from '../core/needsQueue.js'
 import { getMessageIntervals } from '../shared/messageFrequencyConfig.js'
+import { useCageStore } from '../../cage.js'
+import { usePoopStore } from '../../poop.js'
 
 export const useCleanlinessStore = defineStore('cleanliness', {
   state: () => ({
@@ -18,8 +20,8 @@ export const useCleanlinessStore = defineStore('cleanliness', {
     previousStatus: null,
     recentlyFulfilled: false,
     
-    // Cleanliness calculation - each poop reduces cleanliness by 5%
-    poopPenalty: 5, // Points lost per poop
+    // Cleanliness calculation - each poop reduces cleanliness by 2 points
+    poopPenalty: 2, // Points lost per poop
     
     // Status messages for different urgency levels
     urgencyMessages: {
@@ -103,15 +105,18 @@ export const useCleanlinessStore = defineStore('cleanliness', {
   }),
 
   getters: {
-    // Calculate current cleanliness based on poop count
+    // Calculate current cleanliness based on poop count (1.5 points per poop)
     currentValue() {
       const poopStore = this.getPoopStore()
       if (!poopStore) return 100
       
       const poopCount = poopStore.poopCount
+      
+      // Each poop reduces cleanliness by 1.5 points
+      // Example: 6 poops = 100 - (6 * 1.5) = 100 - 9 = 91
       const cleanliness = Math.max(0, 100 - (poopCount * this.poopPenalty))
       
-      return cleanliness
+      return Math.round(cleanliness)
     },
     
     // Status thresholds
@@ -162,10 +167,11 @@ export const useCleanlinessStore = defineStore('cleanliness', {
     // Get cleanliness analysis
     cleanlinessAnalysis() {
       const poopStore = this.getPoopStore()
-      if (!poopStore) return { poopCount: 0, cleanliness: 100, status: 'perfect' }
+      if (!poopStore) return { poopCount: 0, cleanliness: 100, status: 'perfect', pointsLost: 0 }
       
       const poopCount = poopStore.poopCount
       const cleanliness = this.currentValue
+      const pointsLost = poopCount * this.poopPenalty
       
       let status = 'perfect'
       if (cleanliness < 50) status = 'critical'
@@ -176,8 +182,8 @@ export const useCleanlinessStore = defineStore('cleanliness', {
         poopCount,
         cleanliness,
         status,
-        pointsLost: poopCount * this.poopPenalty,
-        maxPoops: Math.floor(100 / this.poopPenalty) // 20 poops = 0% cleanliness
+        pointsLost: Math.round(pointsLost * 10) / 10, // Round to 1 decimal place
+        maxPoopsFor0: Math.ceil(100 / this.poopPenalty) // ~67 poops = 0% cleanliness
       }
     }
   },
@@ -277,7 +283,6 @@ export const useCleanlinessStore = defineStore('cleanliness', {
     // Helper method to get cage store
     getCageStore() {
       try {
-        const { useCageStore } = require('../../cage.js')
         return useCageStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🧹 [CLEANLINESS] Could not get cage store:`, error)
@@ -288,7 +293,6 @@ export const useCleanlinessStore = defineStore('cleanliness', {
     // Helper method to get poop store
     getPoopStore() {
       try {
-        const { usePoopStore } = require('../../poop.js')
         return usePoopStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🧹 [CLEANLINESS] Could not get poop store:`, error)

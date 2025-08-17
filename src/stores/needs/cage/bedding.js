@@ -6,6 +6,7 @@ import { MESSAGE_DURATIONS, MESSAGE_DELAYS, ensureMinimumDuration } from '../sha
 import { DEBUG_STORES } from '../core/needsQueue.js'
 import { useNeedsQueueStore } from '../core/needsQueue.js'
 import { getMessageIntervals } from '../shared/messageFrequencyConfig.js'
+import { useCageStore } from '../../cage.js'
 
 export const useBeddingStore = defineStore('bedding', {
   state: () => ({
@@ -250,7 +251,6 @@ export const useBeddingStore = defineStore('bedding', {
     // Helper method to get cage store
     getCageStore() {
       try {
-        const { useCageStore } = require('../../cage.js')
         return useCageStore()
       } catch (error) {
         DEBUG_STORES() && console.warn(`🛏️ [BEDDING] Could not get cage store:`, error)

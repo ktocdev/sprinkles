@@ -76,6 +76,23 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         allowAllLevels: false,   // Never show urgency messages for sleep
         enableDebugLogs: true,   // Enable detailed logging for sleep
         noUrgencyMessages: false // Temporarily enable urgency messages for testing
+      },
+      // Cage needs - should not show as individual needs, only in CageNeedsStatus
+      bedding: {
+        noUrgencyMessages: true, // Disable individual urgency messages
+        enableDebugLogs: true    // Keep debug logs for troubleshooting
+      },
+      water: {
+        noUrgencyMessages: true, // Disable individual urgency messages
+        enableDebugLogs: true    // Keep debug logs for troubleshooting
+      },
+      habitat: {
+        noUrgencyMessages: true, // Disable individual urgency messages
+        enableDebugLogs: true    // Keep debug logs for troubleshooting
+      },
+      cleanliness: {
+        noUrgencyMessages: true, // Disable individual urgency messages
+        enableDebugLogs: true    // Keep debug logs for troubleshooting
       }
       // Add more special configurations here as needed:
       // love: { priorityBoost: 1 }
@@ -239,9 +256,13 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
     updateQueue() {
       const queue = []
 
+      // Define cage needs that should be excluded from individual needs queue
+      const cageNeeds = ['bedding', 'water', 'habitat', 'cleanliness']
+
       // Calculate urgency for each need and check for reactions
       for (const [needName, storeName] of Object.entries(this.needs)) {
         if (needName === 'autonomy') continue // Skip autonomy store from normal queue processing
+        if (cageNeeds.includes(needName)) continue // Skip cage needs - they're handled in CageNeedsStatus
         
         const store = this.getNeedStore(storeName)
         if (store) {

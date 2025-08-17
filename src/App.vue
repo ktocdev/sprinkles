@@ -51,43 +51,28 @@ window.addEventListener('beforeunload', () => {
 
 const showGuineaPig = ref(false)
 const showStatistics = ref(false)
-const showCageStatus = ref(false)
 const showCageInteractions = ref(false)
 const showMarket = ref(false)
 
 const appPanelsRef = ref(null)
 
-function toggleCageStatus() {
-  showCageStatus.value = !showCageStatus.value
-}
-
 function toggleCageInteractions() {
-  // Close all subnavs when opening modal
-  showCageStatus.value = false
   showCageInteractions.value = !showCageInteractions.value
 }
 
 function toggleGuineaPig() {
-  // Close all subnavs when opening modal
-  showCageStatus.value = false
   showGuineaPig.value = !showGuineaPig.value
 }
 
 function toggleStatistics() {
-  // Close all subnavs when opening modal
-  showCageStatus.value = false
   showStatistics.value = !showStatistics.value
 }
 
 function openGuineaPigInfo() {
-  // Close all subnavs when opening modal from TopBar logo
-  showCageStatus.value = false
   showGuineaPig.value = true
 }
 
 function toggleMarket() {
-  // Close all subnavs when opening modal
-  showCageStatus.value = false
   showMarket.value = !showMarket.value
 }
 
@@ -107,7 +92,6 @@ function handleGameReset() {
   showStatistics.value = false
   showCageInteractions.value = false
   showMarket.value = false
-  showCageStatus.value = false
 }
 
 </script>
@@ -120,16 +104,13 @@ function handleGameReset() {
     <div class="gps-app__main-layout">
       <IconSidebar 
         :showStatistics="showStatistics"
-        :showCageStatus="showCageStatus"
         :showCageInteractions="showCageInteractions"
         :showMarket="showMarket"
         @toggleStatistics="toggleStatistics"
-        @toggleCageStatus="toggleCageStatus"
         @toggleCageInteractions="toggleCageInteractions"
         @toggleMarket="toggleMarket"
         @toggleDebug="toggleDebug"
         @toggleDesign="toggleDesign"
-        @closeCageStatus="showCageStatus = false"
       />
       
       <div class="gps-app__main-wrapper" v-if="userStore.name">
