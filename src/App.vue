@@ -7,6 +7,7 @@ import { useNeedsQueueStore } from './stores/needs/core/needsQueue'
 import { useStatisticsStore } from './stores/statistics'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
+import CageNeedsStatus from './components/statuses/CageNeedsStatus.vue'
 import CageItemManager from './components/cage/CageItemManager.vue'
 import NeedsList from './components/statuses/NeedsList.vue'
 import TopBar from './components/navigation/TopBar.vue'
@@ -142,6 +143,7 @@ function handleGameReset() {
               :items="needsItems"
               :showUrgency="true"
             />
+            <CageNeedsStatus />
             <CageItemManager />
           </div>
         </div>
