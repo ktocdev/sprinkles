@@ -216,6 +216,11 @@ export const useSleepStore = defineStore('sleep', {
       return this.fulfillmentMethods[0] || null
     },
 
+    // Helper methods for setting degradation rates in different time units
+    setDegradationPerSecond(rate) {
+      this.degradationRate = rate
+    },
+
     // Check if guinea pig is currently sleeping and auto-fulfill if so
     checkAutoFulfillment() {
       try {
