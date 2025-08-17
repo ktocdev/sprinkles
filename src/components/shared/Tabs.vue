@@ -198,10 +198,12 @@ const handleTabKeydown = (event, index) => {
 }
 
 .gps-tabs__tab-label {
+  display: none;
   font-size: var(--font-size-sm);
 }
 
 .gps-tabs__tab-badge {
+  display: none;
   background: var(--color-accent);
   color: var(--color-white);
   border-radius: 12px;
@@ -274,7 +276,7 @@ const handleTabKeydown = (event, index) => {
   border-radius: calc(var(--border-radius) * 2);
 }
 
-/* Responsive design */
+/* To do - fix all to be mobile first! */
 @media (max-width: 768px) {
   .gps-tabs__tab {
     padding: 0.5rem 0.75rem;
@@ -303,6 +305,24 @@ const handleTabKeydown = (event, index) => {
   
   .gps-tabs__content {
     max-height: 250px;
+  }
+}
+
+@media (max-width: 600px) {
+  .gps-tabs__tab {
+      margin: 0 .5rem 0;
+      padding: 0 1rem;
+  }
+
+  .gps-tabs__tab:hover {
+    border-bottom: 1px solid;
+  }
+}
+
+@media (min-width: 599px) {
+  .gps-tabs__tab-badge,
+  .gps-tabs__tab-label {
+    display: block;
   }
 }
 </style>

@@ -151,6 +151,7 @@ function resetGame() {
 }
 
 .gps-topbar__title {
+  display: none;
   font-size: var(--font-size-lg);
   margin: 0;
   color: var(--color-accent);
@@ -192,6 +193,7 @@ function resetGame() {
   }
   
   .gps-topbar__title {
+    display: block;
     font-size: var(--font-size-xl);
   }
   

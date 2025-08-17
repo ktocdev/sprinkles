@@ -7,17 +7,22 @@ import { useNeedsQueueStore } from './stores/needs/needsQueue'
 import { useStatisticsStore } from './stores/statistics'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
-import CageControlsSection from './components/cage/CageControlsSection.vue'
+import CageItemManager from './components/cage/CageItemManager.vue'
+import NeedsList from './components/shared/NeedsList.vue'
 import TopBar from './components/navigation/TopBar.vue'
 import IconSidebar from './components/navigation/IconSidebar.vue'
 import AppPanels from './components/panels/AppPanels.vue'
-import NeedsNav from './components/navigation/NeedsNav.vue'
+/* import NeedsNav from './components/navigation/NeedsNav.vue' */
+import { useNeedsList } from './composables/useNeedsList'
 
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const inventoryStore = useInventoryStore()
 const needsQueueStore = useNeedsQueueStore()
 const statisticsStore = useStatisticsStore()
+
+// Needs list data
+const { needsItems } = useNeedsList()
 
 onMounted(() => {
   themeStore.initTheme()
@@ -112,7 +117,7 @@ function handleGameReset() {
     <TopBar v-if="userStore.name" @openGuineaPigInfo="openGuineaPigInfo" @gameReset="handleGameReset" />
     
     <!-- Needs Navigation (desktop: horizontal, mobile: fixed right) -->
-    <NeedsNav v-if="userStore.name" />
+    <!-- <NeedsNav v-if="userStore.name" /> -->
 
     <div class="gps-app__main-layout">
       <IconSidebar 
@@ -129,13 +134,19 @@ function handleGameReset() {
         @closeCageStatus="showCageStatus = false"
       />
       
-      <div class="gps-app__content-area">
-        <div class="gps-main" v-if="userStore.name">
-          <div class="gps-cage-status-wrapper">
-            <Cage />
-            <StatusMarquee />
+      <div class="gps-app__main-wrapper" v-if="userStore.name">
+        <div class="gps-app__main">
+          <div class="gps-app__cage-area">
+            <div>
+              <Cage />
+              <StatusMarquee />
+            </div>
+            <NeedsList 
+              :items="needsItems"
+              :showUrgency="true"
+            />
+            <CageItemManager />
           </div>
-          <CageControlsSection />
         </div>
       </div>
     </div>
@@ -164,17 +175,6 @@ function handleGameReset() {
   width: calc(100% - 40px);
 }
 
-.gps-app__content-area {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center; 
-  min-height: calc(100vh - 7rem); 
-  padding: 1rem 0;
-  overflow-x: hidden; 
-  min-width: 0; 
-}
-
 @media (min-width: 768px) {
   .gps-app__main-layout {
     margin-inline-start: 70px;
@@ -182,21 +182,39 @@ function handleGameReset() {
   }
 }
 
-.gps-main {
+.gps-app__main-wrapper {
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
   width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.gps-cage-status-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 655px;
-  width: fit-content;
+@media (min-width: 800px) {
+  .gps-app__main-wrapper {
+     padding: 2rem;
+  }
+}
+  
+@media (min-width: 1024px) {
+  .gps-app__main-wrapper {
+     padding: 4rem;
+  }
 }
 
+.gps-app__main {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.gps-app__cage-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+    width: 100%;
+    justify-content: center;
+}
 </style>

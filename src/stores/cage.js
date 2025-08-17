@@ -17,7 +17,7 @@ function clampValue(value, min = 0, max = 100) {
 
 export const useCageStore = defineStore('cage', {
   state: () => ({
-    size: { width: 18, height: 12 },
+    size: { width: 16, height: 12 },
     beddingFreshness: 100,
     waterLevel: 100,
     guineaPigPos: { x: 0, y: 0 },
