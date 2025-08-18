@@ -5,10 +5,17 @@
       :hasAnyFoodItems="hasAnyFoodItems"
       :hasAnyChewItems="hasAnyChewItems"
       :hasAnyToyItems="hasAnyToyItems"
+      @placeAllRandomly="placeAllRandomly"
       @placeFurnitureRandomly="placeFurnitureRandomly"
       @placeFoodRandomly="placeFoodRandomly"
       @placeChewsRandomly="placeChewsRandomly"
       @placeToyRandomly="placeToyRandomly"
+    />
+
+    <CageInteractionQuickActions 
+      @refreshWater="handleRefreshWater"
+      @refreshBedding="handleRefreshBedding"
+      @cleanPoop="handleCleanPoop"
     />
 
     <!-- Item Lists -->
@@ -65,6 +72,9 @@ import { useInventoryStore, itemDefinitions } from '../../stores/inventory'
 import { usePoopStore } from '../../stores/poop'
 import { useHungerStore } from '../../stores/needs/individual/hunger'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import { useWaterStore } from '../../stores/needs/cage/water'
+import { useBeddingStore } from '../../stores/needs/cage/bedding'
+import { useCleanlinessStore } from '../../stores/needs/cage/cleanliness'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
@@ -72,6 +82,7 @@ import Input from '../shared/Input.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import CageItemTabs from './CageItemTabs.vue'
 import CageItemQuickActions from './CageItemQuickActions.vue'
+import CageInteractionQuickActions from './CageInteractionQuickActions.vue'
 import AddItem from './AddItem.vue'
 import MoveItem from './MoveItem.vue'
 
@@ -80,6 +91,9 @@ const inventoryStore = useInventoryStore()
 const poopStore = usePoopStore()
 const hungerStore = useHungerStore()
 const guineaPigStore = useGuineaPigStore()
+const waterStore = useWaterStore()
+const beddingStore = useBeddingStore()
+const cleanlinessStore = useCleanlinessStore()
 
 // Modal states
 const showAddItemModal = ref(false)
@@ -712,6 +726,120 @@ function placeToyRandomly() {
     alert(`Successfully placed ${placedItems} toy item${placedItems === 1 ? '' : 's'} randomly in the cage! 🧸`)
   } else {
     alert('Could not place any toy items. Try cleaning up the cage or check your toy inventory.')
+  }
+}
+
+function placeAllRandomly() {
+  // Check if any items are available
+  const hasItems = hasAnyFurnitureItems.value || hasAnyFoodItems.value || hasAnyChewItems.value || hasAnyToyItems.value
+  
+  if (!hasItems) {
+    alert('No items available in inventory! Visit the Market to buy items first.')
+    return
+  }
+  
+  let totalPlaced = 0
+  const placementResults = []
+  
+  // Helper function to place items from a category without showing individual alerts
+  const placeItemsFromCategory = (availableItems, categoryName, emoji, maxItems = 3) => {
+    const allAvailableItems = Object.keys(availableItems)
+    if (allAvailableItems.length === 0) return 0
+    
+    const numItemsToPlace = Math.max(1, Math.min(maxItems, 1 + Math.floor(Math.random() * 2)))
+    let placedItems = 0
+    let attempts = 0
+    const maxAttempts = 100
+    
+    while (placedItems < numItemsToPlace && attempts < maxAttempts) {
+      attempts++
+      
+      const randomItemName = allAvailableItems[Math.floor(Math.random() * allAvailableItems.length)]
+      const itemDef = itemDefinitions[randomItemName]
+      
+      if (!itemDef) continue
+      
+      const availablePositions = getAvailablePositionsForItem(itemDef.size)
+      if (availablePositions.length === 0) continue
+      
+      const randomPos = availablePositions[Math.floor(Math.random() * availablePositions.length)]
+      
+      const success = cageStore.addItem({
+        name: randomItemName,
+        type: itemDef.type,
+        isConsumable: itemDef.isConsumable,
+        size: itemDef.size
+      }, randomPos.x, randomPos.y)
+      
+      if (success) {
+        inventoryStore.removeItem(randomItemName, 1)
+        placedItems++
+      }
+    }
+    
+    return placedItems
+  }
+  
+  // Place items from each category
+  if (hasAnyFurnitureItems.value) {
+    const placed = placeItemsFromCategory(availableFurnitureItems.value, 'furniture', '🪑', 4)
+    if (placed > 0) {
+      placementResults.push(`${placed} furniture item${placed === 1 ? '' : 's'}`)
+      totalPlaced += placed
+    }
+  }
+  
+  if (hasAnyFoodItems.value) {
+    const placed = placeItemsFromCategory(availableFoodItems.value, 'food', '🥕', 3)
+    if (placed > 0) {
+      placementResults.push(`${placed} food item${placed === 1 ? '' : 's'}`)
+      totalPlaced += placed
+    }
+  }
+  
+  if (hasAnyChewItems.value) {
+    const placed = placeItemsFromCategory(availableChewItems.value, 'chew', '🪵', 3)
+    if (placed > 0) {
+      placementResults.push(`${placed} chew item${placed === 1 ? '' : 's'}`)
+      totalPlaced += placed
+    }
+  }
+  
+  if (hasAnyToyItems.value) {
+    const placed = placeItemsFromCategory(availableToyItems.value, 'toy', '🧸', 3)
+    if (placed > 0) {
+      placementResults.push(`${placed} toy item${placed === 1 ? '' : 's'}`)
+      totalPlaced += placed
+    }
+  }
+  
+  // Show single summary message
+  if (totalPlaced > 0) {
+    const resultsText = placementResults.join(', ')
+    alert(`🎲 Successfully placed items from all categories!\n\nTotal: ${totalPlaced} items\n\n${resultsText}`)
+  } else {
+    alert('Could not place any items from any category. Try cleaning up the cage or check your inventory.')
+  }
+}
+
+function handleRefreshWater() {
+  const result = waterStore.fulfill('refresh_water')
+  if (result.success) {
+    alert('💧 Water bottle refreshed! Fresh, clean water is now available.')
+  }
+}
+
+function handleRefreshBedding() {
+  const result = beddingStore.fulfill('refresh_bedding')
+  if (result.success) {
+    alert('🛏️ Bedding refreshed! Fresh bedding material has been added to the cage.')
+  }
+}
+
+function handleCleanPoop() {
+  const result = cleanlinessStore.fulfill('clean_cage')
+  if (result.success) {
+    alert('🧹 Poop cleaned! The cage is now clean and fresh.')
   }
 }
 

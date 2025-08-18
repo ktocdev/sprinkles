@@ -350,7 +350,7 @@ export const useAutonomyStore = defineStore('autonomy', {
             DEBUG_STORES() && console.log(`🤖 [AUTONOMY] REACHED: At water bottle, attempting to drink...`)
             
             // Try to fulfill thirst from water bottle
-            const result = thirstStore.fulfill('water_bottle_fixed')
+            const result = await thirstStore.fulfill('water_bottle_fixed')
             
             if (result.success) {
               DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DRINKING: Successfully drank water, thirst improved by ${result.improvement}`)

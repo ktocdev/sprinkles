@@ -8,6 +8,33 @@
   margin: 0 auto;
 }
 
+/* Quick Actions Panel Utilities */
+.gps-quick-actions-panel {
+  margin-block-end: 1rem;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.gps-quick-actions-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.gps-quick-actions-buttons .gps-button {
+  border-color: var(--color-border-light);
+}
+
+/* Responsive adjustments for quick actions */
+@media (max-width: 767px) {
+  .gps-quick-actions-buttons {
+    justify-content: center;
+  }
+}
+
 a {
   font-weight: var(--font-weight-medium);
   color: var(--color-accent);
