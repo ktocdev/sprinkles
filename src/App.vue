@@ -166,7 +166,7 @@ function handleGameReset() {
   display: flex; 
   align-items: center;
   justify-content: center;
-  padding: 4rem;
+  padding: 4rem 2rem;
   position: relative;
   width: 100%;
 }
@@ -178,6 +178,7 @@ function handleGameReset() {
   }
 
   .gps-app__main-wrapper {
+    padding: 4rem;
     top: 64px;
   }
 }
