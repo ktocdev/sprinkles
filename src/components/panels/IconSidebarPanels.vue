@@ -4,16 +4,14 @@ import Statistics from '../statistics/Statistics.vue'
 import GuineaPig from '../guinea-pig/GuineaPig.vue'
 import Panel from '../shared/Panel.vue'
 import Market from '../market/Market.vue'
-import CageInteractionPanel from './CageInteractionPanel.vue'
 
 const props = defineProps({
   showStatistics: Boolean,
   showGuineaPig: Boolean,
-  showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
-const emit = defineEmits(['closeStatistics', 'closeGuineaPig', 'closeCageInteractions', 'closeMarket'])
+const emit = defineEmits(['closeStatistics', 'closeGuineaPig', 'closeMarket'])
 </script>
 
 <template>
@@ -32,11 +30,6 @@ const emit = defineEmits(['closeStatistics', 'closeGuineaPig', 'closeCageInterac
   >
     <GuineaPig />
   </Panel>
-
-  <CageInteractionPanel 
-    :isOpen="showCageInteractions"
-    @close="emit('closeCageInteractions')"
-  />
 
   <Panel 
     :isOpen="showMarket" 

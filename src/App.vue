@@ -69,14 +69,9 @@ window.addEventListener('beforeunload', () => {
 
 const showGuineaPig = ref(false)
 const showStatistics = ref(false)
-const showCageInteractions = ref(false)
 const showMarket = ref(false)
 
 const appPanelsRef = ref(null)
-
-function toggleCageInteractions() {
-  showCageInteractions.value = !showCageInteractions.value
-}
 
 function toggleGuineaPig() {
   showGuineaPig.value = !showGuineaPig.value
@@ -108,7 +103,6 @@ function handleGameReset() {
   // Reset all panel states
   showGuineaPig.value = false
   showStatistics.value = false
-  showCageInteractions.value = false
   showMarket.value = false
 }
 
@@ -122,10 +116,8 @@ function handleGameReset() {
     <div class="gps-app__main-layout">
       <IconSidebar 
         :showStatistics="showStatistics"
-        :showCageInteractions="showCageInteractions"
         :showMarket="showMarket"
         @toggleStatistics="toggleStatistics"
-        @toggleCageInteractions="toggleCageInteractions"
         @toggleMarket="toggleMarket"
         @toggleDebug="toggleDebug"
         @toggleDesign="toggleDesign"
@@ -153,19 +145,16 @@ function handleGameReset() {
       ref="appPanelsRef"
       :showStatistics="showStatistics"
       :showGuineaPig="showGuineaPig"
-      :showCageInteractions="showCageInteractions"
       :showMarket="showMarket"
       @gameReset="handleGameReset"
       @closeStatistics="showStatistics = false"
       @closeGuineaPig="showGuineaPig = false"
-      @closeCageInteractions="showCageInteractions = false"
       @closeMarket="showMarket = false"
     />
   </div>
 </template>
 
 <style>
-
 .gps-app__main-layout {
   display: flex;
   flex: 1;
@@ -173,30 +162,23 @@ function handleGameReset() {
   width: calc(100% - 40px);
 }
 
+.gps-app__main-wrapper {
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  position: relative;
+  width: 100%;
+}
+
 @media (min-width: 768px) {
   .gps-app__main-layout {
     margin-inline-start: 70px;
     width: calc(100% - 70px);
   }
-}
 
-.gps-app__main-wrapper {
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  width: 100%;
-}
-
-@media (min-width: 800px) {
   .gps-app__main-wrapper {
-     padding: 2rem;
-  }
-}
-  
-@media (min-width: 1024px) {
-  .gps-app__main-wrapper {
-     padding: 4rem;
+    top: 64px;
   }
 }
 

@@ -18,6 +18,12 @@
       @cleanPoop="handleCleanPoop"
     />
 
+    <QuickGuineaPigActions 
+      @getDrink="handleGetDrink"
+      @feedTime="handleFeedTime"
+      @sendToBed="handleSendToBed"
+    />
+
     <!-- Item Lists -->
     <CageItemTabs 
       :allInventoryItems="allInventoryItems"
@@ -75,6 +81,9 @@ import { useGuineaPigStore } from '../../stores/guineaPig'
 import { useWaterStore } from '../../stores/needs/cage/water'
 import { useBeddingStore } from '../../stores/needs/cage/bedding'
 import { useCleanlinessStore } from '../../stores/needs/cage/cleanliness'
+import { useThirstStore } from '../../stores/needs/individual/thirst'
+import { useSleepStore } from '../../stores/needs/individual/sleep'
+import { useNeedsQueueStore } from '../../stores/needs/core/needsQueue'
 import Button from '../shared/Button.vue'
 import Dropdown from '../shared/Dropdown.vue'
 import Modal from '../shared/Modal.vue'
@@ -83,6 +92,7 @@ import FormGroup from '../shared/FormGroup.vue'
 import CageItemTabs from './CageItemTabs.vue'
 import CageItemQuickActions from './CageItemQuickActions.vue'
 import CageInteractionQuickActions from './CageInteractionQuickActions.vue'
+import QuickGuineaPigActions from './QuickGuineaPigActions.vue'
 import AddItem from './AddItem.vue'
 import MoveItem from './MoveItem.vue'
 
@@ -94,6 +104,9 @@ const guineaPigStore = useGuineaPigStore()
 const waterStore = useWaterStore()
 const beddingStore = useBeddingStore()
 const cleanlinessStore = useCleanlinessStore()
+const thirstStore = useThirstStore()
+const sleepStore = useSleepStore()
+const needsQueueStore = useNeedsQueueStore()
 
 // Modal states
 const showAddItemModal = ref(false)
@@ -841,6 +854,57 @@ function handleCleanPoop() {
   if (result.success) {
     alert('🧹 Poop cleaned! The cage is now clean and fresh.')
   }
+}
+
+async function handleGetDrink() {
+  // Set thirst to trigger autonomous drinking behavior
+  thirstStore.currentValue = 65  // Below 70% threshold to trigger autonomy
+  
+  // Update the needs queue to reflect the change
+  needsQueueStore.updateQueue()
+  
+  console.log('💧 [QUICK ACTION] Thirst reduced to trigger autonomous drinking behavior - guinea pig should walk to water bottle')
+  
+  // Update queue again after a short delay to ensure changes propagate
+  setTimeout(() => {
+    needsQueueStore.updateQueue()
+  }, 100)
+}
+
+async function handleFeedTime() {
+  // Set hunger to trigger autonomous feeding behavior
+  hungerStore.currentValue = 60  // Lower value to trigger autonomy
+  
+  // Update the needs queue to reflect the change
+  needsQueueStore.updateQueue()
+  
+  console.log('🍽️ [QUICK ACTION] Hunger reduced to trigger autonomous feeding behavior - guinea pig should walk to food')
+  
+  // Update queue again after a short delay to ensure changes propagate
+  setTimeout(() => {
+    needsQueueStore.updateQueue()
+  }, 100)
+}
+
+async function handleSendToBed() {
+  // Set sleep to 80% to trigger sleep-seeking behavior
+  sleepStore.currentValue = 80
+  
+  // Update the needs queue to reflect the change
+  needsQueueStore.updateQueue()
+  
+  // Trigger the proactive sleep behavior
+  try {
+    await guineaPigStore.handleProactiveSleepBehavior()
+    console.log('💤 [QUICK ACTION] Sleep behavior triggered - guinea pig should seek bed')
+  } catch (error) {
+    console.warn('💤 [QUICK ACTION] Failed to trigger sleep behavior:', error)
+  }
+  
+  // Update queue again after a short delay to ensure changes propagate
+  setTimeout(() => {
+    needsQueueStore.updateQueue()
+  }, 100)
 }
 
 </script>

@@ -1,30 +1,30 @@
 <template>
   <div class="gps-quick-actions-panel">
-    <h4 class="gps-section-header">Cage Interactions</h4>
+    <h4 class="gps-section-header">Guinea Pig Actions</h4>
     <div class="gps-quick-actions-buttons">
       <Button 
         type="primary"
         size="compact"
-        @click="$emit('refreshWater')"
-        title="Refill the water bottle with fresh, clean water"
+        @click="$emit('getDrink')"
+        title="Trigger autonomous drinking behavior - guinea pig will walk to water bottle"
       >
-        💧 Refresh Water
+        💧 Get a Drink
       </Button>
       <Button 
         type="primary"
         size="compact"
-        @click="$emit('refreshBedding')"
-        title="Replace bedding with fresh material"
+        @click="$emit('feedTime')"
+        title="Trigger autonomous feeding behavior - guinea pig will walk to food"
       >
-        🛏️ Refresh Bedding
+        🍽️ Feed Time
       </Button>
       <Button 
         type="primary"
         size="compact"
-        @click="$emit('cleanPoop')"
-        title="Remove waste from the cage"
+        @click="$emit('sendToBed')"
+        title="Trigger sleep-seeking behavior - guinea pig will seek bed"
       >
-        🧹 Clean Poop
+        💤 Send to Bed
       </Button>
     </div>
   </div>
@@ -34,9 +34,9 @@
 import Button from '../shared/Button.vue'
 
 const emit = defineEmits([
-  'refreshWater',
-  'refreshBedding',
-  'cleanPoop'
+  'getDrink',
+  'feedTime', 
+  'sendToBed'
 ])
 </script>
 
