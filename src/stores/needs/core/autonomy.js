@@ -10,15 +10,18 @@ export const useAutonomyStore = defineStore('autonomy', {
     lastDecisionTime: 0,
     decisionInterval: 2000, // Check for new autonomous decisions every 2 seconds
     
+    // Pause state
+    isPaused: false,
+    
     // Movement priorities (higher = more urgent)
     needPriorities: {
       hunger: 100,     // Highest priority - food is critical
+      thirst: 95,      // Very high priority - water is critical
       shelter: 90,     // Very high priority - security need
       chew: 80,        // High priority - dental health
       enrichment: 70,  // High priority - mental stimulation
       sleep: 60,       // Medium priority - rest need
       love: 50,        // Medium priority - social need (requires human)
-      thirst: 40       // Lower priority - water need
       // Note: hygiene and nails excluded - require user interaction
     },
     
@@ -30,7 +33,7 @@ export const useAutonomyStore = defineStore('autonomy', {
       enrichment: 45,  // Start seeking enrichment at 45%
       sleep: 80,       // Start seeking sleep items at 80%
       love: 40,        // Start seeking love at 40%
-      thirst: 30       // Start seeking water at 30% (less frequent)
+      thirst: 70       // Start seeking water at 70% (same as hunger)
       // Note: hygiene and nails excluded - require user interaction only
     }
   }),
@@ -60,6 +63,12 @@ export const useAutonomyStore = defineStore('autonomy', {
       this.lastDecisionTime = now
       
       try {
+        // Check if autonomy system is paused
+        if (this.isPaused) {
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DECISION: Skipping - autonomy system paused`)
+          return false
+        }
+        
         // Check if guinea pig is paused or sleeping
         const guineaPigStore = await this.getGuineaPigStore()
         if (!guineaPigStore || guineaPigStore.isPaused || guineaPigStore.currentStatus === 'sleeping') {
@@ -207,9 +216,12 @@ export const useAutonomyStore = defineStore('autonomy', {
         const targetX = this.currentTarget.x
         const targetY = this.currentTarget.y
         
-        // Check if already at target
-        if (currentX === targetX && currentY === targetY) {
-          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Transitioning based on need type...`)
+        // Check if already at target (or adjacent for thirst)
+        const isAtTarget = currentX === targetX && currentY === targetY
+        const isAdjacentToWater = this.currentTarget.needType === 'thirst' && this.isAdjacentToPosition(currentX, currentY, targetX, targetY)
+        
+        if (isAtTarget || isAdjacentToWater) {
+          DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}${isAdjacentToWater ? ' (adjacent)' : ''}! Transitioning based on need type...`)
           await this.handleReachedTarget()
           return true
         }
@@ -239,9 +251,12 @@ export const useAutonomyStore = defineStore('autonomy', {
           cageStore.setGuineaPigPos(newX, newY)
           DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Moving toward ${this.currentTarget.item.name} from (${currentX}, ${currentY}) to (${newX}, ${newY})`)
           
-          // Check if we've reached the target
-          if (newX === targetX && newY === targetY) {
-            DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}! Handling arrival...`)
+          // Check if we've reached the target (or adjacent for thirst)
+          const reachedExact = newX === targetX && newY === targetY
+          const reachedAdjacent = this.currentTarget.needType === 'thirst' && this.isAdjacentToPosition(newX, newY, targetX, targetY)
+          
+          if (reachedExact || reachedAdjacent) {
+            DEBUG_STORES() && console.log(`🤖 [AUTONOMY] MOVEMENT: Reached ${this.currentTarget.item.name}${reachedAdjacent ? ' (adjacent)' : ''}! Handling arrival...`)
             setTimeout(async () => {
               await this.handleReachedTarget()
             }, 1000) // Small delay to let movement settle
@@ -335,7 +350,7 @@ export const useAutonomyStore = defineStore('autonomy', {
             DEBUG_STORES() && console.log(`🤖 [AUTONOMY] REACHED: At water bottle, attempting to drink...`)
             
             // Try to fulfill thirst from water bottle
-            const result = thirstStore.fulfill('water_bottle_fixed')
+            const result = await thirstStore.fulfill('water_bottle_fixed')
             
             if (result.success) {
               DEBUG_STORES() && console.log(`🤖 [AUTONOMY] DRINKING: Successfully drank water, thirst improved by ${result.improvement}`)
@@ -361,6 +376,28 @@ export const useAutonomyStore = defineStore('autonomy', {
     stopAutonomousMovement() {
       this.clearCurrentTarget()
       DEBUG_STORES() && console.log(`🤖 [AUTONOMY] STOP: Autonomous movement stopped`)
+    },
+    
+    // Pause autonomous decision making
+    pauseAutonomy() {
+      this.isPaused = true
+      this.clearCurrentTarget()
+      DEBUG_STORES() && console.log(`🤖 [AUTONOMY] PAUSE: Autonomy system paused`)
+    },
+    
+    // Resume autonomous decision making
+    resumeAutonomy() {
+      this.isPaused = false
+      DEBUG_STORES() && console.log(`🤖 [AUTONOMY] RESUME: Autonomy system resumed`)
+    },
+    
+    // Check if guinea pig is adjacent to a position (for water drinking)
+    isAdjacentToPosition(currentX, currentY, targetX, targetY) {
+      const deltaX = Math.abs(currentX - targetX)
+      const deltaY = Math.abs(currentY - targetY)
+      
+      // Adjacent means within 1 cell horizontally or vertically (not diagonal)
+      return (deltaX <= 1 && deltaY <= 1) && !(deltaX === 0 && deltaY === 0)
     },
     
     // Update movement priorities (for customization)

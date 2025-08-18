@@ -167,7 +167,7 @@ export const useThirstStore = defineStore('thirst', {
     },
 
     // Thirst fulfillment - only water bottle method available
-    fulfill(methodName) {
+    async fulfill(methodName) {
       if (methodName !== 'water_bottle_fixed') {
         return { success: false, message: 'Invalid water source - only water bottle available' }
       }
@@ -183,10 +183,12 @@ export const useThirstStore = defineStore('thirst', {
 
       // Consume water from cage water store when guinea pig drinks
       try {
-        const { useWaterStore } = require('../cage/water.js')
+        // Use dynamic import to avoid circular dependencies
+        const { useWaterStore } = await import('../cage/water.js')
         const waterStore = useWaterStore()
         if (waterStore && waterStore.consumeWater) {
-          waterStore.consumeWater(10) // Guinea pig consumes 10% of cage water when drinking
+          const consumeResult = waterStore.consumeWater(10) // Guinea pig consumes 10% of cage water when drinking
+          DEBUG_STORES() && console.log(`💧 [THIRST] FULFILL: Consumed ${consumeResult.consumed}% cage water, new level: ${consumeResult.newLevel}%`)
         }
       } catch (error) {
         DEBUG_STORES() && console.warn(`💧 [THIRST] Could not consume cage water:`, error)

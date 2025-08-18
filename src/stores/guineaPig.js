@@ -456,21 +456,33 @@ export const useGuineaPigStore = defineStore('guineaPig', {
       this.scheduleNextTransition() // Resume automatic transitions
     },
     
-    // Check if game is paused by looking at cage store
-    checkGamePaused() {
+    // Check if game is paused by looking at cage store and game controller
+    async checkGamePaused() {
       try {
-        // Dynamic import to avoid circular dependency
-        import('./cage.js').then(({ useCageStore }) => {
-          const cageStore = useCageStore()
-          if (cageStore.paused && !this.isPaused) {
-            this.pauseStatusSystem()
-          } else if (!cageStore.paused && this.isPaused) {
-            this.resumeStatusSystem()
-          }
-        })
+        // Check cage store pause state
+        const { useCageStore } = await import('./cage.js')
+        const cageStore = useCageStore()
+        
+        // Check game controller pause state
+        let gameControllerPaused = false
+        try {
+          const { useGameControllerStore } = await import('./gameController.js')
+          const gameControllerStore = useGameControllerStore()
+          gameControllerPaused = gameControllerStore.shouldGameBePaused
+        } catch (error) {
+          // Game controller not available, continue with cage check only
+        }
+        
+        const shouldBePaused = cageStore.paused || gameControllerPaused
+        
+        if (shouldBePaused && !this.isPaused) {
+          this.pauseStatusSystem()
+        } else if (!shouldBePaused && this.isPaused) {
+          this.resumeStatusSystem()
+        }
       } catch (error) {
         // Fallback - continue with current state
-        DEBUG_STORES() && console.warn(`🐹 [GUINEAPIG] PAUSE: Could not check cage pause state:`, error)
+        DEBUG_STORES() && console.warn(`🐹 [GUINEAPIG] PAUSE: Could not check pause state:`, error)
       }
     },
 

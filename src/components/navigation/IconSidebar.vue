@@ -11,14 +11,6 @@
         </IconSidebarButton>
 
         <IconSidebarButton 
-          :active="showCageInteractions"
-          @click="$emit('toggleCageInteractions')"
-          title="Cage Interactions"
-        >
-          🛠️
-        </IconSidebarButton>
-        
-        <IconSidebarButton 
           :active="showMarket"
           @click="$emit('toggleMarket')"
           title="Show Market"
@@ -54,13 +46,11 @@ import IconSidebarButton from './IconSidebarButton.vue'
 
 const props = defineProps({
   showStatistics: Boolean,
-  showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
 const emit = defineEmits([
   'toggleStatistics',
-  'toggleCageInteractions',
   'toggleMarket',
   'toggleDebug',
   'toggleDesign'

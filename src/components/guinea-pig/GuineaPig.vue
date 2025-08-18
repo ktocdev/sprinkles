@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useGuineaPigStore } from '../../stores/guineaPig'
+import { useUserStore } from '../../stores/user'
 import Input from '../shared/Input.vue'
 import FormGroup from '../shared/FormGroup.vue'
 import Button from '../shared/Button.vue'
 
 const guineaPigStore = useGuineaPigStore()
+const userStore = useUserStore()
 const editingName = ref(false)
 const tempName = ref(guineaPigStore.info.name || '')
 
@@ -58,6 +60,11 @@ function cancelEditName() {
            </div>
          </div>
        </template>
+      
+      <div class="gps-guinea-pig__info-row">
+        <span class="gps-guinea-pig__info-label">Owner:</span>
+        <span class="gps-guinea-pig__info-value">{{ userStore.name || '—' }}</span>
+      </div>
       
       <div class="gps-guinea-pig__info-row">
         <span class="gps-guinea-pig__info-label">Birthday:</span>

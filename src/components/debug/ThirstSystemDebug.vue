@@ -7,7 +7,7 @@
         <Button 
           type="primary"
           @click="getDrink"
-          hint="Trigger drinking behavior (simulates 70% thirst need)"
+          hint="Trigger autonomous drinking behavior - guinea pig will walk to water bottle"
         >
           💧 Get a Drink
         </Button>
@@ -106,23 +106,13 @@ function resetThirst() {
 }
 
 async function getDrink() {
-  // Set thirst to 70% to trigger drinking behavior
-  thirstStore.currentValue = 70
+  // Set thirst to trigger autonomous drinking behavior
+  thirstStore.currentValue = 65  // Below 70% threshold to trigger autonomy
   
   // Update the needs queue to reflect the change
   needsQueueStore.updateQueue()
   
-  // Trigger drinking via thirst fulfillment
-  try {
-    const result = thirstStore.fulfill('water_bottle_fixed')
-    if (result.success) {
-      console.log('💧 [DEBUG] Drinking triggered - guinea pig drank water:', result.message)
-    } else {
-      console.warn('💧 [DEBUG] Failed to drink water:', result.message)
-    }
-  } catch (error) {
-    console.warn('💧 [DEBUG] Failed to trigger drinking behavior:', error)
-  }
+  console.log('💧 [DEBUG] Thirst reduced to trigger autonomous drinking behavior - guinea pig should walk to water bottle')
   
   // Update queue again after a short delay to ensure changes propagate
   setTimeout(() => {

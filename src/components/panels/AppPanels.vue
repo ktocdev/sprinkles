@@ -16,11 +16,9 @@
   <IconSidebarPanels 
     :showStatistics="showStatistics"
     :showGuineaPig="showGuineaPig"
-    :showCageInteractions="showCageInteractions"
     :showMarket="showMarket"
     @closeStatistics="$emit('closeStatistics')"
     @closeGuineaPig="$emit('closeGuineaPig')"
-    @closeCageInteractions="$emit('closeCageInteractions')"
     @closeMarket="$emit('closeMarket')"
   />
 </template>
@@ -37,11 +35,10 @@ import IconSidebarPanels from './IconSidebarPanels.vue'
 const props = defineProps({
   showStatistics: Boolean,
   showGuineaPig: Boolean,
-  showCageInteractions: Boolean,
   showMarket: Boolean
 })
 
-const emit = defineEmits(['gameReset', 'closeStatistics', 'closeGuineaPig', 'closeCageInteractions', 'closeMarket'])
+const emit = defineEmits(['gameReset', 'closeStatistics', 'closeGuineaPig', 'closeMarket'])
 
 // Expose refs for external access
 const debugPanelRef = ref(null)

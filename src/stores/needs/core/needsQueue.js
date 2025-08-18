@@ -228,7 +228,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Check if game is paused at higher level (welcome panel or manual pause)
       const userStore = useUserStore()
       const cageStore = useCageStore()
-      const isGamePaused = !userStore.name || cageStore.paused
+      const isGamePaused = !userStore.name || cageStore.paused || this.timerPaused
       
       if (isGamePaused) {
         // Don't degrade needs when game is paused, but still update queue for display
@@ -517,7 +517,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Check if game is paused - don't add messages when paused
       const userStore = useUserStore()
       const cageStore = useCageStore()
-      const isGamePaused = !userStore.name || cageStore.paused
+      const isGamePaused = !userStore.name || cageStore.paused || this.timerPaused
       
       if (isGamePaused) {
         return null
@@ -655,7 +655,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Check if game is paused - don't add messages when paused
       const userStore = useUserStore()
       const cageStore = useCageStore()
-      const isGamePaused = !userStore.name || cageStore.paused
+      const isGamePaused = !userStore.name || cageStore.paused || this.timerPaused
 
       if (isGamePaused) {
         return null
@@ -1002,7 +1002,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
       // Check if game is paused - don't process reactions when paused
       const userStore = useUserStore()
       const cageStore = useCageStore()
-      const isGamePaused = !userStore.name || cageStore.paused
+      const isGamePaused = !userStore.name || cageStore.paused || this.timerPaused
       
       if (isGamePaused || store.recentlyFulfilled) {
         // Clear pending reactions when paused to avoid stale reactions
@@ -1076,7 +1076,7 @@ export const useNeedsQueueStore = defineStore('needsQueue', {
         // Check if game is paused - don't process messages when paused
         const userStore = useUserStore()
         const cageStore = useCageStore()
-        const isGamePaused = !userStore.name || cageStore.paused
+        const isGamePaused = !userStore.name || cageStore.paused || this.timerPaused
         
         if (isGamePaused) {
           DEBUG_STORES() && console.log(`🐹 [NEEDSQUEUE] GUINEAPIG: Clearing ${pendingMessages.length} pending status messages (game paused)`)

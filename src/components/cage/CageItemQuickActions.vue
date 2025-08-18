@@ -1,7 +1,16 @@
 <template>
-  <div class="gps-cage-item-quick-actions">
+  <div class="gps-quick-actions-panel">
     <h4 class="gps-section-header">Quick Add Items</h4>
-    <div class="gps-cage-item-quick-actions__buttons">
+    <div class="gps-quick-actions-buttons">
+      <Button 
+        type="primary"
+        size="compact"
+        @click="$emit('placeAllRandomly')"
+        title="Place items from all categories randomly in cage"
+        :class="{ 'gps-button--disabled': !hasAnyItems }"
+      >
+        🎲 All
+      </Button>
       <Button 
         type="secondary"
         size="compact"
@@ -43,6 +52,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import Button from '../shared/Button.vue'
 
 const props = defineProps({
@@ -65,37 +75,22 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
+  'placeAllRandomly',
   'placeFurnitureRandomly',
   'placeFoodRandomly',
   'placeChewsRandomly',
   'placeToyRandomly'
 ])
+
+// Check if there are any items available from any category
+const hasAnyItems = computed(() => {
+  return props.hasAnyFurnitureItems || 
+         props.hasAnyFoodItems || 
+         props.hasAnyChewItems || 
+         props.hasAnyToyItems
+})
 </script>
 
 <style>
-.gps-cage-item-quick-actions {
-  margin-block-end: 1rem;
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-}
-
-.gps-cage-item-quick-actions__buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.gps-cage-item-quick-actions__buttons .gps-button {
-  border-color: var(--color-border-light);
-}
-
-/* Responsive adjustments */
-@media (max-width: 767px) {
-  .gps-cage-item-quick-actions__buttons {
-    justify-content: center;
-  }
-}
+/* Component uses utility classes from style.css */
 </style>

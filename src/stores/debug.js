@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useDebugStore = defineStore('debug', {
   state: () => ({
     // Console logging flags
-    storeLogging: true,     // Controls all store console messages (DEBUG_STORES equivalent)
+    storeLogging: false,    // Controls all store console messages (DEBUG_STORES equivalent)
     
     // Individual logging categories (for future expansion)
     autonomyLogging: true,  // Autonomy system messages

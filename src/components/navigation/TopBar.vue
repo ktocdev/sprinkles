@@ -97,7 +97,7 @@ function resetGame() {
   background: var(--color-panel);
   border-block-end: 2px solid var(--color-accent);
   box-shadow: var(--box-shadow);
-  position: relative;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 100;

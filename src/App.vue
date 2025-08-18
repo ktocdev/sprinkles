@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useThemeStore } from './stores/theme'
 import { useInventoryStore } from './stores/inventory'
 import { useNeedsQueueStore } from './stores/needs/core/needsQueue'
 import { useStatisticsStore } from './stores/statistics'
+import { useGameControllerStore } from './stores/gameController'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
 import CageNeedsStatus from './components/statuses/CageNeedsStatus.vue'
@@ -20,12 +21,18 @@ const themeStore = useThemeStore()
 const inventoryStore = useInventoryStore()
 const needsQueueStore = useNeedsQueueStore()
 const statisticsStore = useStatisticsStore()
+const gameControllerStore = useGameControllerStore()
 
 // Needs list data
 const { needsItems } = useNeedsList()
 
+let statisticsVisibilityListener = null
+
 onMounted(() => {
   themeStore.initTheme()
+  
+  // Initialize the game controller first (includes Page Visibility API)
+  gameControllerStore.initialize()
   
   // Always start needs system on page load
   // The debug panel can be used to toggle it off if needed
@@ -33,14 +40,25 @@ onMounted(() => {
   
   // Start session tracking
   statisticsStore.startSession()
+  
+  // Set up statistics visibility listener (separate from game controller)
+  statisticsVisibilityListener = () => {
+    if (document.hidden) {
+      statisticsStore.pauseSession()
+    } else {
+      statisticsStore.startSession()
+    }
+  }
+  document.addEventListener('visibilitychange', statisticsVisibilityListener)
 })
 
-// Handle session pausing/resuming based on page visibility
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    statisticsStore.pauseSession()
-  } else {
-    statisticsStore.startSession()
+onUnmounted(() => {
+  // Clean up game controller
+  gameControllerStore.cleanup()
+  
+  // Clean up statistics listener
+  if (statisticsVisibilityListener) {
+    document.removeEventListener('visibilitychange', statisticsVisibilityListener)
   }
 })
 
@@ -51,14 +69,9 @@ window.addEventListener('beforeunload', () => {
 
 const showGuineaPig = ref(false)
 const showStatistics = ref(false)
-const showCageInteractions = ref(false)
 const showMarket = ref(false)
 
 const appPanelsRef = ref(null)
-
-function toggleCageInteractions() {
-  showCageInteractions.value = !showCageInteractions.value
-}
 
 function toggleGuineaPig() {
   showGuineaPig.value = !showGuineaPig.value
@@ -90,7 +103,6 @@ function handleGameReset() {
   // Reset all panel states
   showGuineaPig.value = false
   showStatistics.value = false
-  showCageInteractions.value = false
   showMarket.value = false
 }
 
@@ -104,10 +116,8 @@ function handleGameReset() {
     <div class="gps-app__main-layout">
       <IconSidebar 
         :showStatistics="showStatistics"
-        :showCageInteractions="showCageInteractions"
         :showMarket="showMarket"
         @toggleStatistics="toggleStatistics"
-        @toggleCageInteractions="toggleCageInteractions"
         @toggleMarket="toggleMarket"
         @toggleDebug="toggleDebug"
         @toggleDesign="toggleDesign"
@@ -135,19 +145,16 @@ function handleGameReset() {
       ref="appPanelsRef"
       :showStatistics="showStatistics"
       :showGuineaPig="showGuineaPig"
-      :showCageInteractions="showCageInteractions"
       :showMarket="showMarket"
       @gameReset="handleGameReset"
       @closeStatistics="showStatistics = false"
       @closeGuineaPig="showGuineaPig = false"
-      @closeCageInteractions="showCageInteractions = false"
       @closeMarket="showMarket = false"
     />
   </div>
 </template>
 
 <style>
-
 .gps-app__main-layout {
   display: flex;
   flex: 1;
@@ -155,30 +162,23 @@ function handleGameReset() {
   width: calc(100% - 40px);
 }
 
+.gps-app__main-wrapper {
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  position: relative;
+  width: 100%;
+}
+
 @media (min-width: 768px) {
   .gps-app__main-layout {
     margin-inline-start: 70px;
     width: calc(100% - 70px);
   }
-}
 
-.gps-app__main-wrapper {
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  width: 100%;
-}
-
-@media (min-width: 800px) {
   .gps-app__main-wrapper {
-     padding: 2rem;
-  }
-}
-  
-@media (min-width: 1024px) {
-  .gps-app__main-wrapper {
-     padding: 4rem;
+    top: 64px;
   }
 }
 
