@@ -71,7 +71,7 @@ const userStore = useUserStore()
   align-items: center;
   padding: 4em 0 1rem 0;
   flex-shrink: 0;
-  height: 100vh;
+  height: 100%;
   position: fixed;
   left: 0;
   top: 0;

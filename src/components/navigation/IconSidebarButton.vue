@@ -65,8 +65,6 @@ const buttonClasses = computed(() => ({
     }
   }
 
-
-
   /* Tooltip styles */
   &::before {
     content: attr(title);
