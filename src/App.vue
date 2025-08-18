@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useUserStore } from './stores/user'
 import { useThemeStore } from './stores/theme'
 import { useInventoryStore } from './stores/inventory'
 import { useNeedsQueueStore } from './stores/needs/core/needsQueue'
 import { useStatisticsStore } from './stores/statistics'
+import { useGameControllerStore } from './stores/gameController'
 import Cage from './components/cage/Cage.vue'
 import StatusMarquee from './components/statuses/StatusMarquee.vue'
 import CageNeedsStatus from './components/statuses/CageNeedsStatus.vue'
@@ -20,12 +21,18 @@ const themeStore = useThemeStore()
 const inventoryStore = useInventoryStore()
 const needsQueueStore = useNeedsQueueStore()
 const statisticsStore = useStatisticsStore()
+const gameControllerStore = useGameControllerStore()
 
 // Needs list data
 const { needsItems } = useNeedsList()
 
+let statisticsVisibilityListener = null
+
 onMounted(() => {
   themeStore.initTheme()
+  
+  // Initialize the game controller first (includes Page Visibility API)
+  gameControllerStore.initialize()
   
   // Always start needs system on page load
   // The debug panel can be used to toggle it off if needed
@@ -33,14 +40,25 @@ onMounted(() => {
   
   // Start session tracking
   statisticsStore.startSession()
+  
+  // Set up statistics visibility listener (separate from game controller)
+  statisticsVisibilityListener = () => {
+    if (document.hidden) {
+      statisticsStore.pauseSession()
+    } else {
+      statisticsStore.startSession()
+    }
+  }
+  document.addEventListener('visibilitychange', statisticsVisibilityListener)
 })
 
-// Handle session pausing/resuming based on page visibility
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    statisticsStore.pauseSession()
-  } else {
-    statisticsStore.startSession()
+onUnmounted(() => {
+  // Clean up game controller
+  gameControllerStore.cleanup()
+  
+  // Clean up statistics listener
+  if (statisticsVisibilityListener) {
+    document.removeEventListener('visibilitychange', statisticsVisibilityListener)
   }
 })
 

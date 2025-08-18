@@ -7,7 +7,7 @@
         <Button 
           type="primary"
           @click="feedTime"
-          hint="Trigger feeding behavior (simulates 70% hunger need)"
+          hint="Trigger autonomous feeding behavior - guinea pig will walk to food"
         >
           🍽️ Feed Time
         </Button>
@@ -104,27 +104,13 @@ function resetHunger() {
 }
 
 async function feedTime() {
-  // Set hunger to 70% to trigger feeding behavior
-  hungerStore.currentValue = 70
+  // Set hunger to trigger autonomous feeding behavior
+  hungerStore.currentValue = 60  // Lower value to trigger autonomy
   
   // Update the needs queue to reflect the change
   needsQueueStore.updateQueue()
   
-  // Try to trigger feeding with hay (common food item)
-  try {
-    const result = hungerStore.fulfill('hay')
-    if (result.success) {
-      console.log('🍽️ [DEBUG] Feeding triggered - guinea pig ate food:', result.message)
-    } else {
-      console.warn('🍽️ [DEBUG] Failed to eat food:', result.message)
-      // If hay failed, just increase hunger directly as fallback
-      const oldValue = hungerStore.currentValue
-      hungerStore.currentValue = Math.min(100, hungerStore.currentValue + 25)
-      console.log('🍽️ [DEBUG] Direct hunger increase:', `${oldValue} -> ${hungerStore.currentValue}`)
-    }
-  } catch (error) {
-    console.warn('🍽️ [DEBUG] Failed to trigger feeding behavior:', error)
-  }
+  console.log('🍽️ [DEBUG] Hunger reduced to trigger autonomous feeding behavior - guinea pig should walk to food')
   
   // Update queue again after a short delay to ensure changes propagate
   setTimeout(() => {
