@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SwatchesExplorer from '../components/experiments/SwatchesExplorer.vue'
+import SwatchesExplorer from '../components/experiments/swatches/SwatchesExplorer.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
