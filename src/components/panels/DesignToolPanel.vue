@@ -21,6 +21,10 @@ function openThemeExplorer() {
   showDesignToolPanel.value = false
 }
 
+function openSwatches() {
+  window.open('./src/swatches.html', '_blank')
+}
+
 // Expose toggle function for external use
 defineExpose({
   toggleDesignToolPanel
@@ -59,6 +63,19 @@ defineExpose({
             </Button>
             <p class="gps-panel-action-description">
               Customize the application theme by adjusting colors, spacing, and other design tokens.
+            </p>
+          </div>
+          
+          <div class="gps-panel-action-item">
+            <Button 
+              type="secondary"
+              @click="openSwatches"
+              class="gps-panel-action-button"
+            >
+              🎨 Color Swatches
+            </Button>
+            <p class="gps-panel-action-description">
+              View and organize color palettes for the Apple Cider Board Game project.
             </p>
           </div>
         </div>
