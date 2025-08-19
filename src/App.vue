@@ -151,6 +151,9 @@ function handleGameReset() {
       @closeGuineaPig="showGuineaPig = false"
       @closeMarket="showMarket = false"
     />
+
+    <!-- Router view for navigation -->
+    <router-view class="gps-router-view" />
   </div>
 </template>
 
@@ -197,5 +200,16 @@ function handleGameReset() {
     align-items: flex-start;
     width: 100%;
     justify-content: center;
+}
+
+.gps-router-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000;
+  overflow: auto;
 }
 </style>

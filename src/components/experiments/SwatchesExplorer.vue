@@ -1,0 +1,478 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const gridSize = ref(4)
+const gridData = new Map()
+
+onMounted(() => {
+  makeSwatchesDraggable()
+  createGrid()
+  bindEvents()
+})
+
+function makeSwatchesDraggable() {
+  const swatches = document.querySelectorAll('.swatch-block .swatch')
+  swatches.forEach(swatch => {
+    swatch.draggable = true
+    swatch.addEventListener('dragstart', handleDragStart)
+    swatch.addEventListener('dragend', handleDragEnd)
+  })
+}
+
+function handleDragStart(e) {
+  const swatchBlock = e.target.closest('.swatch-block')
+  const colorName = swatchBlock.querySelector('.color-name').textContent
+  const hexCode = swatchBlock.querySelector('.hex-code').textContent
+  const bgColor = e.target.style.backgroundColor
+  
+  e.dataTransfer.setData('application/json', JSON.stringify({
+    colorName,
+    hexCode,
+    bgColor
+  }))
+  
+  e.target.classList.add('dragging')
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging')
+}
+
+function createGrid() {
+  const grid = document.getElementById('paletteGrid')
+  grid.style.gridTemplateColumns = `repeat(${gridSize.value}, 1fr)`
+  grid.innerHTML = ''
+
+  for (let i = 0; i < gridSize.value * gridSize.value; i++) {
+    const cell = document.createElement('div')
+    cell.className = 'grid-cell'
+    cell.dataset.index = i
+    
+    cell.addEventListener('dragover', handleDragOver)
+    cell.addEventListener('dragleave', handleDragLeave)
+    cell.addEventListener('drop', handleDrop)
+    
+    if (gridData.has(i)) {
+      populateCell(cell, gridData.get(i))
+    }
+    
+    grid.appendChild(cell)
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault()
+  e.currentTarget.classList.add('drag-over')
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over')
+}
+
+function handleDrop(e) {
+  e.preventDefault()
+  const cell = e.currentTarget
+  cell.classList.remove('drag-over')
+  
+  try {
+    const colorData = JSON.parse(e.dataTransfer.getData('application/json'))
+    const isGridItem = e.dataTransfer.getData('text/plain') === 'grid-item'
+    const index = parseInt(cell.dataset.index)
+    
+    // If this is a grid item being moved, find and clear the source cell
+    if (isGridItem) {
+      const allCells = document.querySelectorAll('.grid-cell')
+      allCells.forEach((sourceCell, sourceIndex) => {
+        if (sourceCell.querySelector('.mini-swatch') && sourceIndex !== index) {
+          const existingSwatch = sourceCell.querySelector('.mini-swatch')
+          if (existingSwatch) {
+            // Check if this swatch matches the one being dragged
+            const existingColor = existingSwatch.style.backgroundColor
+            if (existingColor === colorData.bgColor) {
+              // Clear the source cell
+              sourceCell.classList.remove('occupied')
+              sourceCell.innerHTML = ''
+              gridData.delete(sourceIndex)
+            }
+          }
+        }
+      })
+    }
+    
+    gridData.set(index, colorData)
+    populateCell(cell, colorData)
+  } catch (err) {
+    console.error('Error handling drop:', err)
+  }
+}
+
+function populateCell(cell, colorData) {
+  cell.classList.add('occupied')
+  cell.innerHTML = `
+    <div class="mini-swatch" draggable="true" style="background-color: ${colorData.bgColor}">
+      <div class="mini-color-name">${colorData.colorName}</div>
+    </div>
+  `
+  
+  const miniSwatch = cell.querySelector('.mini-swatch')
+  miniSwatch.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('application/json', JSON.stringify(colorData))
+    e.dataTransfer.setData('text/plain', 'grid-item')
+  })
+  
+  miniSwatch.addEventListener('dragend', () => {
+    setTimeout(() => {
+      if (!cell.querySelector('.mini-swatch')) {
+        cell.classList.remove('occupied')
+        gridData.delete(parseInt(cell.dataset.index))
+      }
+    }, 100)
+  })
+}
+
+function handleGridSizeChange(newSize) {
+  const oldSize = gridSize.value
+  gridSize.value = parseInt(newSize)
+  
+  if (gridSize.value < oldSize) {
+    const maxIndex = gridSize.value * gridSize.value - 1
+    const keysToRemove = Array.from(gridData.keys()).filter(key => key > maxIndex)
+    keysToRemove.forEach(key => gridData.delete(key))
+  }
+  
+  createGrid()
+}
+
+function bindEvents() {
+  const gridSizeSelect = document.getElementById('gridSize')
+  gridSizeSelect.addEventListener('change', (e) => {
+    handleGridSizeChange(e.target.value)
+  })
+}
+
+function goBack() {
+  router.back()
+}
+</script>
+
+<template>
+  <div class="swatches-explorer">
+    <div class="swatches-header">
+      <h2>Apple Cider Board Game – All Palette Colors</h2>
+      <button @click="goBack" class="close-button">✕ Close</button>
+    </div>
+    
+    <div class="grid-controls">
+      <label for="gridSize">Palette Grid Size:</label>
+      <select id="gridSize">
+        <option value="2">2×2</option>
+        <option value="3">3×3</option>
+        <option value="4" selected>4×4</option>
+        <option value="5">5×5</option>
+      </select>
+    </div>
+    
+    <div class="swatch-grid">
+      <!-- Golden tones -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #D9A441;"></div>
+        <div class="color-name">Golden Orchard</div>
+        <div class="hex-code">#D9A441</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FFB000;"></div>
+        <div class="color-name">Spiced Gold Rush</div>
+        <div class="hex-code">#FFB000</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FFD700;"></div>
+        <div class="color-name">Marmalade Madness</div>
+        <div class="hex-code">#FFD700</div>
+      </div>
+
+      <!-- Browns -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #A65C3A;"></div>
+        <div class="color-name">Cider Spice</div>
+        <div class="hex-code">#A65C3A</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #6E4B2F;"></div>
+        <div class="color-name">Boardwalk Maple</div>
+        <div class="hex-code">#6E4B2F</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #3E1F0F;"></div>
+        <div class="color-name">Twilight Bark</div>
+        <div class="hex-code">#3E1F0F</div>
+      </div>
+
+      <!-- Reds -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #6B0F1A;"></div>
+        <div class="color-name">Blood Cider</div>
+        <div class="hex-code">#6B0F1A</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FF0055;"></div>
+        <div class="color-name">Laser Apple</div>
+        <div class="hex-code">#FF0055</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FF6F91;"></div>
+        <div class="color-name">Flamingo Fizz</div>
+        <div class="hex-code">#FF6F91</div>
+      </div>
+
+      <!-- Creams -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #F2E3C6;"></div>
+        <div class="color-name">Dice Cream</div>
+        <div class="hex-code">#F2E3C6</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FFF3E0;"></div>
+        <div class="color-name">Dice Ivory Pop</div>
+        <div class="hex-code">#FFF3E0</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FBE7C6;"></div>
+        <div class="color-name">Crumbly Crayon Crust</div>
+        <div class="hex-code">#FBE7C6</div>
+      </div>
+
+      <!-- Greens -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #39FF14;"></div>
+        <div class="color-name">Dice Glitch Green</div>
+        <div class="hex-code">#39FF14</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #B4F8C8;"></div>
+        <div class="color-name">Dice Whimsy</div>
+        <div class="hex-code">#B4F8C8</div>
+      </div>
+
+      <!-- Blues & Teals -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #00CED1;"></div>
+        <div class="color-name">Teal Teacup</div>
+        <div class="hex-code">#00CED1</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #A0E7E5;"></div>
+        <div class="color-name">Teacup Tumble</div>
+        <div class="hex-code">#A0E7E5</div>
+      </div>
+
+      <!-- Purples -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #2C2A4A;"></div>
+        <div class="color-name">Moonlit Pawn</div>
+        <div class="hex-code">#2C2A4A</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #4B3B47;"></div>
+        <div class="color-name">Foggy Velvet</div>
+        <div class="hex-code">#4B3B47</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #6A5ACD;"></div>
+        <div class="color-name">Royal Riddle</div>
+        <div class="hex-code">#6A5ACD</div>
+      </div>
+
+      <!-- Pinks -->
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FF69B4;"></div>
+        <div class="color-name">Bubblegum Banter</div>
+        <div class="hex-code">#FF69B4</div>
+      </div>
+      <div class="swatch-block">
+        <div class="swatch" style="background-color: #FF00FF;"></div>
+        <div class="color-name">Board Game Glitch</div>
+        <div class="hex-code">#FF00FF</div>
+      </div>
+    </div>
+
+    <div class="palette-grid-container">
+      <h3>Your Custom Palette</h3>
+      <div class="palette-grid" id="paletteGrid">
+        <!-- Grid cells will be generated here -->
+      </div>
+    </div>
+
+    <div class="footer">
+      Generated by Swatch and Palette Maker by Katie O'Connor
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.swatches-explorer {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #fff;
+  color: #333;
+  min-height: 100vh;
+}
+
+.swatches-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.close-button:hover {
+  background: #d32f2f;
+}
+
+.swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.swatch-block {
+  width: 100px;
+  text-align: center;
+}
+
+.swatch {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+}
+
+.color-name {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.hex-code {
+  font-size: 11px;
+  color: #555;
+}
+
+.footer {
+  margin-top: 40px;
+  font-size: 10px;
+  color: #888;
+}
+
+.grid-controls {
+  margin: 30px 0 20px 0;
+}
+
+.grid-controls label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.grid-controls select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.palette-grid-container {
+  margin-top: 30px;
+  padding: 20px;
+  background: linear-gradient(145deg, #f0f0f0, #ffffff);
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  max-width: 500px;
+}
+
+.palette-grid {
+  display: grid;
+  gap: 8px;
+  padding: 15px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+}
+
+:deep(.grid-cell) {
+  aspect-ratio: 1;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 60px;
+}
+
+:deep(.grid-cell.drag-over) {
+  border-color: #007bff;
+  background: #e7f3ff;
+  transform: scale(1.02);
+}
+
+:deep(.grid-cell.occupied) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.grid-cell .mini-swatch) {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+:deep(.grid-cell .mini-swatch:active) {
+  cursor: grabbing;
+}
+
+:deep(.grid-cell .mini-swatch .mini-color-name) {
+  font-size: 8px;
+  font-weight: bold;
+  color: rgba(0,0,0,0.8);
+  text-align: center;
+  margin-top: 2px;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+
+.swatch[draggable="true"] {
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.swatch[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+:deep(.swatch.dragging) {
+  opacity: 0.5;
+  transform: rotate(5deg) scale(0.95);
+}
+</style>

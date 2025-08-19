@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Panel from '../shared/Panel.vue'
 import Button from '../shared/Button.vue'
 
 const showDesignToolPanel = ref(false)
+const router = useRouter()
 
 const emit = defineEmits(['showSpecimenLanding', 'showThemeExplorer'])
 
@@ -22,7 +24,8 @@ function openThemeExplorer() {
 }
 
 function openSwatches() {
-  window.open('./src/swatches.html', '_blank')
+  router.push('/swatches')
+  showDesignToolPanel.value = false
 }
 
 // Expose toggle function for external use
