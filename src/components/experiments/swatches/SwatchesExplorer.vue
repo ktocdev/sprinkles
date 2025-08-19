@@ -123,15 +123,16 @@ function handleDrop(e) {
   try {
     const colorData = JSON.parse(e.dataTransfer.getData('application/json'))
     const isGridItem = e.dataTransfer.getData('text/plain') === 'grid-item'
-    const index = parseInt(cell.dataset.index)
+    const targetIndex = parseInt(cell.dataset.index)
     
-    // If this is a grid item being moved, find and clear the source cell
     if (isGridItem) {
-      clearSourceCell(colorData.bgColor, index)
+      // Handle grid-to-grid movement (swap or move)
+      swapOrMoveGridColors(colorData, targetIndex)
+    } else {
+      // Handle swatch-to-grid (regular drop from swatch)
+      gridData.set(targetIndex, colorData)
+      populateCell(cell, colorData)
     }
-    
-    gridData.set(index, colorData)
-    populateCell(cell, colorData)
   } catch (err) {
     console.error('Error handling drop:', err)
   }
@@ -217,13 +218,20 @@ function bindTouchEvents() {
 
 function handleTouchDrop(e) {
   const { dragData, targetCell } = e.detail
-  const index = parseInt(targetCell.dataset.index)
+  const targetIndex = parseInt(targetCell.dataset.index)
   
-  // If this is a grid item being moved, find and clear the source cell
-  clearSourceCell(dragData.bgColor, index)
+  // For touch, we need to determine if this is from a grid item
+  // Check if the drag data has the same structure as grid items
+  const isGridItem = dragData.bgColor && dragData.colorName && dragData.hexCode
   
-  gridData.set(index, dragData)
-  populateCell(targetCell, dragData)
+  if (isGridItem) {
+    // Handle grid-to-grid movement (swap or move)
+    swapOrMoveGridColors(dragData, targetIndex)
+  } else {
+    // Handle swatch-to-grid (regular drop from swatch)
+    gridData.set(targetIndex, dragData)
+    populateCell(targetCell, dragData)
+  }
 }
 
 function clearPalette() {
@@ -275,26 +283,56 @@ function randomPalette() {
   }
 }
 
-// Helper function to clear source cell (extracted duplicate logic)
-function clearSourceCell(bgColor, targetIndex) {
+// Helper function to swap or move colors between grid cells
+function swapOrMoveGridColors(draggedColor, targetIndex) {
   if (!gridElement) return
   
+  // Find the source cell that contains the dragged color
+  const sourceIndex = findSourceCellIndex(draggedColor.bgColor, targetIndex)
+  if (sourceIndex === -1) return // Source not found
+  
+  // Get target cell data (if any)
+  const targetColorData = gridData.get(targetIndex)
+  const targetCell = gridElement.querySelector(`.grid-cell[data-index="${targetIndex}"]`)
+  const sourceCell = gridElement.querySelector(`.grid-cell[data-index="${sourceIndex}"]`)
+  
+  if (!targetCell || !sourceCell) return
+  
+  // Place dragged color in target cell
+  gridData.set(targetIndex, draggedColor)
+  populateCell(targetCell, draggedColor)
+  
+  if (targetColorData) {
+    // Swap: Place target color in source cell
+    gridData.set(sourceIndex, targetColorData)
+    populateCell(sourceCell, targetColorData)
+  } else {
+    // Move: Clear source cell (make it white/empty)
+    cleanupCellListeners(sourceIndex)
+    sourceCell.classList.remove('occupied')
+    sourceCell.innerHTML = ''
+    gridData.delete(sourceIndex)
+  }
+}
+
+// Helper function to find the source cell index by background color
+function findSourceCellIndex(bgColor, excludeIndex) {
+  if (!gridElement) return -1
+  
   const allCells = gridElement.querySelectorAll('.grid-cell')
-  allCells.forEach((sourceCell, sourceIndex) => {
-    if (sourceCell.querySelector('.mini-swatch') && sourceIndex !== targetIndex) {
-      const existingSwatch = sourceCell.querySelector('.mini-swatch')
-      if (existingSwatch) {
-        const existingColor = existingSwatch.style.backgroundColor
-        if (existingColor === bgColor) {
-          // Clean up listeners before clearing
-          cleanupCellListeners(sourceIndex)
-          sourceCell.classList.remove('occupied')
-          sourceCell.innerHTML = ''
-          gridData.delete(sourceIndex)
-        }
+  for (let i = 0; i < allCells.length; i++) {
+    if (i === excludeIndex) continue
+    
+    const cell = allCells[i]
+    const existingSwatch = cell.querySelector('.mini-swatch')
+    if (existingSwatch) {
+      const existingColor = existingSwatch.style.backgroundColor
+      if (existingColor === bgColor) {
+        return i
       }
     }
-  })
+  }
+  return -1
 }
 
 function goBack() {
