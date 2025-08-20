@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 // Components
@@ -16,16 +16,18 @@ const router = useRouter()
 // Use color data composable
 const { palette, allColors } = useColorData()
 
+// Grid size state shared between components
+const gridSize = ref(4)
+
 // Handle navigation
 const handleClose = () => {
   document.body.style.overflow = ''
   router.back()
 }
 
-// Handle grid size changes
+// Handle grid size changes from GridControls
 const handleGridSizeChange = (newSize) => {
-  // Grid size is managed internally by PaletteGrid component
-  console.log('Grid size changed to:', newSize)
+  gridSize.value = newSize
 }
 
 // Setup and cleanup
@@ -51,14 +53,15 @@ onUnmounted(() => {
     />
     
     <GridControls
-      :grid-size="4"
+      :grid-size="gridSize"
       @size-change="handleGridSizeChange"
     />
     
     <div class="main-content">
       <PaletteGrid
         :colors="allColors"
-        :initial-grid-size="4"
+        :initial-grid-size="gridSize"
+        :grid-size="gridSize"
         @grid-size-change="handleGridSizeChange"
       />
     </div>
