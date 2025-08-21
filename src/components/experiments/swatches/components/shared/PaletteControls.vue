@@ -3,7 +3,7 @@ defineEmits(['clear', 'randomize'])
 </script>
 
 <template>
-  <div class="palette-controls">
+  <div class="palette-controls flex-column-mobile flex-center">
     <button @click="$emit('clear')" class="btn-compact btn-gradient-red">
       Clear Palette
     </button>
@@ -16,15 +16,11 @@ defineEmits(['clear', 'randomize'])
 <style scoped>
 @import '../../styles/shared.css';
 
-/* Mobile-first palette header */
+/* Component-specific responsive layout */
 .palette-controls {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   gap: 8px;
 }
 
-/* Tablet and up */
 @media (min-width: 481px) {
   .palette-controls {
     flex-direction: row;

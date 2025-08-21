@@ -20,6 +20,9 @@ const { palette, allColors } = useColorData()
 // Reference to PaletteGrid component
 const paletteGridRef = ref(null)
 
+// Track current grid size
+const currentGridSize = ref(4)
+
 // Handle navigation
 const handleClose = () => {
   document.body.style.overflow = ''
@@ -28,7 +31,7 @@ const handleClose = () => {
 
 // Handle grid size changes
 const handleGridSizeChange = (newSize) => {
-  // Grid size is managed internally by PaletteGrid component
+  currentGridSize.value = newSize
   console.log('Grid size changed to:', newSize)
 }
 
@@ -65,6 +68,7 @@ onUnmounted(() => {
           ref="paletteGridRef"
           :colors="allColors"
           :initial-grid-size="4"
+          :grid-size="currentGridSize"
           @grid-size-change="handleGridSizeChange"
         />
         
@@ -76,7 +80,7 @@ onUnmounted(() => {
           />
           
           <GridControls
-            :grid-size="4"
+            :grid-size="currentGridSize"
             @size-change="handleGridSizeChange"
           />
 
@@ -90,7 +94,15 @@ onUnmounted(() => {
 <style scoped>
 @import './styles/shared.css';
 
-/* Component-specific styles only */
+/* Component-specific styles */
+.swatches-explorer {
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(188, 179, 222, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(188, 179, 222, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.15) 0%, transparent 30%),
+    linear-gradient(135deg, #bcb3de 0%, #e8e4f0 50%, #f5f2f8 100%);
+}
 
 /* Responsive adjustments */
 @media (min-width: 769px) {
