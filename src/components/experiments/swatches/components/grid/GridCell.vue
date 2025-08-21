@@ -121,7 +121,8 @@ const onMiniSwatchTouchEnd = (e) => {
   justify-content: center;
   transition: all 0.2s ease;
   position: relative;
-  min-height: 60px;
+  height: 72px;
+  width: 72px;
 }
 
 .grid-cell.drag-over {
@@ -169,6 +170,7 @@ const onMiniSwatchTouchEnd = (e) => {
   margin-top: 2px;
   text-shadow: 0 0 3px rgba(255,255,255,0.8);
   pointer-events: none;
+  max-width: 64px;
 }
 
 .mini-swatch.dark-mini-swatch .mini-color-name {

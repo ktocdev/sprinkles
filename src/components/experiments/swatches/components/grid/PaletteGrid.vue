@@ -161,10 +161,8 @@ defineExpose({
 /* Tablet and up */
 @media (min-width: 481px) {
   .palette-grid-container {
-    margin-top: 15px;
     padding: 18px;
     border-radius: 10px 10px 0 0;
-    max-width: 600px;
   }
 }
 
@@ -173,13 +171,11 @@ defineExpose({
   .palette-grid-container {
     margin-top: 0;
     padding: 20px;
-    border-radius: 12px 12px 0 0;
     box-shadow: 
       0 8px 32px rgba(0,0,0,0.1),
       inset 0 1px 0 rgba(255,255,255,0.8);
     max-width: 400px;
     flex: 1 1 auto;
-    min-width: 300px;
   }
 }
 </style>

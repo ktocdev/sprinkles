@@ -14,17 +14,15 @@ const handleSizeChange = (event) => {
 </script>
 
 <template>
-  <div class="grid-controls">
+  <div class="grid-controls flex-column-mobile flex-center">
     <label for="gridSize">Palette Grid Size:</label>
     <select 
       id="gridSize" 
       :value="gridSize"
       @change="handleSizeChange"
     >
-      <option value="2">2×2</option>
       <option value="3">3×3</option>
       <option value="4">4×4</option>
-      <option value="5">5×5</option>
     </select>
   </div>
 </template>
@@ -32,12 +30,9 @@ const handleSizeChange = (event) => {
 <style scoped>
 @import '../../styles/shared.css';
 
-/* Mobile-first grid controls */
+/* Component-specific styles */
 .grid-controls {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
-  align-items: center;
 }
 
 .grid-controls label {
@@ -53,7 +48,7 @@ const handleSizeChange = (event) => {
   min-width: 120px;
 }
 
-/* Tablet and up */
+/* Responsive adjustments */
 @media (min-width: 481px) {
   .grid-controls {
     flex-direction: row;
@@ -67,7 +62,6 @@ const handleSizeChange = (event) => {
   }
 }
 
-/* Desktop and up */
 @media (min-width: 769px) {
   .grid-controls {
     justify-content: flex-start;

@@ -72,7 +72,7 @@ const {
   top: 0;
   z-index: 100;
   background: linear-gradient(145deg, #e8e4f0, #d6d0e0);
-  border-radius: 0 0 12px 12px;
+  border-radius: 12px;
   box-shadow: 
     0 4px 16px rgba(0,0,0,0.15),
     inset 0 1px 0 rgba(255,255,255,0.6),
@@ -160,6 +160,10 @@ const {
   height: 50px;
   margin-bottom: 2px;
   flex-shrink: 0;
+  border-radius: 6px;
+  box-shadow: 
+    inset 0 2px 0 rgba(0,0,0,0.1),
+    inset 0 2px 0 rgba(255,255,255,0.2);
 }
 
 .carousel-swatches :deep(.color-name) {
@@ -210,6 +214,7 @@ const {
     width: 70px;
     height: 70px;
     margin-bottom: 3px;
+    border-radius: 8px;
   }
 
   .carousel-swatches :deep(.color-name) {
@@ -237,6 +242,7 @@ const {
 
   .carousel-swatches :deep(.swatch) {
     margin-bottom: 4px;
+    border-radius: 10px;
   }
 
   .carousel-swatches :deep(.hex-code) {
@@ -255,6 +261,7 @@ const {
   .carousel-swatches :deep(.swatch) {
     width: 45px;
     height: 45px;
+    border-radius: 4px;
   }
   
   .carousel-swatches :deep(.color-name) {
@@ -275,6 +282,7 @@ const {
   .carousel-swatches :deep(.swatch) {
     width: 55px;
     height: 55px;
+    border-radius: 6px;
   }
   
   .carousel-swatches :deep(.color-name) {
@@ -296,6 +304,7 @@ const {
   .carousel-swatches :deep(.swatch) {
     width: 65px;
     height: 65px;
+    border-radius: 7px;
   }
   
   .carousel-swatches :deep(.color-name) {
@@ -317,6 +326,7 @@ const {
   .carousel-swatches :deep(.swatch) {
     width: 85px;
     height: 85px;
+    border-radius: 9px;
   }
   
   .carousel-swatches :deep(.color-name) {
@@ -338,6 +348,7 @@ const {
   .carousel-swatches :deep(.swatch) {
     width: 90px;
     height: 90px;
+    border-radius: 10px;
   }
   
   .carousel-swatches :deep(.color-name) {
