@@ -1,26 +1,52 @@
 {
   "palettes": {
     "appleCiderBoardGame": {
-      "name": "Apple Cider Board Game – All Palette Colors",
+      "name": "",
       "categories": {
+        "creams": [
+          {
+            "name": "Dice Cream",
+            "hex": "#F2E3C6",
+            "id": "dice-cream",
+            "is_dark": false,
+            "effect": "matte"
+          },
+          {
+            "name": "Dice Ivory Pop",
+            "hex": "#FFF3E0",
+            "id": "dice-ivory-pop",
+            "is_dark": false,
+            "effect": "shimmer"
+          },
+          {
+            "name": "Crumbly Crayon Crust",
+            "hex": "#FBE7C6",
+            "id": "crumbly-crayon-crust",
+            "is_dark": false,
+            "effect": "sparkly"
+          }
+        ],
         "goldenTones": [
           {
             "name": "Golden Orchard",
             "hex": "#D9A441",
             "id": "golden-orchard",
-            "is_dark": false
+            "is_dark": false,
+            "effect": "shimmer"
           },
           {
             "name": "Spiced Gold Rush",
             "hex": "#FFB000",
             "id": "spiced-gold-rush",
-            "is_dark": false
+            "is_dark": false,
+            "effect": "sparkly"
           },
           {
             "name": "Marmalade Madness",
             "hex": "#FFD700",
             "id": "marmalade-madness",
-            "is_dark": false
+            "is_dark": false,
+            "effect": "shimmer"
           }
         ],
         "browns": [
@@ -28,19 +54,22 @@
             "name": "Cider Spice",
             "hex": "#A65C3A",
             "id": "cider-spice",
-            "is_dark": true
+            "is_dark": true,
+            "effect": "matte"
           },
           {
             "name": "Boardwalk Maple",
             "hex": "#6E4B2F",
             "id": "boardwalk-maple",
-            "is_dark": true
+            "is_dark": true,
+            "effect": "matte"
           },
           {
             "name": "Twilight Bark",
             "hex": "#3E1F0F",
             "id": "twilight-bark",
-            "is_dark": true
+            "is_dark": true,
+            "effect": "shimmer"
           }
         ],
         "reds": [
@@ -48,87 +77,22 @@
             "name": "Blood Cider",
             "hex": "#6B0F1A",
             "id": "blood-cider",
-            "is_dark": true
+            "is_dark": true,
+            "effect": "matte"
           },
           {
             "name": "Laser Apple",
             "hex": "#FF0055",
             "id": "laser-apple",
-            "is_dark": true
+            "is_dark": true,
+            "effect": "sparkly"
           },
           {
             "name": "Flamingo Fizz",
             "hex": "#FF6F91",
             "id": "flamingo-fizz",
-            "is_dark": false
-          }
-        ],
-        "creams": [
-          {
-            "name": "Dice Cream",
-            "hex": "#F2E3C6",
-            "id": "dice-cream",
-            "is_dark": false
-          },
-          {
-            "name": "Dice Ivory Pop",
-            "hex": "#FFF3E0",
-            "id": "dice-ivory-pop",
-            "is_dark": false
-          },
-          {
-            "name": "Crumbly Crayon Crust",
-            "hex": "#FBE7C6",
-            "id": "crumbly-crayon-crust",
-            "is_dark": false
-          }
-        ],
-        "greens": [
-          {
-            "name": "Dice Glitch Green",
-            "hex": "#39FF14",
-            "id": "dice-glitch-green",
-            "is_dark": false
-          },
-          {
-            "name": "Dice Whimsy",
-            "hex": "#B4F8C8",
-            "id": "dice-whimsy",
-            "is_dark": false
-          }
-        ],
-        "bluesAndTeals": [
-          {
-            "name": "Teal Teacup",
-            "hex": "#00CED1",
-            "id": "teal-teacup",
-            "is_dark": false
-          },
-          {
-            "name": "Teacup Tumble",
-            "hex": "#A0E7E5",
-            "id": "teacup-tumble",
-            "is_dark": false
-          }
-        ],
-        "purples": [
-          {
-            "name": "Moonlit Pawn",
-            "hex": "#2C2A4A",
-            "id": "moonlit-pawn",
-            "is_dark": true
-          },
-          {
-            "name": "Foggy Velvet",
-            "hex": "#4B3B47",
-            "id": "foggy-velvet",
-            "is_dark": true
-          },
-          {
-            "name": "Royal Riddle",
-            "hex": "#6A5ACD",
-            "id": "royal-riddle",
-            "is_dark": true
+            "is_dark": false,
+            "effect": "shimmer"
           }
         ],
         "pinks": [
@@ -136,13 +100,77 @@
             "name": "Bubblegum Banter",
             "hex": "#FF69B4",
             "id": "bubblegum-banter",
-            "is_dark": false
+            "is_dark": false,
+            "effect": "sparkly"
           },
           {
             "name": "Board Game Glitch",
             "hex": "#FF00FF",
             "id": "board-game-glitch",
-            "is_dark": false
+            "is_dark": false,
+            "effect": "sparkly"
+          }
+        ],
+        "purples": [
+          {
+            "name": "Moonlit Pawn",
+            "hex": "#2C2A4A",
+            "id": "moonlit-pawn",
+            "is_dark": true,
+            "effect": "matte"
+          },
+          {
+            "name": "Foggy Velvet",
+            "hex": "#4B3B47",
+            "id": "foggy-velvet",
+            "is_dark": true,
+            "effect": "matte"
+          },
+          {
+            "name": "Royal Riddle",
+            "hex": "#6A5ACD",
+            "id": "royal-riddle",
+            "is_dark": true,
+            "effect": "shimmer"
+          }
+        ],
+        "bluesAndTeals": [
+          {
+            "name": "Teal Teacup",
+            "hex": "#00CED1",
+            "id": "teal-teacup",
+            "is_dark": false,
+            "effect": "sparkly"
+          },
+          {
+            "name": "Teacup Tumble",
+            "hex": "#A0E7E5",
+            "id": "teacup-tumble",
+            "is_dark": false,
+            "effect": "shimmer"
+          }
+        ],
+        "greens": [
+          {
+            "name": "Dice Whimsy",
+            "hex": "#B4F8C8",
+            "id": "dice-whimsy",
+            "is_dark": false,
+            "effect": "matte"
+          },
+          {
+            "name": "Dice Glitch Green",
+            "hex": "#39FF14",
+            "id": "dice-glitch-green",
+            "is_dark": false,
+            "effect": "sparkly"
+          },
+          {
+            "name": "Goblin's Midnight Snack",
+            "hex": "#0F4B1A",
+            "id": "goblins-midnight-snack",
+            "is_dark": true,
+            "effect": "matte"
           }
         ]
       }

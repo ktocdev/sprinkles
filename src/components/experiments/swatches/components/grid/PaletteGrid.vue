@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, watch } from 'vue'
 import GridCell from './GridCell.vue'
-import PaletteControls from '../shared/PaletteControls.vue'
 import { usePaletteGrid } from '../../composables/usePaletteGrid.js'
 import { useEventCleanup } from '../../composables/useEventCleanup.js'
 
@@ -72,14 +71,6 @@ const handleGridSizeChange = (newSize) => {
   emit('grid-size-change', newSize)
 }
 
-// Handle palette controls
-const handleClear = () => {
-  clearGrid()
-}
-
-const handleRandomize = () => {
-  generateRandomPalette()
-}
 
 // Handle touch drop events
 const handleTouchDrop = (e) => {
@@ -112,15 +103,16 @@ const gridCells = computed(() => {
   
   return cells
 })
+
+// Expose functions for parent component
+defineExpose({
+  clearGrid,
+  generateRandomPalette
+})
 </script>
 
 <template>
   <div class="palette-grid-container">
-    <PaletteControls 
-      @clear="handleClear"
-      @randomize="handleRandomize"
-    />
-    
     <div 
       class="palette-grid"
       :style="{ gridTemplateColumns: gridColumns }"
@@ -140,31 +132,38 @@ const gridCells = computed(() => {
 <style scoped>
 /* Mobile-first palette grid container */
 .palette-grid-container {
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 15px;
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
-  border-radius: 8px;
+  background: linear-gradient(145deg, #e8e4f0, #d6d0e0);
+  border-radius: 8px 8px 0 0;
   box-shadow: 
-    0 4px 16px rgba(0,0,0,0.1),
-    inset 0 1px 0 rgba(255,255,255,0.8);
+    0 4px 16px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 2px 6px rgba(139,129,165,0.2);
   max-width: 100%;
+  border: 1px solid rgba(139,129,165,0.3);
+  border-bottom: none;
 }
 
 .palette-grid {
   display: grid;
   gap: 8px;
   padding: 15px;
-  background: #f8f8f8;
+  background: linear-gradient(145deg, #f0ecf8, #e4dced);
   border-radius: 8px;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 
+    inset 0 3px 8px rgba(139,129,165,0.25),
+    inset 0 1px 2px rgba(100,85,130,0.3),
+    inset 0 -1px 2px rgba(255,255,255,0.4);
+  border: 1px solid rgba(139,129,165,0.2);
 }
 
 /* Tablet and up */
 @media (min-width: 481px) {
   .palette-grid-container {
-    margin-top: 25px;
+    margin-top: 15px;
     padding: 18px;
-    border-radius: 10px;
+    border-radius: 10px 10px 0 0;
     max-width: 600px;
   }
 }
@@ -174,7 +173,7 @@ const gridCells = computed(() => {
   .palette-grid-container {
     margin-top: 0;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 12px 12px 0 0;
     box-shadow: 
       0 8px 32px rgba(0,0,0,0.1),
       inset 0 1px 0 rgba(255,255,255,0.8);

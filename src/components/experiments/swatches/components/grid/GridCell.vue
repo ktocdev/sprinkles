@@ -86,7 +86,10 @@ const onMiniSwatchTouchEnd = (e) => {
     <div 
       v-if="colorData"
       class="mini-swatch"
-      :class="{ 'dark-mini-swatch': colorData.isDark }"
+      :class="[
+        { 'dark-mini-swatch': colorData.isDark },
+        `effect-${colorData.effect || 'matte'}`
+      ]"
       :style="{ backgroundColor: colorData.bgColor }"
       draggable="true"
       @dragstart="onMiniSwatchDragStart"
@@ -101,11 +104,18 @@ const onMiniSwatchTouchEnd = (e) => {
 </template>
 
 <style scoped>
+@import '../../styles/shared.css';
+
 .grid-cell {
   aspect-ratio: 1;
-  border: 2px dashed #ddd;
+  border: none;
   border-radius: 6px;
-  background: #fafafa;
+  background: linear-gradient(145deg, #f0f0f0, #e8e8e8);
+  box-shadow: 
+    inset 0 1px 2px rgba(0,0,0,0.08),
+    inset 0 -1px 2px rgba(255,255,255,0.5),
+    inset 1px 0 2px rgba(0,0,0,0.05),
+    inset -1px 0 2px rgba(255,255,255,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,8 +125,12 @@ const onMiniSwatchTouchEnd = (e) => {
 }
 
 .grid-cell.drag-over {
-  border-color: #007bff;
-  background: #e7f3ff;
+  background: linear-gradient(145deg, #e8f2ff, #dae8ff);
+  box-shadow: 
+    inset 0 1px 2px rgba(0,123,255,0.12),
+    inset 0 -1px 2px rgba(255,255,255,0.6),
+    inset 1px 0 2px rgba(0,123,255,0.08),
+    inset -1px 0 2px rgba(255,255,255,0.4);
   transform: scale(1.02);
 }
 

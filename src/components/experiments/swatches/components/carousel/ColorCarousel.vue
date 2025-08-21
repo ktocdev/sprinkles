@@ -28,20 +28,18 @@ const {
 
 <template>
   <div class="color-carousel">
-    <div class="carousel-header">
-      <h3>{{ paletteName }} Colors</h3>
-      <div class="carousel-info">{{ currentPage + 1 }} / {{ totalPages }}</div>
-    </div>
-    
     <div class="carousel-container">
-      <button 
-        @click="goToPrevPage" 
-        class="carousel-arrow prev-arrow"
-        :disabled="!canGoPrev"
-        :class="{ disabled: !canGoPrev }"
-      >
-        ‹
-      </button>
+      <div class="carousel-left">
+        <div class="carousel-info">{{ currentPage + 1 }} / {{ totalPages }}</div>
+        <button 
+          @click="goToPrevPage" 
+          class="carousel-arrow prev-arrow"
+          :disabled="!canGoPrev"
+          :class="{ disabled: !canGoPrev }"
+        >
+          ‹
+        </button>
+      </div>
       
       <div class="carousel-swatches">
         <SwatchBlock 
@@ -50,7 +48,8 @@ const {
           :color-name="color.name" 
           :hex-code="color.hex" 
           :background-color="color.hex"
-          :is-dark="color.is_dark" 
+          :is-dark="color.is_dark"
+          :effect="color.effect"
         />
       </div>
       
@@ -67,42 +66,45 @@ const {
 </template>
 
 <style scoped>
-/* Color Carousel Styles - Responsive */
+/* Color Carousel Styles - Responsive with Container Queries */
 .color-carousel {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: linear-gradient(145deg, #f8f9fa, #ffffff);
+  background: linear-gradient(145deg, #e8e4f0, #d6d0e0);
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  margin: -10px -10px 20px -10px;
+  box-shadow: 
+    0 4px 16px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 2px 6px rgba(139,129,165,0.2);
+  border: 1px solid rgba(139,129,165,0.3);
+  border-top: none;
   padding: 15px;
+  container-type: inline-size;
 }
 
-.carousel-header {
+.carousel-left {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.carousel-header h3 {
-  font-size: 14px;
-  margin: 0;
-  font-weight: bold;
-  color: #333;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .carousel-info {
-  font-size: 12px;
+  font-size: 10px;
   color: #666;
   font-weight: 500;
+  text-align: center;
+  min-width: 40px;
 }
 
 .carousel-container {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: min-content;
+  margin: auto;
 }
 
 .carousel-arrow {
@@ -165,10 +167,9 @@ const {
   line-height: 1;
   text-align: center;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  height: 12px;
+  white-space: normal;
+  word-wrap: break-word;
+  min-height: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,16 +193,7 @@ const {
 /* Tablet swatch sizing - fixed dimensions */
 @media (min-width: 481px) {
   .color-carousel {
-    margin: -15px -15px 25px -15px;
     padding: 20px;
-  }
-  
-  .carousel-header h3 {
-    font-size: 16px;
-  }
-  
-  .carousel-info {
-    font-size: 14px;
   }
   
   .carousel-swatches {
@@ -222,7 +214,7 @@ const {
 
   .carousel-swatches :deep(.color-name) {
     font-size: 8px;
-    height: 14px;
+    min-height: 14px;
   }
 
   .carousel-swatches :deep(.hex-code) {
@@ -232,15 +224,10 @@ const {
   }
 }
 
-/* Desktop swatch sizing - fixed dimensions */
+/* Desktop layout adjustments - container queries handle sizing */
 @media (min-width: 769px) {
   .color-carousel {
-    margin: -20px -20px 30px -20px;
     padding: 25px;
-  }
-  
-  .carousel-header h3 {
-    font-size: 18px;
   }
   
   .carousel-swatches {
@@ -248,26 +235,118 @@ const {
     gap: 10px;
   }
 
+  .carousel-swatches :deep(.swatch) {
+    margin-bottom: 4px;
+  }
+
+  .carousel-swatches :deep(.hex-code) {
+    height: 12px;
+    margin-top: 2px;
+  }
+}
+
+/* Container Queries for smooth responsive transitions */
+@container (max-width: 320px) {
+  .carousel-swatches :deep(.swatch-block) {
+    width: 45px;
+    height: 75px;
+  }
+  
+  .carousel-swatches :deep(.swatch) {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .carousel-swatches :deep(.color-name) {
+    font-size: 6px;
+  }
+  
+  .carousel-swatches :deep(.hex-code) {
+    font-size: 5px;
+  }
+}
+
+@container (min-width: 400px) and (max-width: 540px) {
+  .carousel-swatches :deep(.swatch-block) {
+    width: 55px;
+    height: 85px;
+  }
+  
+  .carousel-swatches :deep(.swatch) {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .carousel-swatches :deep(.color-name) {
+    font-size: 7.5px;
+    min-height: 13px;
+  }
+  
+  .carousel-swatches :deep(.hex-code) {
+    font-size: 6.5px;
+  }
+}
+
+@container (min-width: 540px) and (max-width: 650px) {
+  .carousel-swatches :deep(.swatch-block) {
+    width: 65px;
+    height: 95px;
+  }
+  
+  .carousel-swatches :deep(.swatch) {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .carousel-swatches :deep(.color-name) {
+    font-size: 8.5px;
+    min-height: 14px;
+  }
+  
+  .carousel-swatches :deep(.hex-code) {
+    font-size: 7.5px;
+  }
+}
+
+@container (min-width: 650px) and (max-width: 920px) {
+  .carousel-swatches :deep(.swatch-block) {
+    width: 85px;
+    height: 115px;
+  }
+  
+  .carousel-swatches :deep(.swatch) {
+    width: 85px;
+    height: 85px;
+  }
+  
+  .carousel-swatches :deep(.color-name) {
+    font-size: 9.5px;
+    min-height: 15px;
+  }
+  
+  .carousel-swatches :deep(.hex-code) {
+    font-size: 8.5px;
+  }
+}
+
+@container (min-width: 920px) {
   .carousel-swatches :deep(.swatch-block) {
     width: 90px;
     height: 120px;
   }
-
+  
   .carousel-swatches :deep(.swatch) {
     width: 90px;
     height: 90px;
-    margin-bottom: 4px;
   }
-
+  
   .carousel-swatches :deep(.color-name) {
     font-size: 10px;
-    height: 16px;
+    min-height: 16px;
   }
-
+  
   .carousel-swatches :deep(.hex-code) {
     font-size: 8px;
-    height: 12px;
-    margin-top: 2px;
   }
 }
 </style>

@@ -1,0 +1,354 @@
+/* Shared Styles for Swatches Explorer Components */
+
+/* Common Button Gradients - Glassy Transparent */
+.btn-gradient-red {
+  background: linear-gradient(135deg, rgba(107, 15, 26, 0.7), rgba(255, 0, 85, 0.8));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-gradient-red:hover {
+  background: linear-gradient(135deg, rgba(90, 13, 22, 0.8), rgba(230, 0, 76, 0.9));
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-gradient-purple {
+  background: linear-gradient(135deg, rgba(106, 90, 205, 0.7), rgba(44, 42, 74, 0.8));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-gradient-purple:hover {
+  background: linear-gradient(135deg, rgba(90, 74, 183, 0.8), rgba(36, 34, 64, 0.9));
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-gradient-gray {
+  background: linear-gradient(135deg, #8a8a8a, #444444);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn-gradient-gray:hover {
+  background: linear-gradient(135deg, #777777, #333333);
+}
+
+/* Common Typography */
+.typography-base {
+  font-family: Arial, sans-serif;
+}
+
+/* Common Layout Utilities */
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.center-content {
+  justify-content: center;
+  align-items: center;
+}
+
+.space-between {
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Main content layout pattern */
+.main-content-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+/* Page container */
+.page-container {
+  background-color: #fff;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* Button base styles */
+.btn-base {
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn-standard {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.btn-compact {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Section Styles - Eyeshadow Palette Theme */
+.section-container {
+  background: linear-gradient(145deg, #e8e4f0, #d6d0e0);
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 16px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 2px 6px rgba(139,129,165,0.2);
+  border: 1px solid rgba(139,129,165,0.3);
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.section-inner {
+  background: linear-gradient(145deg, #f0ecf8, #e4dced);
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 3px 8px rgba(139,129,165,0.25),
+    inset 0 1px 2px rgba(100,85,130,0.3),
+    inset 0 -1px 2px rgba(255,255,255,0.4);
+  border: 1px solid rgba(139,129,165,0.2);
+  padding: 15px;
+}
+
+/* Lighter section for controls */
+.section-controls {
+  background: linear-gradient(145deg, #f5f2f8, #ebe8f0);
+  border-radius: 8px;
+  box-shadow: 
+    0 2px 8px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 1px 3px rgba(139,129,165,0.15);
+  border: 1px solid rgba(139,129,165,0.25);
+  padding: 15px;
+  margin: 10px 0;
+}
+
+/* Palette lid - connected to grid container */
+.palette-lid {
+  background: linear-gradient(145deg, #e8e4f0, #d6d0e0);
+  border-radius: 0 0 8px 8px;
+  box-shadow: 
+    0 4px 16px rgba(0,0,0,0.15),
+    inset 0 -1px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 6px rgba(139,129,165,0.2);
+  border: 1px solid rgba(139,129,165,0.3);
+  border-top: none;
+  padding: 15px;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  align-items: center;
+}
+
+.palette-lid > *:not(:last-child) {
+  position: relative;
+}
+
+.palette-lid > *:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  max-width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(139,129,165,0.2) 20%, 
+    rgba(139,129,165,0.3) 50%, 
+    rgba(139,129,165,0.2) 80%, 
+    transparent 100%
+  );
+  margin-top: 28px;
+  box-shadow: 
+    0 1px 0 rgba(255,255,255,0.4),
+    inset 0 1px 1px rgba(139,129,165,0.15);
+}
+
+/* Responsive palette lid */
+@media (min-width: 481px) {
+  .palette-lid {
+    padding: 18px;
+    border-radius: 0 0 10px 10px;
+  }
+}
+
+@media (min-width: 769px) {
+  .palette-lid {
+    padding: 20px;
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+/* Color Effect Styles */
+.effect-matte {
+  /* Clean matte finish - starting blank */
+}
+
+.effect-shimmer {
+  /* Static metallic shimmer with soft outset square look */
+  position: relative;
+  box-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.3),
+    inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.effect-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.0) 0%,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.3) 75%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
+}
+
+.effect-sparkly {
+  /* Dense sparkle effect with three-layer alternating animation */
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-sparkly::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 1) 1px, transparent 1px),
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.9) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 1) 0.7px, transparent 0.7px),
+    radial-gradient(circle at 70% 65%, rgba(255, 255, 255, 0.8) 0.9px, transparent 0.9px);
+  animation: sparkleLayer1 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.effect-sparkly::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 90% 85%, rgba(255, 255, 255, 1) 0.6px, transparent 0.6px),
+    radial-gradient(circle at 45% 15%, rgba(255, 255, 255, 0.9) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 60% 45%, rgba(255, 255, 255, 0.7) 0.7px, transparent 0.7px),
+    radial-gradient(circle at 10% 60%, rgba(255, 255, 255, 1) 0.9px, transparent 0.9px),
+    radial-gradient(circle at 35% 90%, rgba(255, 255, 255, 0.8) 0.6px, transparent 0.6px),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 1) 1px, transparent 1px),
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.6) 0.7px, transparent 0.7px),
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.9) 0.8px, transparent 0.8px);
+  animation: sparkleLayer2 4s ease-in-out infinite 1.3s;
+  pointer-events: none;
+}
+
+@keyframes sparkleLayer1 {
+  0% { opacity: 0.2; }
+  33% { opacity: 1; }
+  66% { opacity: 0.1; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes sparkleLayer2 {
+  0% { opacity: 0.8; }
+  33% { opacity: 0.1; }
+  66% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* Responsive Breakpoints - Mobile First */
+@media (min-width: 481px) {
+  .tablet-flex-row {
+    flex-direction: row;
+  }
+  
+  .tablet-space-between {
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* Common Padding/Margin Patterns */
+.padding-mobile {
+  padding: 10px;
+}
+
+.padding-tablet {
+  padding: 15px;
+}
+
+.padding-desktop {
+  padding: 20px;
+}
+
+.gap-small {
+  gap: 8px;
+}
+
+.gap-medium {
+  gap: 10px;
+}
+
+.gap-large {
+  gap: 15px;
+}
+
+/* Responsive Padding Classes */
+@media (min-width: 481px) {
+  .responsive-padding {
+    padding: 15px;
+  }
+}
+
+@media (min-width: 769px) {
+  .responsive-padding {
+    padding: 20px;
+  }
+}
