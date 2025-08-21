@@ -18,6 +18,10 @@ const props = defineProps({
   isDark: {
     type: Boolean,
     default: false
+  },
+  effect: {
+    type: String,
+    default: 'matte'
   }
 })
 
@@ -36,7 +40,8 @@ const colorData = computed(() => ({
   colorName: props.colorName,
   hexCode: props.hexCode,
   bgColor: props.backgroundColor,
-  isDark: props.isDark
+  isDark: props.isDark,
+  effect: props.effect
 }))
 
 // Handle events with proper data
@@ -51,6 +56,7 @@ const onTouchEnd = (e) => handleTouchEnd(e)
   <div class="swatch-block">
     <div 
       class="swatch" 
+      :class="`effect-${effect}`"
       :style="{ backgroundColor: backgroundColor }"
       draggable="true"
       @dragstart="onDragStart"
@@ -65,6 +71,8 @@ const onTouchEnd = (e) => handleTouchEnd(e)
 </template>
 
 <style scoped>
+@import '../../styles/shared.css';
+
 /* Mobile-first design */
 .swatch-block {
   width: 60px;
@@ -93,6 +101,8 @@ const onTouchEnd = (e) => handleTouchEnd(e)
   font-size: 9px;
   font-weight: bold;
   line-height: 1.2;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .hex-code {

@@ -87,7 +87,8 @@ export function useColorData() {
       colorName: paletteColor.name,
       hexCode: paletteColor.hex,
       bgColor: paletteColor.hex,
-      isDark: paletteColor.is_dark
+      isDark: paletteColor.is_dark,
+      effect: paletteColor.effect || 'matte'
     }
   }
   

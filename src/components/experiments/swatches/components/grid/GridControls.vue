@@ -30,9 +30,10 @@ const handleSizeChange = (event) => {
 </template>
 
 <style scoped>
+@import '../../styles/shared.css';
+
 /* Mobile-first grid controls */
 .grid-controls {
-  margin: 15px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -58,7 +59,6 @@ const handleSizeChange = (event) => {
     flex-direction: row;
     justify-content: center;
     gap: 10px;
-    margin: 20px 0;
   }
   
   .grid-controls select {
@@ -71,7 +71,6 @@ const handleSizeChange = (event) => {
 @media (min-width: 769px) {
   .grid-controls {
     justify-content: flex-start;
-    margin: 30px 0 20px 0;
   }
   
   .grid-controls select {
